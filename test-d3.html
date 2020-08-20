@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Test of the D3 framework</title>
+    <script
+	src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
+	charset="utf-8"></script>
+  </head>
+
+  <body>
+    <svg width="800" height="800">
+    </svg>
+    <script type="text/javascript">
+    
+      var boxWidth = 400;
+      var boxHeight = 400;
+      var boxCentreX = 200;
+      var boxCentreY = 200;
+      var particleSize = 5;
+
+      var maxBoxX = Math.abs(boxWidth + boxCentreX - particleSize);
+      var maxBoxY = Math.abs(boxHeight + boxCentreY - particleSize);
+      var minBoxX = Math.abs(boxCentreX + particleSize);
+      var minBoxY = Math.abs(boxCentreY + particleSize);
+
+
+      var momentum = [
+        {x:3,y:5},
+        {x:3,y:5}
+
+        ];
+
+
+      var box = d3.select("svg")
+        .append("rect")
+        .attr("width", boxWidth)
+        .attr("height", boxHeight)
+        .attr("x", boxCentreX)
+        .attr("y",boxCentreY)
+        .attr("fill", "none")
+        .attr("stroke","black");
+
+
+        var particle = d3.select("svg").selectAll("circle").data(momentum);
+
+        particle.enter().append("circle")
+          .attr("cy", minBoxY)
+          .attr("cx", minBoxX)
+          .attr("r",particleSize);
+        particle.attr("fill", "red");
+
+
+    </script>
+  </body>
+</html>

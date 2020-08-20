@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Test of the D3 framework</title>
+    <script
+	src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
+	charset="utf-8"></script>
+  </head>
+
+  <body>
+    <svg width="800" height="120">
+    </svg>
+    <script type="text/javascript">
+        var data = [1,2,3,4,5];
+
+        var scale = d3.scale.linear()
+          .domain([1,5])
+          .range([0,200]);
+
+        var svg = d3.select("body").append("svg")
+               .attr("height", 250)
+               .attr("width", 500);
+
+       var
+
+       function render(data, colour){
+         var rects = svg.selectAll("rect").data(data);
+
+         // enter
+         rects
+           .enter()
+           .append("rect") // append rects donew data
+           .attr("y", 50)
+           .attr("fill",colour)
+           .attr("height", 10)
+           .attr("width", 10);
+
+         // update
+         rects
+           .attr("x",scale);
+
+         // exit
+         rects.exit().remove();
+       }
+
+  render([1,2,3,4], "red");
+
+     </script>
+  </body>
+</html>
