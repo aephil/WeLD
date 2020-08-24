@@ -8,10 +8,12 @@
   </head>
 
   <body>
-    <svg width="800" height="800">
-    </svg>
     <script type="text/javascript">
-    
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", 800)
+        .attr("height",800);
+
       var boxWidth = 400;
       var boxHeight = 400;
       var boxCentreX = 200;
@@ -24,12 +26,11 @@
       var minBoxY = Math.abs(boxCentreY + particleSize);
 
 
-      var momentum = [
-        {x:3,y:5},
-        {x:3,y:5}
-
+      var particleData = [
+        {mx:-2,my:2,px:340, py:350},
+        //{mx:-3,my:-7,px:340,py:350},
+        //{mx:-3,my:5,px:80,py:200},
         ];
-
 
       var box = d3.select("svg")
         .append("rect")
@@ -40,14 +41,58 @@
         .attr("fill", "none")
         .attr("stroke","black");
 
+      var translateX = function(d, x){
+        return d.px + x;
+      }
 
-        var particle = d3.select("svg").selectAll("circle").data(momentum);
+      var translateY = function(d, y){
+        return d.py + y;
+      }
+
+      var recalculateMomentum = function (d, grad, elasticity){
+        d.mx = -1*d.mx;
+        d.my = -1*d.my;
+      }
+
+        var particle = d3.select("svg").selectAll("circle").data(particleData);
 
         particle.enter().append("circle")
-          .attr("cy", minBoxY)
-          .attr("cx", minBoxX)
-          .attr("r",particleSize);
-        particle.attr("fill", "red");
+          .attr("cy", function (d){ return translateX(d,minBoxX)})
+          .attr("cx", function (d){ return translateY(d,minBoxY)})
+          .attr("r",particleSize)
+          .attr("fill", "red");
+
+        d3.timer( function(el) {
+          particle.data(function() {
+            // update the positions of the particles
+            particleData.forEach(
+              function (d,i){
+
+                d.px += d.mx;
+                d.py += d.my;
+
+                if ( d.py <= minBoxY || d.py >= maxBoxY){
+                //  recalculateMomentum(d, 45, 1);
+                d.my = -1*d.my;
+                };
+                if ( d.px <= minBoxX || d.px >= maxBoxX){
+                //  recalculateMomentum(d, 45, 1);
+                d.mx = -1*d.mx;
+                };
+
+              }
+            );
+
+
+            return particleData;
+          });
+
+
+        particle.attr("cx", function(d, i) { return  translateX(d,minBoxX); });
+        particle.attr("cy", function(d, i) { return  translateY(d,minBoxY); });
+        return false;
+        });
+
 
 
     </script>
