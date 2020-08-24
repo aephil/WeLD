@@ -17,11 +17,11 @@
         .attr("width", worldWidth)
         .attr("height",worldHeight);
 
-      var boxWidth = 800;
-      var boxHeight = 800;
+      var boxWidth = 400;
+      var boxHeight = 400;
       var boxCentreX = (worldWidth - boxWidth) / 2;
       var boxCentreY = (worldHeight - boxWidth) / 2;
-      var particleSize = 5;
+      var particleSize = 2;
 
       // coordinates of box edges
       var rightBoxEdge = Math.abs(boxWidth + boxCentreX - particleSize);
@@ -37,16 +37,30 @@
         return y + boxCentreY;
       }
 
-      var particleData = [
-        {mx:-2,my:6,px:boxCoordX(7), py:boxCoordY(7)},
-        {mx:-3,my:-7,px:boxCoordX(540),py:boxCoordY(650)},
-        {mx:-3,my:5,px:boxCoordX(790),py:boxCoordY(700)},
-        {mx:-6,my:7,px:boxCoordX(60),py:boxCoordY(140)},
-        {mx:-3,my:-5,px:boxCoordX(120),py:boxCoordY(250)},
-        {mx:-35,my:-50,px:boxCoordX(245),py:boxCoordY(400)},
-        {mx:-70,my:-05,px:boxCoordX(123),py:boxCoordY(456)},
-        ];
+      var randomNumber = function(min, max) {
+        return Math.random() * (max - min) + min;
+    }
 
+    var data = new Array;
+    for (var i = 0; i < 100 ; i++){
+      n = {
+        mx: randomNumber(-7,7),
+        my: randomNumber(-7,7),
+        px: randomNumber(leftBoxEdge, rightBoxEdge),
+        py: randomNumber(upperBoxEdge, lowerBoxEdge)
+      }
+      data.push(n)
+    }
+
+      //var particleData = [
+      //  {mx:-2,my:6,px:boxCoordX(7), py:boxCoordY(7)},
+      //  {mx:-3,my:-7,px:boxCoordX(540),py:boxCoordY(650)},
+      //  {mx:-3,my:5,px:boxCoordX(790),py:boxCoordY(700)},
+      //  {mx:-6,my:7,px:boxCoordX(60),py:boxCoordY(140)},
+      //  {mx:-3,my:-5,px:boxCoordX(120),py:boxCoordY(250)},
+      //  ];
+
+      var particleData = data;
       var box = d3.select("svg")
         .append("rect")
         .attr("width", boxWidth)
@@ -101,6 +115,7 @@
 
       particle.attr("cx", function(d, i) { return  d.px; });
       particle.attr("cy", function(d, i) { return  d.py; });
+      particle.attr("fill", function(d,i ) {return "rgb(" +randomNumber(0,255)+ ","+ randomNumber(0,255)+ ","+randomNumber(0,255)})
       return false;
       });
 
