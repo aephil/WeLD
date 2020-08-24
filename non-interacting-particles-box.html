@@ -12,6 +12,7 @@
 
     var worldHeight = 1000;
     var worldWidth = 1000;
+    var globalTime = 0;
 
       var svg = d3.select("body").append("svg")
         .attr("width", worldWidth)
@@ -37,6 +38,11 @@
         return y + boxCentreY;
       }
 
+      var updateVerletP = function(d, dt = 1){
+        d.px += d.vx + (0.5*Math.pow(dt,2)*((d.vx-d.ux)/2))
+        d.py += d.vy + (0.5*Math.pow(dt,2)*((d.vy-d.uy)/2))
+      }
+
       var randomNumber = function(min, max) {
         return Math.random() * (max - min) + min;
     }
@@ -44,22 +50,15 @@
     var data = new Array;
     for (var i = 0; i < 100 ; i++){
       n = {
-        mx: randomNumber(-7,7),
-        my: randomNumber(-7,7),
+        ux:0,
+        uy:0,
+        vx: randomNumber(-7,7),
+        vy: randomNumber(-7,7),
         px: randomNumber(leftBoxEdge, rightBoxEdge),
         py: randomNumber(upperBoxEdge, lowerBoxEdge)
       }
       data.push(n)
     }
-
-      //var particleData = [
-      //  {mx:-2,my:6,px:boxCoordX(7), py:boxCoordY(7)},
-      //  {mx:-3,my:-7,px:boxCoordX(540),py:boxCoordY(650)},
-      //  {mx:-3,my:5,px:boxCoordX(790),py:boxCoordY(700)},
-      //  {mx:-6,my:7,px:boxCoordX(60),py:boxCoordY(140)},
-      //  {mx:-3,my:-5,px:boxCoordX(120),py:boxCoordY(250)},
-      //  ];
-
       var particleData = data;
       var box = d3.select("svg")
         .append("rect")
@@ -69,16 +68,6 @@
         .attr("y",boxCentreY)
         .attr("fill", "b")
         .attr("stroke","white");
-
-
-
-      var translateX = function(d, x){
-        return d.px + x;
-      }
-
-      var translateY = function(d, y){
-        return d.py + y;
-      }
 
       var particle = d3.select("svg").selectAll("circle").data(particleData);
 
@@ -90,25 +79,18 @@
 
       d3.timer( function(el) {
         particle.data(function() {
-          // update the positions of the particles
+
           particleData.forEach(
             function (d,i){
-
-              d.px += d.mx;
-              d.py += d.my;
-
+              updateVerletP(d,1);
               if ( d.py <= upperBoxEdge || d.py >= lowerBoxEdge){
-              //  recalculateMomentum(d, 45, 1);
-              d.my = -1*d.my;
+              d.vy = -1*d.vy;
               };
               if ( d.px <= leftBoxEdge || d.px >= rightBoxEdge){
-              d.mx = -1*d.mx;
+              d.vx = -1*d.vx;
               };
-
             }
           );
-
-
           return particleData;
         });
 
@@ -116,6 +98,7 @@
       particle.attr("cx", function(d, i) { return  d.px; });
       particle.attr("cy", function(d, i) { return  d.py; });
       particle.attr("fill", function(d,i ) {return "rgb(" +randomNumber(0,255)+ ","+ randomNumber(0,255)+ ","+randomNumber(0,255)})
+      globalTime++;
       return false;
       });
 
