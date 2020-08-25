@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Test of the D3 framework</title>
+    <script
+	src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
+	charset="utf-8"></script>
+  </head>
+
+  <body>
+    <script type="text/javascript">
+
+    var worldHeight = 1000;
+    var worldWidth = 1000;
+    var globalTime = 0;
+    let dt = 0.1;
+    let g = 9.81;
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", worldWidth)
+        .attr("height",worldHeight);
+
+      var boxWidth = 400;
+      var boxHeight = 400;
+      var boxCentreX = (worldWidth - boxWidth) / 2;
+      var boxCentreY = (worldHeight - boxWidth) / 2;
+      var bobSize = 5;
+
+      // coordinates of box edges
+      var rightBoxEdge = Math.abs(boxWidth + boxCentreX - bobSize);
+      var lowerBoxEdge = Math.abs(boxHeight + boxCentreY - bobSize);
+      var leftBoxEdge = Math.abs(boxCentreX + bobSize);
+      var upperBoxEdge = Math.abs(boxCentreY + bobSize);
+
+      var boxCoordX = function(x){
+        return x + boxCentreX;
+      }
+
+      var boxCoordY = function(y){
+        return y + boxCentreY;
+      }
+
+      var updateVerletV = function(d,dt=0.001,ax=0,ay=0){
+        d.vx += ax*dt;
+        d.vy += ay*dt;
+      }
+
+      var updateVerletP = function(d, dt = 0.001, ax = 0, ay = 0){
+        d.px += d.vx + (0.5*Math.pow(dt,2)*ax);
+        d.py += d.vy + (0.5*Math.pow(dt,2)*ay);
+      }
+
+    var randomNumber = function(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    var box = d3.select("svg")
+      .append("rect")
+      .attr("width", boxWidth)
+      .attr("height", boxHeight)
+      .attr("x", boxCentreX)
+      .attr("y",boxCentreY)
+      .attr("fill", "none")
+      .attr("stroke","black");
+
+      var timeInfo = d3.select("svg")
+        .append("text")
+        .attr("x",boxCentreX)
+        .attr("y", boxCentreY+boxHeight+ 20)
+        .attr("fill","none")
+        .attr("stroke","black");
+
+      let r = 100;
+      var w = 5;
+      var globalTime = 0;
+      var dt = 0.001;
+
+      var group = svg.append("g")
+            .attr("transform","translate(0, 0)");
+
+      var stringData = [
+        {x: boxCoordX(boxWidth/2), y: boxCentreY},
+        {x:bobX, y:bobY },
+      ];
+
+      var pendulumData = [
+        {
+          r:100,
+          w:5,
+          angle:30
+        }
+      ]
+
+      var stringGenerator = d3.svg.line()
+        .x(function(d) {return d.x})
+        .y(function(d) {return d.y});
+
+        group.selectAll("path")
+        .data([stringData])
+        .enter()
+        .append("path")
+        .attr("d",stringGenerator)
+        .attr("fill", "none")
+        .attr("stroke","black")
+        .attr("stroke-width", 1);
+
+        var v = 5;
+
+
+        var bobs = svg
+          .append("circle")
+          .attr("cy", bobY)
+          .attr("cx", bobX)
+          .attr("r",bobSize)
+          .attr("fill", "red");
+
+      //d3.timer( function(el) {
+      //bob.attr("cx", 500);
+      //bob.attr("cy", 500);
+      //timeInfo.text(function () {return "time: " + globalTime.toFixed(2) + "s"})
+      //return false;
+      //});
+
+    </script>
+  </body>
+</html>
