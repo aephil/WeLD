@@ -3,135 +3,182 @@
   <head>
     <title>Test of the D3 framework</title>
     <script
-	src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
+	src="https://d3js.org/d3.v3.min.js"
 	charset="utf-8"></script>
+  <script src="framework.js"></script>
   </head>
 
   <body>
     <script type="text/javascript">
 
+
+
+    /*
+      create an svg canvas
+    */
+
     var worldHeight = 1000;
     var worldWidth = 1000;
-    var globalTime = 0;
-    let dt = 0.0001;
-    let g = 9.81;
-    let cOfR = 0.7 // Coefficient of Restitution
 
-      var svg = d3.select("body").append("svg")
-        .attr("width", worldWidth)
-        .attr("height",worldHeight);
+    var svg = d3.select("body").append("svg")
+      .attr("width", worldWidth)
+      .attr("height",worldHeight);
 
-      var boxWidth = 800;
-      var boxHeight = 400;
-      var boxCentreX = (worldWidth - boxWidth) / 2;
-      var boxCentreY = (worldHeight - boxWidth) / 2;
-      var particleSize = 5;
+    /*
+      create a box onto the svg canvas
+    */
 
-      // coordinates of box edges
-      var rightBoxEdge = Math.abs(boxWidth + boxCentreX - particleSize);
-      var lowerBoxEdge = Math.abs(boxHeight + boxCentreY - particleSize);
-      var leftBoxEdge = Math.abs(boxCentreX + particleSize);
-      var upperBoxEdge = Math.abs(boxCentreY + particleSize);
+    var boxWidth = 800;
+    var boxHeight = 800;
+    var boxDepth = 800;
+    var boxCentreX = (worldWidth - boxWidth) / 2;
+    var boxCentreY = (worldHeight - boxWidth) / 2;
+    var particleSize = 5;
 
-      var boxCoordX = function(x){
-        return x + boxCentreX;
-      }
-
-      var boxCoordY = function(y){
-        return y + boxCentreY;
-      }
-
-      var updateVerletV = function(d,t=globalTime,ax=0,ay=0){
-        d.vx += ax*t;
-        d.vy += ay*t;
-      }
-
-      var updateVerletP = function(d,t=globalTime, ax = 0, ay =0){
-        d.px += d.vx + (0.5*Math.pow(t,2)*ax);
-        d.py += d.vy + (0.5*Math.pow(t,2)*ay);
-      }
-
-      var randomNumber = function(min, max) {
-        return Math.random() * (max - min) + min;
+    var boxCoordX = function(x){
+      return x + boxCentreX;
     }
 
+    var boxCoordY = function(y){
+      return y + boxCentreY;
+    }
+
+    // coordinates of box edges
+    var rightBoxEdge = function(r){return Math.abs(boxWidth + boxCentreX - r);}
+    var lowerBoxEdge = function(r){return Math.abs(boxHeight + boxCentreY - r);}
+    var leftBoxEdge = function(r){return Math.abs(boxCentreX + r);}
+    var upperBoxEdge = function(r){return Math.abs(boxCentreY + r);}
+    var outerBoxEdge = function(r){return Math.abs(boxDepth-r);}
+
+    var box = d3.select("svg")
+      .append("rect")
+      .attr("width", boxWidth)
+      .attr("height", boxHeight)
+      .attr("x", boxCentreX)
+      .attr("y",boxCentreY)
+      .attr("fill", "white")
+      .attr("stroke","black");
+
+    /*
+      generate particle data and append particles to the canvas
+    */
+
     var data = new Array;
-    for (var i = 0; i < 10 ; i++){
+    for (var i = 0; i < 100 ; i++){
       n = {
-        vx: randomNumber(-35,35),
-        vy: randomNumber(-35,35),
-        px: randomNumber(leftBoxEdge, rightBoxEdge),
-        py: randomNumber(upperBoxEdge, lowerBoxEdge)
+        vx: randomNumber(-40,40),
+        vy: randomNumber(-40,40),
+        vz: randomNumber(-40,40),
+        px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
+        py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+        pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+        r: particleSize,
+        m: randomNumber(1,5)
       }
       data.push(n)
     }
-      var particleData = data;
-      var box = d3.select("svg")
-        .append("rect")
-        .attr("width", boxWidth)
-        .attr("height", boxHeight)
-        .attr("x", boxCentreX)
-        .attr("y",boxCentreY)
-        .attr("fill", "b")
-        .attr("stroke","white");
+    var particleData = data;
 
-        var timeInfo = d3.select("svg")
-          .append("text")
-          .attr("x",boxCentreX)
-          .attr("y", boxCentreY+boxHeight+ 20)
-          .attr("fill","none")
-          .attr("stroke","black");
+    var particle = d3.select("svg").selectAll("circle").data(particleData);
+
+    particle.enter().append("circle")
+      .attr("cy", function (d){ return d.py})
+      .attr("cx", function (d){ return d.px})
+      .attr("r",particleSize)
+      .attr("stroke","black")
+      //.attr("fill","black")
 
 
-      var particle = d3.select("svg").selectAll("circle").data(particleData);
+    /*
+      display for time elapsed
+    */
 
-      particle.enter().append("circle")
-        .attr("cy", function (d){ return d.py})
-        .attr("cx", function (d){ return d.px})
-        .attr("r",particleSize)
-        .attr("fill", function(d,i ) {return "rgb(" +randomNumber(0,255)+ ","+ randomNumber(0,255)+ ","+randomNumber(0,255)});
+    var timeInfo = d3.select("svg")
+      .append("text")
+      .attr("x",boxCentreX)
+      .attr("y", boxCentreY+boxHeight+ 20)
+      .attr("fill","none")
+      .attr("stroke","black");
 
-      d3.timer( function(el) {
-        particle.data(function() {
+    /*
+      display for perspective point
+    */
 
-          particleData.forEach(
-            function (d,i){
-              updateVerletV(d,globalTime,0,g);
-              updateVerletP(d,globalTime,0,g);
-              globalTime += dt;
+    var xp = boxCoordX(boxWidth/2);
+    var yp = boxCoordY(boxHeight/2);
+    var zp = 5000;
 
-              if( d.py <= upperBoxEdge ) {
-              d.py = upperBoxEdge + particleSize;
+        svg.append("circle")
+            .attr("r",2)
+            .attr("cx",xp)
+            .attr("cy",yp)
+            .attr("fill","red");
+
+    var globalTime = 0;
+    let dt = 0.0001;
+    let g = 9.81*0.1;
+    let cOfR = 0.8; // Coefficient of Restitution
+
+    // runs the simulation
+
+    d3.timer( function(duration) {
+      var interval = duration*0.0001;
+      particle.data(function(d) {
+
+        particleData.forEach(
+          function (d,i,data){
+
+            exchangeMomenta(d,i,particleData);
+            updateVerletV(d,interval,0,0,0);
+            updateVerletP(d,interval,0,0,0);
+
+            var upperLim = upperBoxEdge(d.r + (0.02*d.pz));
+            var lowerLim = lowerBoxEdge(d.r + (0.02*d.pz));
+            var leftLim = leftBoxEdge(d.r + (0.02*d.pz));
+            var rightLim = rightBoxEdge(d.r + (0.02*d.pz));
+            var outerLim = outerBoxEdge(d.r + (0.02*d.pz));
+            var innerLim = d.r + (0.02*d.pz);
+
+            if( d.py <= upperLim ) {
+            d.py = upperLim;
+            d.vy = -1*d.vy*cOfR;
+            };
+
+            if( d.py >= lowerLim ) {
+              d.py = lowerLim ;
               d.vy = -1*d.vy*cOfR;
-              };
+            };
 
-              if( d.py >= lowerBoxEdge ) {
-                d.py = lowerBoxEdge - particleSize;
-                d.vy = -1*d.vy*cOfR;
-              };
+            if( d.px <= leftLim ) {
+              d.px = leftLim;
+              d.vx = -1*d.vx*cOfR;
+            };
 
-              if( d.px <= leftBoxEdge ) {
-                d.px = leftBoxEdge + particleSize;
-                d.vx = -1*d.vx*cOfR;
-              };
+            if( d.px >= rightLim ) {
+              d.px = rightLim;
+              d.vx = -1*d.vx*cOfR;
+            };
 
-              if( d.px >= rightBoxEdge ) {
-                d.px = rightBoxEdge - particleSize;
-                d.vx = -1*d.vx*cOfR;
-              };
-            }
-          );
-          return particleData;
-        });
+            if( d.pz <= innerLim ) {
+              d.vz = -1*d.vz*cOfR;
+              d.pz = innerLim;
+            };
 
-      particle.attr("cx", function(d, i) { return  d.px; });
-      particle.attr("cy", function(d, i) { return  d.py; });
-      timeInfo.text(function () {return "time: " + globalTime.toFixed(2) + "s"})
-      return false;
+            if( d.pz >= outerLim ) {
+              d.vz = -1*d.vz*cOfR;
+              d.pz = outerLim;
+            };
+          }
+        );
+        return particleData;
       });
 
-
-
+    particle.attr("cx", function(d, i) { return  d.px; });
+    particle.attr("cy", function(d, i) { return  d.py; });
+    particle.attr("r", function(d,i) {return d.r + (0.02*d.pz)});
+    timeInfo.text(function (d,i) {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+    return false;
+    });
     </script>
   </body>
 </html>

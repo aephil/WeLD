@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Test of the D3 framework</title>
+    <script
+	src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
+	charset="utf-8"></script>
+  </head>
+
+  <body>
+    <script type="text/javascript">
+
+    var worldHeight = 1000;
+    var worldWidth = 1000;
+    var globalTime = 0;
+    let dt = 0.0001;
+    let g = 9.81;
+    let cOfR = 0.7 // Coefficient of Restitution
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", worldWidth)
+        .attr("height", worldHeight);
+
+        var boxWidth = 800;
+        var boxHeight = 800;
+        var boxDepth = 800;
+        var boxCentreX = (worldWidth - boxWidth) / 2;
+        var boxCentreY = (worldHeight - boxWidth) / 2;
+        var particleSize = 5;
+
+      // coordinates of box edges
+      var rightBoxEdge = Math.abs(boxWidth + boxCentreX - particleSize);
+      var lowerBoxEdge = Math.abs(boxHeight + boxCentreY - particleSize);
+      var leftBoxEdge = Math.abs(boxCentreX + particleSize);
+      var upperBoxEdge = Math.abs(boxCentreY + particleSize);
+
+      var boxCoordX = function(x){
+        return x + boxCentreX;
+      }
+
+      var boxCoordY = function(y){
+        return y + boxCentreY;
+      }
+
+      var updateVerletV = function(d,t=globalTime,ax=0,ay=0){
+        d.vx += ax*t;
+        d.vy += ay*t;
+      }
+
+      var updateVerletP = function(d,t=globalTime, ax = 0, ay =0){
+        d.px += d.vx + (0.5*Math.pow(t,2)*ax);
+        d.py += d.vy + (0.5*Math.pow(t,2)*ay);
+      }
+
+      var randomNumber = function(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    var data = new Array;
+    for (var i = 0; i < 10 ; i++){
+      n = {
+        vx: randomNumber(-35,35),
+        vy: randomNumber(-35,35),
+        vz: randomNumber(-35,35),
+        px: randomNumber(leftBoxEdge, rightBoxEdge),
+        py: randomNumber(upperBoxEdge, lowerBoxEdge),
+        pz: randomNumber(upperBoxEdge, lowerBoxEdge),
+        r: particleSize
+
+      }
+      data.push(n)
+    }
+      var particleData = data;
+      var box = d3.select("svg")
+        .append("rect")
+        .attr("width", boxWidth)
+        .attr("height", boxHeight)
+        .attr("x", boxCentreX)
+        .attr("y",boxCentreY)
+        .attr("fill", "b")
+        .attr("stroke","white");
+
+        var timeInfo = d3.select("svg")
+          .append("text")
+          .attr("x",boxCentreX)
+          .attr("y", boxCentreY+boxHeight+ 20)
+          .attr("fill","none")
+          .attr("stroke","black");
+
+
+      var particle = d3.select("svg").selectAll("circle").data(particleData);
+
+      particle.enter().append("circle")
+        .attr("cy", function (d){ return d.py})
+        .attr("cx", function (d){ return d.px})
+        .attr("r",particleSize)
+        .attr("fill", function(d,i ) {return "rgb(" +randomNumber(0,255)+ ","+ randomNumber(0,255)+ ","+randomNumber(0,255)});
+
+        var updateFrame = function (d, time){
+          particleData.forEach(
+            function (d,i){
+              updateVerletV(d,time,0,g);
+              updateVerletP(d,time,0,g);
+              d.r = particleSize + (0.1*d.pz);
+
+              var upperLim = upperBoxEdge;
+              var lowerLim = lowerBoxEdge;
+              var leftLim = leftBoxEdge;
+              var rightLim = rightBoxEdge;
+              //var outerLim = outerBoxEdge;
+              var innerLim = d.r;
+
+              if( d.py <= upperBoxEdge ) {
+                d.py = upperBoxEdge + particleSize;
+                d.vy = -1*d.vy*cOfR;
+              };
+
+              if( d.py >= lowerBoxEdge ) {
+                d.py = lowerBoxEdge - particleSize;
+                d.vy = -1*d.vy*cOfR;
+              };
+
+              if( d.px <= leftBoxEdge ) {
+                d.px = leftBoxEdge + particleSize;
+                d.vx = -1*d.vx*cOfR;
+              };
+
+              if( d.px >= rightBoxEdge ) {
+                d.px = rightBoxEdge - particleSize;
+                d.vx = -1*d.vx*cOfR;
+              };
+
+            }
+          );
+          return particleData;
+        }
+
+        d3.timer( function(duration) {
+          particle.data(function(d) {
+            return updateFrame(d,duration*0.0001);
+          });
+
+      particle.attr("cx", function(d, i) { return  d.px; });
+      particle.attr("cy", function(d, i) { return  d.py; });
+      timeInfo.text(function () {return "time: " + globalTime.toFixed(2) + "s"})
+      return false;
+      });
+
+
+
+    </script>
+  </body>
+</html>

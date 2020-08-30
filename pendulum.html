@@ -8,7 +8,7 @@
   </head>
 
   <body>
-    <script type="text/javascript">
+    <script type="text/javascript" ,src="framework.js">
 
     var worldHeight = 1000;
     var worldWidth = 1000;
@@ -70,26 +70,18 @@
         .attr("fill","none")
         .attr("stroke","black");
 
-      let r = 100;
-      var w = 5;
-      var globalTime = 0;
-      var dt = 0.001;
-
       var group = svg.append("g")
             .attr("transform","translate(0, 0)");
-
-      var stringData = [
-        {x: boxCoordX(boxWidth/2), y: boxCentreY},
-        {x:bobX, y:bobY },
-      ];
 
       var pendulumData = [
         {
           r:100,
           w:5,
-          angle:30
+          angle:30,
+          hx: boxCoordX(boxWidth/2),
+          hy: boxCentreY,
         }
-      ]
+      ];
 
       var stringGenerator = d3.svg.line()
         .x(function(d) {return d.x})
