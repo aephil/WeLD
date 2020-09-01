@@ -16,22 +16,30 @@ var randomNumber = function(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-var onePointPerspective = function(d,interval,x,y,z){
+var onePointPerspective = function(d,maxZ,x,y,z, offset){
 
-  var deltaX = d.px - x;
-  var deltaY = d.py - y;
-  var deltaZ = d.pz - z;
-  var r = Math.sqrt(Math.pow(deltaX,2) + Math.pow(deltaY,2) + Math.pow(deltaZ,2));
-  var polar = Math.acos(d.pz/r);
-  var azimuthal = Math.asin(d.py/r*Math.sin(polar));
+  var dx = d.px - x;
+  var dy = d.py - y;
+  var dz = d.pz - z;
+  var r = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2) + Math.pow(dz,2));
 
-  var contributionX = Math.sin(polar)*Math.cos(azimuthal)*d.vz*interval;
-  var contributionY = Math.sin(polar)*Math.sin(azimuthal)*d.vz*interval;
+  var deltaX = 0;
+  var deltaY = 0;
+  if(dx != 0 ){
 
-  return [contributionX,contributionY];
+    var theta = Math.acos(dz/r);
+    var phi =  Math.atan(dy/dx);
+    var dr = r*Math.abs((d.pz/maxZ)) + offset;
+
+    detlaX = dr*Math.sin(theta)*Math.cos(phi);
+    deltaY = dr*Math.sin(theta)*Math.sin(phi);
+
+  }
+  return [0,0];
+
 }
 
-var exchangeMomenta = function(p, n, data){
+var exchangeMomenta = function(p, n, data, cOfR){
   var dataLength = data.length;
   var skipOver = [n];
    for(var i = 0; i < dataLength; i++ ){
@@ -57,13 +65,13 @@ var exchangeMomenta = function(p, n, data){
        var qvy = gamma*q.vy + delta*p.vy;
        var qvz = gamma*q.vz + delta*p.vz;
 
-       p.vx = pvx;
-       p.vy = pvy;
-       p.vz = pvz;
+       p.vx = pvx*cOfR;
+       p.vy = pvy*cOfR;
+       p.vz = pvz*cOfR;
 
-       data[i].vx = qvx;
-       data[i].vy = qvy;
-       data[i].vz = qvz;
+       data[i].vx = qvx*cOfR;
+       data[i].vy = qvy*cOfR;
+       data[i].vz = qvz*cOfR;
 
        skipOver.push(i);
       }

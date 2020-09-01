@@ -20,6 +20,12 @@
     var worldHeight = 1000;
     var worldWidth = 1000;
 
+    var csiy = -1; //coordinate to screen inversion in y
+    var csix = 1;  //coordinate to screen inversion in x
+
+    var offsetX = worldWidth/2;
+    var offsetY = worldHeight/2;
+
     var svg = d3.select("body").append("svg")
       .attr("width", worldWidth)
       .attr("height",worldHeight);
@@ -31,88 +37,102 @@
     var boxWidth = 800;
     var boxHeight = 800;
     var boxDepth = 800;
-    var boxCentreX = (worldWidth - boxWidth) / 2;
-    var boxCentreY = (worldHeight - boxWidth) / 2;
-    var particleSize = 5;
+    var boxCentreX = -boxWidth/2; // in local coordinates
+    var boxCentreY = boxHeight/2; // in local coordinates
+    var particleSize = 10;
 
-    var boxCoordX = function(x){
-      return x + boxCentreX;
+    var sCoordX = function(x){
+      return x + offsetX;
     }
 
-    var boxCoordY = function(y){
-      return y + boxCentreY;
+    var sCoordY = function(y){
+      return offsetY - y;
+    }
+
+
+    // establish a coordinate system
+    var coordY = function(y){
+      // y is negative because coordinate system of page marks y travelling downwards
+      return -(offsetY-y);
+    }
+    var coordX = function(x){
+    return  x - offsetX;
     }
 
     // coordinates of box edges
-    var rightBoxEdge = function(r){return Math.abs(boxWidth + boxCentreX - r);}
-    var lowerBoxEdge = function(r){return Math.abs(boxHeight + boxCentreY - r);}
-    var leftBoxEdge = function(r){return Math.abs(boxCentreX + r);}
-    var upperBoxEdge = function(r){return Math.abs(boxCentreY + r);}
-    var outerBoxEdge = function(r){return Math.abs(boxDepth-r);}
+    var leftBoxEdge = function(r){return -boxWidth/2 + r;}
+    var rightBoxEdge = function(r){return boxWidth/2 - r;}
+
+      var upperBoxEdge = function(r){return boxHeight/2 - r;}
+    var lowerBoxEdge = function(r){return -boxHeight/2 + r;}
+
+
+    var outerBoxEdge = function(r){return boxDepth/2 - r;}
+    var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
     var box = d3.select("svg")
       .append("rect")
-      .attr("width", boxWidth)
-      .attr("height", boxHeight)
-      .attr("x", boxCentreX)
-      .attr("y",boxCentreY)
+      .attr("width", worldWidth)
+      .attr("height", worldHeight)
+      .attr("x", 0)
+      .attr("y",0)
       .attr("fill", "white")
       .attr("stroke","black");
 
-    /*
-      generate particle data and append particles to the canvas
-    */
+      var box = d3.select("svg")
+        .append("rect")
+        .attr("width", boxWidth)
+        .attr("height", boxHeight)
+        .attr("x", sCoordX(boxCentreX))
+        .attr("y",sCoordY(boxCentreY))
+        .attr("fill", "white")
+        .attr("stroke","black");
+
+      var xp = sCoordX(0);
+      var yp = sCoordY(0);
+      var zp = -2000;
 
     var data = new Array;
     for (var i = 0; i < 100 ; i++){
       n = {
-        vx: randomNumber(-40,40),
-        vy: randomNumber(-40,40),
-        vz: randomNumber(-40,40),
+        vx: randomNumber(-0,0),
+        vy: randomNumber(-0,0),
+        vz: randomNumber(-10,10),
         px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
         py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         r: particleSize,
-        m: randomNumber(1,5)
+        m: 1
       }
       data.push(n)
     }
     var particleData = data;
-
     var particle = d3.select("svg").selectAll("circle").data(particleData);
 
     particle.enter().append("circle")
-      .attr("cy", function (d){ return d.py})
-      .attr("cx", function (d){ return d.px})
+      .attr("cy", function (d){ return sCoordY(d.py)})
+      .attr("cx", function (d){ return sCoordX(d.px)})
       .attr("r",particleSize)
       .attr("stroke","black")
       //.attr("fill","black")
 
 
-    /*
-      display for time elapsed
-    */
 
     var timeInfo = d3.select("svg")
       .append("text")
-      .attr("x",boxCentreX)
-      .attr("y", boxCentreY+boxHeight+ 20)
+      .attr("x",sCoordX(boxCentreX))
+      .attr("y", sCoordY(-boxCentreY-20))
       .attr("fill","none")
       .attr("stroke","black");
 
-    /*
-      display for perspective point
-    */
+      svg.append("circle")
+          .attr("r",2)
+          .attr("cx",xp)
+          .attr("cy",yp)
+          .attr("fill","red");
 
-    var xp = boxCoordX(boxWidth/2);
-    var yp = boxCoordY(boxHeight/2);
-    var zp = 5000;
 
-        svg.append("circle")
-            .attr("r",2)
-            .attr("cx",xp)
-            .attr("cy",yp)
-            .attr("fill","red");
+
 
     var globalTime = 0;
     let dt = 0.0001;
@@ -123,28 +143,33 @@
 
     d3.timer( function(duration) {
       var interval = duration*0.0001;
+      var perspective = [0,0];
+      var shrinkFactor = new Number();
       particle.data(function(d) {
+
 
         particleData.forEach(
           function (d,i,data){
 
-            exchangeMomenta(d,i,particleData);
+            exchangeMomenta(d,i,particleData, 1);
             updateVerletV(d,interval,0,0,0);
             updateVerletP(d,interval,0,0,0);
+            shrinkFactor = d.r*Math.abs(5+(d.pz/(boxDepth-2*d.r)));
 
-            var upperLim = upperBoxEdge(d.r + (0.02*d.pz));
-            var lowerLim = lowerBoxEdge(d.r + (0.02*d.pz));
-            var leftLim = leftBoxEdge(d.r + (0.02*d.pz));
-            var rightLim = rightBoxEdge(d.r + (0.02*d.pz));
-            var outerLim = outerBoxEdge(d.r + (0.02*d.pz));
+
+            var upperLim = upperBoxEdge(shrinkFactor);
+            var lowerLim = lowerBoxEdge(shrinkFactor);
+            var leftLim = leftBoxEdge(shrinkFactor);
+            var rightLim = rightBoxEdge(shrinkFactor);
+            var outerLim = outerBoxEdge(shrinkFactor);
             var innerLim = d.r + (0.02*d.pz);
 
-            if( d.py <= upperLim ) {
-            d.py = upperLim;
-            d.vy = -1*d.vy*cOfR;
+            if( d.py >= upperLim ) {
+              d.py = upperLim;
+              d.vy = -1*d.vy*cOfR;
             };
 
-            if( d.py >= lowerLim ) {
+            if( d.py <= lowerLim ) {
               d.py = lowerLim ;
               d.vy = -1*d.vy*cOfR;
             };
@@ -173,12 +198,15 @@
         return particleData;
       });
 
-    particle.attr("cx", function(d, i) { return  d.px; });
-    particle.attr("cy", function(d, i) { return  d.py; });
-    particle.attr("r", function(d,i) {return d.r + (0.02*d.pz)});
+
+    onePointPerspective;
+    particle.attr("cx", function(d, i) { return sCoordX(d.px + onePointPerspective(d,boxDepth - 2*d.r, xp,yp,zp,10)[0]); });
+    particle.attr("cy", function(d, i) { return sCoordY(d.py + onePointPerspective(d,boxDepth - 2*d.r, xp,yp,zp,10)[1]); });
+    particle.attr("r", function(d,i) {return d.r*Math.abs((d.pz/(boxDepth-2*d.r)))});
     timeInfo.text(function (d,i) {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
     return false;
     });
+
     </script>
   </body>
 </html>
