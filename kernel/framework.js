@@ -16,26 +16,14 @@ var randomNumber = function(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-var onePointPerspective = function(d,maxZ,x,y,z, offset){
+var onePointPerspective = function(d,maxZ,minZ,xAlpha,yAlpha,x,y,z){
 
   var dx = d.px - x;
   var dy = d.py - y;
   var dz = d.pz - z;
-  var r = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2) + Math.pow(dz,2));
 
-  var deltaX = 0;
-  var deltaY = 0;
-  if(dx != 0 ){
+  var lenZ = (maxZ)
 
-    var theta = Math.acos(dz/r);
-    var phi =  Math.atan(dy/dx);
-    var dr = r*Math.abs((d.pz/maxZ)) + offset;
-
-    detlaX = dr*Math.sin(theta)*Math.cos(phi);
-    deltaY = dr*Math.sin(theta)*Math.sin(phi);
-
-  }
-  return [0,0];
 
 }
 

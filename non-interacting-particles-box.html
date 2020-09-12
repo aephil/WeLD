@@ -2,16 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Test of the D3 framework</title>
-    <script
-	src="https://d3js.org/d3.v3.min.js"
-	charset="utf-8"></script>
-  <script src="framework.js"></script>
+  <script src="d3v3/d3.v3.min.js"></script>
+  <script src="kernel/framework.js"></script>
+  <script src="d3-path/d3-path.min.js"></script>
   </head>
 
   <body>
     <script type="text/javascript">
-
-
 
     /*
       create an svg canvas
@@ -34,17 +31,19 @@
       create a box onto the svg canvas
     */
 
-    var boxWidth = 800;
-    var boxHeight = 800;
-    var boxDepth = 800;
+    var boxWidth = 400;
+    var boxHeight = 400;
+    var boxDepth = 400;
     var boxCentreX = -boxWidth/2; // in local coordinates
     var boxCentreY = boxHeight/2; // in local coordinates
     var particleSize = 10;
+    var particleSizeMin = particleSize/4;
 
+    // returns the screen x coordinate equivalent of the user defined coordinate system
     var sCoordX = function(x){
       return x + offsetX;
     }
-
+    // returns the screen y coordinate equivalent of the user defined coordinate system
     var sCoordY = function(y){
       return offsetY - y;
     }
@@ -70,7 +69,7 @@
     var outerBoxEdge = function(r){return boxDepth/2 - r;}
     var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
-    var box = d3.select("svg")
+    var worldBox = d3.select("svg")
       .append("rect")
       .attr("width", worldWidth)
       .attr("height", worldHeight)
@@ -79,29 +78,105 @@
       .attr("fill", "white")
       .attr("stroke","black");
 
-      var box = d3.select("svg")
-        .append("rect")
-        .attr("width", boxWidth)
-        .attr("height", boxHeight)
-        .attr("x", sCoordX(boxCentreX))
-        .attr("y",sCoordY(boxCentreY))
-        .attr("fill", "white")
-        .attr("stroke","black");
+    var box = d3.select("svg")
+      .append("rect")
+      .attr("width", boxWidth)
+      .attr("height", boxHeight)
+      .attr("x", sCoordX(boxCentreX))
+      .attr("y",sCoordY(boxCentreY))
+      .attr("fill", "none")
+      .attr("stroke","black");
 
-      var xp = sCoordX(0);
-      var yp = sCoordY(0);
-      var zp = -2000;
+    var box2 = d3.select("svg")
+      .append("rect")
+      .attr("width", boxWidth/2)
+      .attr("height", boxHeight/2)
+      .attr("x", sCoordX(boxCentreX/2))
+      .attr("y",sCoordY(boxCentreY/2))
+      .attr("fill", "rgba(0,0,255,0.5)")
+      .attr("stroke","black")
+      .attr("stroke-width",0.4);
+
+      //This is the accessor function we talked about above
+    var lineFunction = d3.svg.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
+      .interpolate('linear');
+
+    //The data for our line
+    var topEdge = [
+      { x: sCoordX(-boxWidth/2),   y: sCoordY(boxHeight/2)},
+      { x: sCoordX(-boxWidth/4),  y: sCoordY(boxHeight/4)},
+      { x: sCoordX(boxWidth/4),  y: sCoordY(boxHeight/4)},
+      { x: sCoordX(boxWidth/2),  y: sCoordY(boxHeight/2)},
+      { x: sCoordX(-boxWidth/2),  y: sCoordY(boxHeight/2)},
+    ];
+
+    var leftEdge = [
+      { x: sCoordX(-boxWidth/2),   y: sCoordY(boxHeight/2)},
+      { x: sCoordX(-boxWidth/4),  y: sCoordY(boxHeight/4)},
+      { x: sCoordX(-boxWidth/4),  y: sCoordY(-boxHeight/4)},
+      { x: sCoordX(-boxWidth/2),  y: sCoordY(-boxHeight/2)},
+      { x: sCoordX(-boxWidth/2),  y: sCoordY(boxHeight/2)},
+    ];
+
+    var bottomEdge = [
+      { x: sCoordX(-boxWidth/2),   y: sCoordY(-boxHeight/2)},
+      { x: sCoordX(-boxWidth/4),  y: sCoordY(-boxHeight/4)},
+      { x: sCoordX(boxWidth/4),  y: sCoordY(-boxHeight/4)},
+      { x: sCoordX(boxWidth/2),  y: sCoordY(-boxHeight/2)},
+      { x: sCoordX(boxWidth/2),  y: sCoordY(-boxHeight/2)},
+    ];
+
+    var rightEdge = [
+      { x: sCoordX(boxWidth/2),   y: sCoordY(-boxHeight/2)},
+      { x: sCoordX(boxWidth/4),  y: sCoordY(-boxHeight/4)},
+      { x: sCoordX(boxWidth/4),  y: sCoordY(boxHeight/4)},
+      { x: sCoordX(boxWidth/2),  y: sCoordY(boxHeight/2)},
+      { x: sCoordX(boxWidth/2),  y: sCoordY(-boxHeight/2)},
+    ];
+
+    //The line SVG Path we draw
+    var drawTopEdge = svg.append("path")
+      .attr("d", lineFunction(topEdge))
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.4)
+      .attr("fill", "rgba(0,0,255,0.3)");
+
+    var drawBottomEdge = svg.append("path")
+      .attr("d", lineFunction(bottomEdge))
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.4)
+      .attr("fill", "rgba(0,0,255,0.3)");
+
+    var drawLeftEdge = svg.append("path")
+      .attr("d", lineFunction(leftEdge))
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.4)
+      .attr("fill", "rgba(0,0,255,0.3)");
+
+    var drawrightEdge = svg.append("path")
+      .attr("d", lineFunction(rightEdge))
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.4)
+      .attr("fill", "rgba(0,0,255,0.3)");
+
+    var xp = sCoordX(0);
+    var yp = sCoordY(0);
+    var zp = -800;
 
     var data = new Array;
-    for (var i = 0; i < 100 ; i++){
+    for (var i = 0; i < 1; i++){
       n = {
         vx: randomNumber(-0,0),
         vy: randomNumber(-0,0),
-        vz: randomNumber(-10,10),
-        px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
-        py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
-        pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+        vz: randomNumber(10,10),
+        px: 10,//randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
+        py: -10,//randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+        pz: -10,//randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         r: particleSize,
+        ix: 0,
+        iy: 0,
         m: 1
       }
       data.push(n)
@@ -113,8 +188,8 @@
       .attr("cy", function (d){ return sCoordY(d.py)})
       .attr("cx", function (d){ return sCoordX(d.px)})
       .attr("r",particleSize)
-      .attr("stroke","black")
-      //.attr("fill","black")
+      .attr("stroke","none")
+      .attr("fill","blue")
 
 
 
@@ -125,6 +200,13 @@
       .attr("fill","none")
       .attr("stroke","black");
 
+    var miscInfo = d3.select("svg")
+      .append("text")
+      .attr("x",sCoordX(boxCentreX))
+      .attr("y", sCoordY(-boxCentreY-40))
+      .attr("fill","none")
+      .attr("stroke","black");
+
       svg.append("circle")
           .attr("r",2)
           .attr("cx",xp)
@@ -132,37 +214,31 @@
           .attr("fill","red");
 
 
-
-
     var globalTime = 0;
     let dt = 0.0001;
     let g = 9.81*0.1;
-    let cOfR = 0.8; // Coefficient of Restitution
+    let cOfR = 1; // Coefficient of Restitution
 
     // runs the simulation
 
     d3.timer( function(duration) {
       var interval = duration*0.0001;
-      var perspective = [0,0];
-      var shrinkFactor = new Number();
+
       particle.data(function(d) {
-
-
         particleData.forEach(
           function (d,i,data){
-
-            exchangeMomenta(d,i,particleData, 1);
+            //exchangeMomenta(d,i,particleData, 1);
             updateVerletV(d,interval,0,0,0);
             updateVerletP(d,interval,0,0,0);
-            shrinkFactor = d.r*Math.abs(5+(d.pz/(boxDepth-2*d.r)));
+            var frameFactor = (boxDepth - particleSize)/ boxDepth;
+            imageRadius = ((particleSize-particleSizeMin)/boxDepth)*Math.abs(d.pz-boxDepth/2) + particleSizeMin;
 
-
-            var upperLim = upperBoxEdge(shrinkFactor);
-            var lowerLim = lowerBoxEdge(shrinkFactor);
-            var leftLim = leftBoxEdge(shrinkFactor);
-            var rightLim = rightBoxEdge(shrinkFactor);
-            var outerLim = outerBoxEdge(shrinkFactor);
-            var innerLim = d.r + (0.02*d.pz);
+            var upperLim = upperBoxEdge(imageRadius);
+            var lowerLim = lowerBoxEdge(imageRadius);
+            var leftLim = leftBoxEdge(imageRadius);
+            var rightLim = rightBoxEdge(imageRadius);
+            var outerLim = outerBoxEdge(imageRadius);
+            var innerLim = innerBoxEdge(imageRadius);
 
             if( d.py >= upperLim ) {
               d.py = upperLim;
@@ -198,12 +274,14 @@
         return particleData;
       });
 
-
-    onePointPerspective;
-    particle.attr("cx", function(d, i) { return sCoordX(d.px + onePointPerspective(d,boxDepth - 2*d.r, xp,yp,zp,10)[0]); });
-    particle.attr("cy", function(d, i) { return sCoordY(d.py + onePointPerspective(d,boxDepth - 2*d.r, xp,yp,zp,10)[1]); });
-    particle.attr("r", function(d,i) {return d.r*Math.abs((d.pz/(boxDepth-2*d.r)))});
-    timeInfo.text(function (d,i) {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+    particle.attr("cx", function(d, i) { return sCoordX(d.px ); });
+    particle.attr("cy", function(d, i) { return sCoordY(d.py ); });
+    particle.attr("r", function(d,i) {return ((particleSize-particleSizeMin)/boxDepth)*Math.abs(d.pz-boxDepth/2) + particleSizeMin});
+    //timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+    miscInfo.text(function () {return "x: " + particleData[0].px.toFixed() + " " +
+    "y: " + particleData[0].py.toFixed() + " " +
+    "z: " + particleData[0].pz.toFixed()
+  });
     return false;
     });
 
