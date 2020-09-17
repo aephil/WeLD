@@ -1,5 +1,66 @@
 //import * as d3 from "./d3v3/d3.v3.min.js"
 
+// returns the screen x coordinate equivalent of the user defined coordinate system
+var screenToCentreX = function(x, worldWidth = 1000){
+  var screenToCentreOffX = worldWidth/2;
+  return (x + screenToCentreOffX);
+}
+// returns the screen y coordinate equivalent of the user defined coordinate system
+var screenToCentreY = function(y, worldHeight = 1000){
+  var screenToCentreOffY = worldHeight/2;
+  return (screenToCentreOffY - y);
+  }
+
+// returns the bottom coordinates
+var screenToBottomLeftX = function(x){
+  // they are the same!
+  return x;
+}
+var screenToBottomLeftY = function(y, worldHeight = 1000){
+  return worldHeight - y ;
+}
+
+var centreToBottomLeftX = function(x, worldWidth = 1000){
+  return x + worldWidth/2;
+}
+var centreToBottomLeftY = function(y,worldHeight=1000){
+  return (worldHeight/2) + y;
+}
+
+var bottomLeftToCentreX = function(x,worldWidth=1000){
+  return (-worldWidth/2) + x;
+}
+
+var bottomLeftToCentreY = function(x,worldHeight=1000){
+  return (-worldHeight/2) + y;
+}
+
+// establish a coordinate system
+var centreToScreenY = function(y, worldHeight=1000){
+  return (worldHeight/2) - y;
+}
+var centreToScreenX = function(x, worldWidth=1000){
+return  x + worldWidth/2;
+}
+
+var bottomLeftToScreenX = function(x, worldWidth=1000){
+  // they are the same!
+  return x;
+}
+
+var bottomLeftToScreenY = function(y,worldHeight=1000){
+  return worldHeight - y;
+}
+
+var bottomLeftToCentreZ = function(z, worldDepth = 1000){
+  return z + worldDepth/2;
+}
+var centrToBottomLeftZ = function(z, worldDepth = 1000){
+  return z - worldDepth/2; 
+}
+
+
+
 var updateVerletV = function(d,t,ax=0,ay=0,az=0){
   d.vx += ax*t;
   d.vy += ay*t;
@@ -16,13 +77,29 @@ var randomNumber = function(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-var onePointPerspective = function(d,maxZ,minZ,xAlpha,yAlpha,x,y,z){
+var onePointPerspectiveCentred = function(d,alphaZero,alphaFinal,point){
 
-  var dx = d.px - x;
-  var dy = d.py - y;
-  var dz = d.pz - z;
+  var dx = d.px - point[0];
+  var dy = d.py - point[1];
+  var dz = d.pz - point[2];
 
-  var lenZ = (maxZ)
+  var depth = Math.abs(alphaZero[2] - alphaFinal[2]);
+
+  var r = Math.sqrt(Math.pow(dy,2) + Math.pow(dx,2));
+
+  var zFactor = Math.abs(alphaZero[2] - d.pz)/depth;
+  var theta = Math.atan(dy/dx);
+
+  var alphaX = alphaZero[0] + zFactor*Math.abs(alphaZero[0] - alphaFinal[0])
+  var alphaY = alphaZero[1] +  zFactor*Math.abs(alphaZero[1] - alphaFinal[1])
+
+  var betaX = Math.abs(d.px - alphaX)/ (2*Math.abs(alphaX));
+  var betaY = Math.abs(d.px - alphaY)/ (2*Math.abs(alphaY));
+
+  var newX = alphaX //+ betaX*Math.abs(2*alphaX);
+  var newY = alphaY //+ betaY*Math.abs(2*alphaY);
+
+  return [newX,newY,Math.abs(d.pz)];
 
 
 }

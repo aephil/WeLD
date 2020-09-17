@@ -17,12 +17,6 @@
     var worldHeight = 1000;
     var worldWidth = 1000;
 
-    var csiy = -1; //coordinate to screen inversion in y
-    var csix = 1;  //coordinate to screen inversion in x
-
-    var offsetX = worldWidth/2;
-    var offsetY = worldHeight/2;
-
     var svg = d3.select("body").append("svg")
       .attr("width", worldWidth)
       .attr("height",worldHeight);
@@ -31,32 +25,19 @@
       create a box onto the svg canvas
     */
 
-    var boxWidth = 400;
-    var boxHeight = 400;
-    var boxDepth = 400;
+    var boxWidth = 800;
+    var boxHeight = 800;
+    var boxDepth = 800;
     var boxCentreX = -boxWidth/2; // in local coordinates
     var boxCentreY = boxHeight/2; // in local coordinates
-    var particleSize = 10;
+    var particleSize = 8;
     var particleSizeMin = particleSize/4;
 
-    // returns the screen x coordinate equivalent of the user defined coordinate system
-    var sCoordX = function(x){
-      return x + offsetX;
-    }
-    // returns the screen y coordinate equivalent of the user defined coordinate system
-    var sCoordY = function(y){
-      return offsetY - y;
-    }
-
-
-    // establish a coordinate system
-    var coordY = function(y){
-      // y is negative because coordinate system of page marks y travelling downwards
-      return -(offsetY-y);
-    }
-    var coordX = function(x){
-    return  x - offsetX;
-    }
+    var xp = screenToCentreX(0);
+    var yp = screenToCentreY(0);
+    var zp = -(1500);
+    var depthMax = 1-(boxDepth/Math.abs(boxDepth/2-zp))
+    var depthMin = 1-(boxDepth/Math.abs(-boxDepth/2-zp))
 
     // coordinates of box edges
     var leftBoxEdge = function(r){return -boxWidth/2 + r;}
@@ -78,132 +59,112 @@
       .attr("fill", "white")
       .attr("stroke","black");
 
-    var box = d3.select("svg")
-      .append("rect")
-      .attr("width", boxWidth)
-      .attr("height", boxHeight)
-      .attr("x", sCoordX(boxCentreX))
-      .attr("y",sCoordY(boxCentreY))
-      .attr("fill", "none")
-      .attr("stroke","black");
-
-    var box2 = d3.select("svg")
-      .append("rect")
-      .attr("width", boxWidth/2)
-      .attr("height", boxHeight/2)
-      .attr("x", sCoordX(boxCentreX/2))
-      .attr("y",sCoordY(boxCentreY/2))
-      .attr("fill", "rgba(0,0,255,0.5)")
-      .attr("stroke","black")
-      .attr("stroke-width",0.4);
-
       //This is the accessor function we talked about above
     var lineFunction = d3.svg.line()
       .x(function(d) { return d.x; })
       .y(function(d) { return d.y; })
       .interpolate('linear');
 
+    var a = (1-((boxDepth)/Math.abs((boxDepth/2)-zp)));
+    var b = (1-((boxDepth)/Math.abs((boxDepth/4)-zp)));
+
     //The data for our line
     var topEdge = [
-      { x: sCoordX(-boxWidth/2),   y: sCoordY(boxHeight/2)},
-      { x: sCoordX(-boxWidth/4),  y: sCoordY(boxHeight/4)},
-      { x: sCoordX(boxWidth/4),  y: sCoordY(boxHeight/4)},
-      { x: sCoordX(boxWidth/2),  y: sCoordY(boxHeight/2)},
-      { x: sCoordX(-boxWidth/2),  y: sCoordY(boxHeight/2)},
+      { x: screenToCentreX(-boxWidth/2 * a),   y: screenToCentreY(boxHeight/2 * a)},
+      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
+      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
+      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(boxHeight/2 * a)},
+      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(boxHeight/2 * a)},
     ];
 
     var leftEdge = [
-      { x: sCoordX(-boxWidth/2),   y: sCoordY(boxHeight/2)},
-      { x: sCoordX(-boxWidth/4),  y: sCoordY(boxHeight/4)},
-      { x: sCoordX(-boxWidth/4),  y: sCoordY(-boxHeight/4)},
-      { x: sCoordX(-boxWidth/2),  y: sCoordY(-boxHeight/2)},
-      { x: sCoordX(-boxWidth/2),  y: sCoordY(boxHeight/2)},
+      { x: screenToCentreX(-boxWidth/2 * a ),   y: screenToCentreY(boxHeight/2 * a)},
+      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
+      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
+      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
+      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(boxHeight/2  * a)},
     ];
 
     var bottomEdge = [
-      { x: sCoordX(-boxWidth/2),   y: sCoordY(-boxHeight/2)},
-      { x: sCoordX(-boxWidth/4),  y: sCoordY(-boxHeight/4)},
-      { x: sCoordX(boxWidth/4),  y: sCoordY(-boxHeight/4)},
-      { x: sCoordX(boxWidth/2),  y: sCoordY(-boxHeight/2)},
-      { x: sCoordX(boxWidth/2),  y: sCoordY(-boxHeight/2)},
+      { x: screenToCentreX(-boxWidth/2 * a),   y: screenToCentreY(-boxHeight/2 * a)},
+      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
+      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
+      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
+      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
     ];
 
     var rightEdge = [
-      { x: sCoordX(boxWidth/2),   y: sCoordY(-boxHeight/2)},
-      { x: sCoordX(boxWidth/4),  y: sCoordY(-boxHeight/4)},
-      { x: sCoordX(boxWidth/4),  y: sCoordY(boxHeight/4)},
-      { x: sCoordX(boxWidth/2),  y: sCoordY(boxHeight/2)},
-      { x: sCoordX(boxWidth/2),  y: sCoordY(-boxHeight/2)},
+      { x: screenToCentreX(boxWidth/2 * a),   y: screenToCentreY(-boxHeight/2 * a)},
+      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
+      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
+      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(boxHeight/2 * a)},
+      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
     ];
 
     //The line SVG Path we draw
     var drawTopEdge = svg.append("path")
       .attr("d", lineFunction(topEdge))
       .attr("stroke", "black")
-      .attr("stroke-width", 0.4)
-      .attr("fill", "rgba(0,0,255,0.3)");
+      .attr("stroke-width", 0.7)
+      .attr("fill", "rgba(255,255,255,1)");
 
     var drawBottomEdge = svg.append("path")
       .attr("d", lineFunction(bottomEdge))
       .attr("stroke", "black")
-      .attr("stroke-width", 0.4)
-      .attr("fill", "rgba(0,0,255,0.3)");
+      .attr("stroke-width", 0.7)
+      .attr("fill", "rgba(255,255,255,1)");
 
     var drawLeftEdge = svg.append("path")
       .attr("d", lineFunction(leftEdge))
       .attr("stroke", "black")
-      .attr("stroke-width", 0.4)
-      .attr("fill", "rgba(0,0,255,0.3)");
+      .attr("stroke-width", 0.7)
+      .attr("fill", "rgba(255,255,255,1)");
 
     var drawrightEdge = svg.append("path")
       .attr("d", lineFunction(rightEdge))
       .attr("stroke", "black")
-      .attr("stroke-width", 0.4)
-      .attr("fill", "rgba(0,0,255,0.3)");
+      .attr("stroke-width", 0.7)
+      .attr("fill", "rgba(255,255,255,1)");
 
-    var xp = sCoordX(0);
-    var yp = sCoordY(0);
-    var zp = -800;
+
 
     var data = new Array;
-    for (var i = 0; i < 1; i++){
+    for (var i = 0; i < 50; i++){
       n = {
-        vx: randomNumber(-0,0),
-        vy: randomNumber(-0,0),
-        vz: randomNumber(10,10),
-        px: 10,//randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
-        py: -10,//randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
-        pz: -10,//randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+        vx: randomNumber(-20,20),
+        vy: randomNumber(-20,20),
+        vz: randomNumber(20,20),
+        px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
+        py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+        pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         r: particleSize,
         ix: 0,
         iy: 0,
         m: 1
       }
-      data.push(n)
+      data.push(n);
     }
     var particleData = data;
     var particle = d3.select("svg").selectAll("circle").data(particleData);
 
     particle.enter().append("circle")
-      .attr("cy", function (d){ return sCoordY(d.py)})
-      .attr("cx", function (d){ return sCoordX(d.px)})
+      .attr("cy", function (d){ return screenToCentreY(d.py)})
+      .attr("cx", function (d){ return screenToCentreX(d.px)})
       .attr("r",particleSize)
-      .attr("stroke","none")
-      .attr("fill","blue")
-
-
+      .attr("stroke","black")
+      .attr("fill","blue");
 
     var timeInfo = d3.select("svg")
       .append("text")
-      .attr("x",sCoordX(boxCentreX))
-      .attr("y", sCoordY(-boxCentreY-20))
+      .attr("x",screenToCentreX(boxCentreX))
+      .attr("y", screenToCentreY(-boxCentreY-25))
       .attr("fill","none")
       .attr("stroke","black");
 
     var miscInfo = d3.select("svg")
       .append("text")
-      .attr("x",sCoordX(boxCentreX))
-      .attr("y", sCoordY(-boxCentreY-40))
+      .attr("x",screenToCentreX(boxCentreX))
+      .attr("y", screenToCentreY(-boxCentreY-45))
       .attr("fill","none")
       .attr("stroke","black");
 
@@ -213,14 +174,12 @@
           .attr("cy",yp)
           .attr("fill","red");
 
-
     var globalTime = 0;
     let dt = 0.0001;
     let g = 9.81*0.1;
-    let cOfR = 1; // Coefficient of Restitution
+    let cOfR = 0.8; // Coefficient of Restitution
 
     // runs the simulation
-
     d3.timer( function(duration) {
       var interval = duration*0.0001;
 
@@ -231,14 +190,13 @@
             updateVerletV(d,interval,0,0,0);
             updateVerletP(d,interval,0,0,0);
             var frameFactor = (boxDepth - particleSize)/ boxDepth;
-            imageRadius = ((particleSize-particleSizeMin)/boxDepth)*Math.abs(d.pz-boxDepth/2) + particleSizeMin;
 
-            var upperLim = upperBoxEdge(imageRadius);
-            var lowerLim = lowerBoxEdge(imageRadius);
-            var leftLim = leftBoxEdge(imageRadius);
-            var rightLim = rightBoxEdge(imageRadius);
-            var outerLim = outerBoxEdge(imageRadius);
-            var innerLim = innerBoxEdge(imageRadius);
+            var upperLim = upperBoxEdge(d.r);
+            var lowerLim = lowerBoxEdge(d.r);
+            var leftLim = leftBoxEdge(d.r);
+            var rightLim = rightBoxEdge(d.r);
+            var outerLim = outerBoxEdge(d.r);
+            var innerLim = innerBoxEdge(d.r);
 
             if( d.py >= upperLim ) {
               d.py = upperLim;
@@ -274,17 +232,25 @@
         return particleData;
       });
 
-    particle.attr("cx", function(d, i) { return sCoordX(d.px ); });
-    particle.attr("cy", function(d, i) { return sCoordY(d.py ); });
-    particle.attr("r", function(d,i) {return ((particleSize-particleSizeMin)/boxDepth)*Math.abs(d.pz-boxDepth/2) + particleSizeMin});
-    //timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
-    miscInfo.text(function () {return "x: " + particleData[0].px.toFixed() + " " +
+    particle.attr("cx", function(d, i) {
+      var zFactor = (1-((boxDepth)/Math.abs(d.pz-zp)));
+      return centreToScreenX(d.px*zFactor);});
+
+    particle.attr("cy", function(d, i) {
+      var zFactor = (1-(boxDepth/Math.abs(d.pz-zp)));
+      return centreToScreenY(d.py*zFactor); });
+
+    particle.attr("r", function(d,i) {
+      var imageRadius = ((particleSize-particleSizeMin)/boxDepth)*Math.abs(-d.pz-boxDepth/2) + particleSizeMin;
+      return imageRadius;})
+    timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+    miscInfo.text(function () {
+    return "x: " + particleData[0].px.toFixed() + " " +
     "y: " + particleData[0].py.toFixed() + " " +
     "z: " + particleData[0].pz.toFixed()
-  });
+      });
     return false;
     });
-
     </script>
   </body>
 </html>
