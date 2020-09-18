@@ -25,9 +25,11 @@
       create a box onto the svg canvas
     */
 
-    var boxWidth = 800;
-    var boxHeight = 800;
-    var boxDepth = 800;
+    // Z direction INTO screen
+
+    var boxWidth = 700;
+    var boxHeight = 700;
+    var boxDepth = 700;
     var boxCentreX = -boxWidth/2; // in local coordinates
     var boxCentreY = boxHeight/2; // in local coordinates
     var particleSize = 8;
@@ -35,9 +37,9 @@
 
     var xp = screenToCentreX(0);
     var yp = screenToCentreY(0);
-    var zp = -(1500);
-    var depthMax = 1-(boxDepth/Math.abs(boxDepth/2-zp))
-    var depthMin = 1-(boxDepth/Math.abs(-boxDepth/2-zp))
+    var zp = (2*boxDepth);
+
+    let N = 50
 
     // coordinates of box edges
     var leftBoxEdge = function(r){return -boxWidth/2 + r;}
@@ -56,8 +58,8 @@
       .attr("height", worldHeight)
       .attr("x", 0)
       .attr("y",0)
-      .attr("fill", "white")
-      .attr("stroke","black");
+      .attr("fill", "none")
+      .attr("stroke","none");
 
       //This is the accessor function we talked about above
     var lineFunction = d3.svg.line()
@@ -66,80 +68,95 @@
       .interpolate('linear');
 
     var a = (1-((boxDepth)/Math.abs((boxDepth/2)-zp)));
-    var b = (1-((boxDepth)/Math.abs((boxDepth/4)-zp)));
+    var b = (1-((boxDepth)/Math.abs((-boxDepth/2)-zp)));
 
     //The data for our line
     var topEdge = [
-      { x: screenToCentreX(-boxWidth/2 * a),   y: screenToCentreY(boxHeight/2 * a)},
-      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
-      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
-      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(boxHeight/2 * a)},
-      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),   y: centreToScreenY(boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * b),  y: centreToScreenY(boxHeight/2 * b)},
+      { x: centreToScreenX(boxWidth/2 * b),  y: centreToScreenY(boxHeight/2 * b)},
+      { x: centreToScreenX(boxWidth/2 * a),  y: centreToScreenY(boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),  y: centreToScreenY(boxHeight/2 * a)},
     ];
 
     var leftEdge = [
-      { x: screenToCentreX(-boxWidth/2 * a ),   y: screenToCentreY(boxHeight/2 * a)},
-      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
-      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
-      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
-      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(boxHeight/2  * a)},
+      { x: centreToScreenX(-boxWidth/2 * a ),   y: centreToScreenY(boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * b),  y: centreToScreenY(boxHeight/2 * b)},
+      { x: centreToScreenX(-boxWidth/2 * b),  y: centreToScreenY(-boxHeight/2 * b)},
+      { x: centreToScreenX(-boxWidth/2 * a),  y: centreToScreenY(-boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),  y: centreToScreenY(boxHeight/2  * a)},
     ];
 
     var bottomEdge = [
-      { x: screenToCentreX(-boxWidth/2 * a),   y: screenToCentreY(-boxHeight/2 * a)},
-      { x: screenToCentreX(-boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
-      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
-      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
-      { x: screenToCentreX(-boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),   y: centreToScreenY(-boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * b),  y: centreToScreenY(-boxHeight/2 * b)},
+      { x: centreToScreenX(boxWidth/2 * b),  y: centreToScreenY(-boxHeight/2 * b)},
+      { x: centreToScreenX(boxWidth/2 * a),  y: centreToScreenY(-boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),  y: centreToScreenY(-boxHeight/2 * a)},
     ];
 
     var rightEdge = [
-      { x: screenToCentreX(boxWidth/2 * a),   y: screenToCentreY(-boxHeight/2 * a)},
-      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(-boxHeight/4 * b)},
-      { x: screenToCentreX(boxWidth/4 * b),  y: screenToCentreY(boxHeight/4 * b)},
-      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(boxHeight/2 * a)},
-      { x: screenToCentreX(boxWidth/2 * a),  y: screenToCentreY(-boxHeight/2 * a)},
+      { x: centreToScreenX(boxWidth/2 * a),   y: centreToScreenY(-boxHeight/2 * a)},
+      { x: centreToScreenX(boxWidth/2 * b),  y: centreToScreenY(-boxHeight/2 * b)},
+      { x: centreToScreenX(boxWidth/2 * b),  y: centreToScreenY(boxHeight/2 * b)},
+      { x: centreToScreenX(boxWidth/2 * a),  y: centreToScreenY(boxHeight/2 * a)},
+      { x: centreToScreenX(boxWidth/2 * a),  y: centreToScreenY(-boxHeight/2 * a)},
     ];
+
+    var innerEdge = [
+      { x: centreToScreenX(-boxWidth/2 * a),   y: centreToScreenY(-boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),  y: centreToScreenY(boxHeight/2 * a)},
+      { x: centreToScreenX(boxWidth/2 * a),  y: centreToScreenY(boxHeight/2 * a)},
+      { x: centreToScreenX(boxWidth/2 * a),  y: centreToScreenY(-boxHeight/2 * a)},
+      { x: centreToScreenX(-boxWidth/2 * a),  y: centreToScreenY(-boxHeight/2 * a)},
+    ]
 
     //The line SVG Path we draw
     var drawTopEdge = svg.append("path")
       .attr("d", lineFunction(topEdge))
-      .attr("stroke", "black")
+      .attr("stroke", "white")
       .attr("stroke-width", 0.7)
-      .attr("fill", "rgba(255,255,255,1)");
+      .attr("fill", "rgba(0,0,0,1)");
 
     var drawBottomEdge = svg.append("path")
       .attr("d", lineFunction(bottomEdge))
-      .attr("stroke", "black")
+      .attr("stroke", "white")
       .attr("stroke-width", 0.7)
-      .attr("fill", "rgba(255,255,255,1)");
+      .attr("fill", "rgba(0,0,0,1)");
 
     var drawLeftEdge = svg.append("path")
       .attr("d", lineFunction(leftEdge))
-      .attr("stroke", "black")
+      .attr("stroke", "white")
       .attr("stroke-width", 0.7)
-      .attr("fill", "rgba(255,255,255,1)");
+      .attr("fill", "rgba(0,0,0,1)");
 
-    var drawrightEdge = svg.append("path")
+    var drawRightEdge = svg.append("path")
       .attr("d", lineFunction(rightEdge))
-      .attr("stroke", "black")
+      .attr("stroke", "white")
       .attr("stroke-width", 0.7)
-      .attr("fill", "rgba(255,255,255,1)");
+      .attr("fill", "rgba(0,0,0,1)");
+
+    var drawInnerEdge = svg.append("path")
+      .attr("d", lineFunction(innerEdge))
+      .attr("stroke", "white")
+      .attr("stroke-width", 0.7)
+      .attr("fill", "rgba(0,0,0,1)");
 
 
 
     var data = new Array;
-    for (var i = 0; i < 50; i++){
+    for (var i = 0; i < N; i++){
       n = {
-        vx: randomNumber(-20,20),
-        vy: randomNumber(-20,20),
-        vz: randomNumber(20,20),
+        vx: randomNumber(-40,40),
+        vy: randomNumber(-40,40),
+        vz: randomNumber(-40,40),
         px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
         py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         r: particleSize,
         ix: 0,
         iy: 0,
+        ir: 0,
         m: 1
       }
       data.push(n);
@@ -152,19 +169,19 @@
       .attr("cx", function (d){ return screenToCentreX(d.px)})
       .attr("r",particleSize)
       .attr("stroke","black")
-      .attr("fill","blue");
+      .attr("fill","white");
 
     var timeInfo = d3.select("svg")
       .append("text")
-      .attr("x",screenToCentreX(boxCentreX))
-      .attr("y", screenToCentreY(-boxCentreY-25))
+      .attr("x",screenToCentreX(boxCentreX*b))
+      .attr("y", screenToCentreY((-boxCentreY-25)*b))
       .attr("fill","none")
       .attr("stroke","black");
 
     var miscInfo = d3.select("svg")
       .append("text")
-      .attr("x",screenToCentreX(boxCentreX))
-      .attr("y", screenToCentreY(-boxCentreY-45))
+      .attr("x",screenToCentreX(boxCentreX*b))
+      .attr("y", screenToCentreY((-boxCentreY-50)*b))
       .attr("fill","none")
       .attr("stroke","black");
 
@@ -176,7 +193,9 @@
 
     var globalTime = 0;
     let dt = 0.0001;
-    let g = 9.81*0.1;
+    let gx = 0//9.81*0.1
+    let gy = -9.81*0.1
+    let gz = 0//9.81*0.1;
     let cOfR = 0.8; // Coefficient of Restitution
 
     // runs the simulation
@@ -186,10 +205,14 @@
       particle.data(function(d) {
         particleData.forEach(
           function (d,i,data){
-            //exchangeMomenta(d,i,particleData, 1);
-            updateVerletV(d,interval,0,0,0);
-            updateVerletP(d,interval,0,0,0);
-            var frameFactor = (boxDepth - particleSize)/ boxDepth;
+            exchangeMomenta(d,i,particleData, 1);
+            updateVerletV(d,interval,gx,gy,gz);
+            updateVerletP(d,interval,gx,gy,gz);
+
+            var scaleFactor = (1-((boxDepth)/Math.abs(d.pz-zp)));
+            d.ix = d.px*scaleFactor;
+            d.iy = d.py*scaleFactor;
+            d.ir = d.r*scaleFactor;
 
             var upperLim = upperBoxEdge(d.r);
             var lowerLim = lowerBoxEdge(d.r);
@@ -233,21 +256,18 @@
       });
 
     particle.attr("cx", function(d, i) {
-      var zFactor = (1-((boxDepth)/Math.abs(d.pz-zp)));
-      return centreToScreenX(d.px*zFactor);});
+      return centreToScreenX(d.ix);});
 
     particle.attr("cy", function(d, i) {
-      var zFactor = (1-(boxDepth/Math.abs(d.pz-zp)));
-      return centreToScreenY(d.py*zFactor); });
+      return centreToScreenY(d.iy); });
 
     particle.attr("r", function(d,i) {
-      var imageRadius = ((particleSize-particleSizeMin)/boxDepth)*Math.abs(-d.pz-boxDepth/2) + particleSizeMin;
-      return imageRadius;})
+      return d.ir;})
+
     timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
     miscInfo.text(function () {
-    return "x: " + particleData[0].px.toFixed() + " " +
-    "y: " + particleData[0].py.toFixed() + " " +
-    "z: " + particleData[0].pz.toFixed()
+    return "N:\n" + N + " " +
+    "gravity: " + gy.toFixed(3) + " ms^2"
       });
     return false;
     });
