@@ -1,4 +1,4 @@
-//import * as d3 from "./d3v3/d3.v3.min.js"
+
 
 // returns the screen x coordinate equivalent of the user defined coordinate system
 var screenToCentreX = function(x, worldWidth = 1000){
@@ -56,7 +56,7 @@ var bottomLeftToCentreZ = function(z, worldDepth = 1000){
   return z + worldDepth/2;
 }
 var centrToBottomLeftZ = function(z, worldDepth = 1000){
-  return z - worldDepth/2; 
+  return z - worldDepth/2;
 }
 
 
@@ -71,10 +71,6 @@ var updateVerletP = function(d,t,ax=0, ay=0,az=0){
   d.px += d.vx + (0.5*Math.pow(t,2)*ax);
   d.py += d.vy + (0.5*Math.pow(t,2)*ay);
   d.pz += d.vz + (0.5*Math.pow(t,2)*az);
-}
-
-var randomNumber = function(min, max) {
-  return Math.random() * (max - min) + min;
 }
 
 var onePointPerspectiveCentred = function(d,alphaZero,alphaFinal,point){
@@ -142,4 +138,78 @@ var exchangeMomenta = function(p, n, data, cOfR){
       }
     }
   }
+ }
+
+ var randomNumber = function(min, max) {
+   return Math.random() * (max - min) + min;
+ }
+
+ var randomColour = function(){
+   return "rgb("+randomNumber(0,255)+","+randomNumber(0,255)+","+randomNumber(0,255)+")";
+ }
+
+ var zFactor = function(d,z,zp=2){
+   return (1-((d)/Math.abs(z-zp)));
+ }
+
+ var createCentredBox = function(w,h,d,zp=2){
+
+   var a = zFactor(d,d/2,zp);
+   var b = zFactor(d,-d/2,zp);
+
+   //The data for our line
+   var topEdge = [
+     { x: centreToScreenX(-w/2 * a),   y: centreToScreenY(h/2 * a)},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(h/2 * b)},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(h/2 * b)},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(h/2 * a)},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(h/2 * a)},
+   ];
+
+   var leftEdge = [
+     { x: centreToScreenX(-w/2 * a ),   y: centreToScreenY(h/2 * a)},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(h/2 * b)},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(-h/2 * b)},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(-h/2 * a)},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(h/2  * a)},
+   ];
+
+   var bottomEdge = [
+     { x: centreToScreenX(-w/2 * a),   y: centreToScreenY(-h/2 * a)},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(-h/2 * b)},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(-h/2 * b)},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(-h/2 * a)},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(-h/2 * a)},
+   ];
+
+   var rightEdge = [
+     { x: centreToScreenX(w/2 * a),   y: centreToScreenY(-h/2 * a)},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(-h/2 * b)},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(h/2 * b)},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(h/2 * a)},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(-h/2 * a)},
+   ];
+
+   var innerEdge = [
+     { x: centreToScreenX(-w/2 * a),   y: centreToScreenY(-h/2 * a)},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(h/2 * a)},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(h/2 * a)},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(-h/2 * a)},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(-h/2 * a)},
+   ]
+
+   var outerEdge = [
+     { x: centreToScreenX(-w/2 * b),   y: centreToScreenY(-h/2 * b)},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(h/2 * b)},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(h/2 * b)},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(-h/2 * b)},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(-h/2 * b)},
+   ]
+
+   return [topEdge,bottomEdge,leftEdge,rightEdge,innerEdge,outerEdge]
+
+ }
+
+ var createCentredCube = function(l,zp){
+   return createCentredBox(l,l,l,zp);
  }

@@ -2,117 +2,153 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Test of the D3 framework</title>
-    <script
-	src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"
-	charset="utf-8"></script>
+    <script src="d3v3/d3.v3.min.js"></script>
+    <script src="kernel/framework.js"></script>
+    <script src="d3-path/d3-path.min.js"></script>
   </head>
 
   <body>
     <script type="text/javascript" ,src="framework.js">
 
+
     var worldHeight = 1000;
     var worldWidth = 1000;
-    var globalTime = 0;
-    let dt = 0.1;
-    let g = 9.81;
 
-      var svg = d3.select("body").append("svg")
-        .attr("width", worldWidth)
-        .attr("height",worldHeight);
+    var svg = d3.select("body").append("svg")
+      .attr("width", worldWidth)
+      .attr("height",worldHeight);
 
-      var boxWidth = 400;
-      var boxHeight = 400;
-      var boxCentreX = (worldWidth - boxWidth) / 2;
-      var boxCentreY = (worldHeight - boxWidth) / 2;
-      var bobSize = 5;
+    // Z direction INTO screen
 
-      // coordinates of box edges
-      var rightBoxEdge = Math.abs(boxWidth + boxCentreX - bobSize);
-      var lowerBoxEdge = Math.abs(boxHeight + boxCentreY - bobSize);
-      var leftBoxEdge = Math.abs(boxCentreX + bobSize);
-      var upperBoxEdge = Math.abs(boxCentreY + bobSize);
+    let boxWidth = 800;
+    let boxHeight = 800;
+    let boxDepth = 800;
+    let boxCentreX = -boxWidth/2; // in local coordinates
+    let boxCentreY = boxHeight/2; // in local coordinates
 
-      var boxCoordX = function(x){
-        return x + boxCentreX;
-      }
+    // centred coordinates of the perspective point
+    var xp = screenToCentreX(0);
+    var yp = screenToCentreY(0);
+    let zp = (2*boxDepth);
 
-      var boxCoordY = function(y){
-        return y + boxCentreY;
-      }
+    // coordinates of box edges
+    var leftBoxEdge = function(r){return -boxWidth/2 + r;}
+    var rightBoxEdge = function(r){return boxWidth/2 - r;}
 
-      var updateVerletV = function(d,dt=0.001,ax=0,ay=0){
-        d.vx += ax*dt;
-        d.vy += ay*dt;
-      }
+    var upperBoxEdge = function(r){return boxHeight/2 - r;}
+    var lowerBoxEdge = function(r){return -boxHeight/2 + r;}
 
-      var updateVerletP = function(d, dt = 0.001, ax = 0, ay = 0){
-        d.px += d.vx + (0.5*Math.pow(dt,2)*ax);
-        d.py += d.vy + (0.5*Math.pow(dt,2)*ay);
-      }
+    var outerBoxEdge = function(r){return boxDepth/2 - r;}
+    var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
-    var randomNumber = function(min, max) {
-      return Math.random() * (max - min) + min;
-    }
+    var lineFunction = d3.svg.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
+      .interpolate('linear');
 
-    var box = d3.select("svg")
-      .append("rect")
-      .attr("width", boxWidth)
-      .attr("height", boxHeight)
-      .attr("x", boxCentreX)
-      .attr("y",boxCentreY)
-      .attr("fill", "none")
+    var a = (1-((boxDepth)/Math.abs((boxDepth/2)-zp)));
+    var b = (1-((boxDepth)/Math.abs((-boxDepth/2)-zp)));
+
+    var edges = createCentredCube(boxWidth,zp);
+
+    var boxColour = "rgba(255,255,255,1)";
+    var boxStroke = "black";
+
+    edges.slice(0,1).forEach(function(d){
+      svg.append("path")
+        .attr("d", lineFunction(d))
+        .attr("stroke", boxStroke)
+        .attr("stroke-width", 0.7)
+        .attr("fill", boxColour);
+    })
+
+    var pendulumData = [
+      {
+        hx:0, // hinge x
+        hy:boxHeight/2, //hinge y
+        hz:0, // hinge z
+        x:0,  // bob x
+        y:0,  // bob y
+        z:0,  // bob z
+        r:20,  // radius
+        m:1,  // bob mass
+        a:50, // amplitude
+
+        scale: function(){
+          return zFactor(boxDepth,this.z,zp);
+        },
+
+        ix: function(){
+          return this.x * this.scale();
+        },
+        iy: function(){
+          return this.y * this.scale();
+        },
+        ir: function(){
+          return this.r * this.scale();
+        },
+        s: function(){
+            return [{x:centreToScreenX(this.hx*this.scale()),y:centreToScreenY(this.hy*this.scale())},{x:centreToScreenX(this.x*this.scale()),y:centreToScreenY(this.y*this.scale())}];
+          },
+        theta: function(){
+          return Math.atan(Math.abs(this.x-this.hx)/Math.abs(this.y - this.hy));
+        }
+
+
+      },
+    ];
+
+
+
+    var group1 = svg.append("g");
+    var string = group1.selectAll("path").data(pendulumData);
+    var pendulum = d3.select("svg").selectAll("circle").data(pendulumData);
+
+    pendulum.enter()
+      .append("circle")
+      .attr("r",function(d){return d.ir()})
+      .attr("cx",function(d){return centreToScreenX(d.ix())})
+      .attr("cy", function(d){return centreToScreenY(d.iy())})
+      .attr("fill", "red");
+
+    string.enter()
+      .append("path")
+      .attr("stroke", "red")
+      .attr("stroke-width", 1)
+      .attr("fill", "none");
+
+    var timeInfo = d3.select("svg")
+      .append("text")
+      .attr("x",screenToCentreX(boxCentreX*b))
+      .attr("y", screenToCentreY((-boxCentreY-25)*b))
+      .attr("fill","none")
       .attr("stroke","black");
 
-      var timeInfo = d3.select("svg")
-        .append("text")
-        .attr("x",boxCentreX)
-        .attr("y", boxCentreY+boxHeight+ 20)
-        .attr("fill","none")
-        .attr("stroke","black");
+      d3.timer( function(duration) {
+        var interval = duration*0.001;
+        pendulum.data(function(d) {
+          pendulumData.forEach(
+            function (d,i,data){
+              d.x = d.m*(-0.981)*Math.sin(d.theta());
+              d.y = d.a*Math.cos(interval);
 
-      var group = svg.append("g")
-            .attr("transform","translate(0, 0)");
-
-      var pendulumData = [
-        {
-          r:100,
-          w:5,
-          angle:30,
-          hx: boxCoordX(boxWidth/2),
-          hy: boxCentreY,
-        }
-      ];
-
-      var stringGenerator = d3.svg.line()
-        .x(function(d) {return d.x})
-        .y(function(d) {return d.y});
-
-        group.selectAll("path")
-        .data([stringData])
-        .enter()
-        .append("path")
-        .attr("d",stringGenerator)
-        .attr("fill", "none")
-        .attr("stroke","black")
-        .attr("stroke-width", 1);
-
-        var v = 5;
+              string.attr("d", lineFunction(d.s()))
 
 
-        var bobs = svg
-          .append("circle")
-          .attr("cy", bobY)
-          .attr("cx", bobX)
-          .attr("r",bobSize)
-          .attr("fill", "red");
+            }
 
-      //d3.timer( function(el) {
-      //bob.attr("cx", 500);
-      //bob.attr("cy", 500);
-      //timeInfo.text(function () {return "time: " + globalTime.toFixed(2) + "s"})
-      //return false;
-      //});
+          );
+          return pendulumData;
+        });
 
+        pendulum.attr("cx",function(d){return centreToScreenX(d.ix())});
+        pendulum.attr("cy",function(d){return centreToScreenY(d.iy())});
+        pendulum.attr("r", function(d){return d.ir()});
+
+
+        timeInfo.text(function(){return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+        return false;
+      });
     </script>
   </body>
 </html>
