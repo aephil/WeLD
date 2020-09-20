@@ -38,7 +38,7 @@
     // z-perspective value
     let zp = (2*boxDepth);
 
-    let N = 10
+    let N = 10;
 
     // coordinates of box edges
     var leftBoxEdge = function(r){return -boxWidth/2 + r;}
@@ -46,7 +46,6 @@
 
     var upperBoxEdge = function(r){return boxHeight/2 - r;}
     var lowerBoxEdge = function(r){return -boxHeight/2 + r;}
-
 
     var outerBoxEdge = function(r){return boxDepth/2 - r;}
     var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
@@ -84,13 +83,13 @@
         pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         r: particleSize,
         scale: function(){
-          return zFactor(boxDepth,this.z,zp);
+          return zFactor(boxDepth,this.pz,zp);
         },
         ix: function(){
-          return this.x * this.scale();
+          return this.px * this.scale();
         },
         iy: function(){
-          return this.y * this.scale();
+          return this.py * this.scale();
         },
         ir: function(){
           return this.r * this.scale();
