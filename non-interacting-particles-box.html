@@ -24,7 +24,6 @@
     /*
       create a box onto the svg canvas
     */
-
     // Z direction INTO screen
 
     var boxWidth = 800;
@@ -38,7 +37,7 @@
     // z-perspective value
     let zp = (2*boxDepth);
 
-    let N = 10;
+
 
     // coordinates of box edges
     var leftBoxEdge = function(r){return -boxWidth/2 + r;}
@@ -71,7 +70,7 @@
         .attr("stroke-width", 0.7)
         .attr("fill", boxColour);
     })
-
+    let N = 10;
     var data = new Array;
     for (var i = 0; i < N; i++){
       n = {
@@ -105,8 +104,8 @@
       .attr("cy", function (d){ return screenToCentreY(d.py)})
       .attr("cx", function (d){ return screenToCentreX(d.px)})
       .attr("r",particleSize)
-      .attr("stroke","white")
-      .attr("fill","white");
+      .attr("stroke","none")
+      .attr("fill",randomColour);
 
     var timeInfo = d3.select("svg")
       .append("text")
@@ -133,7 +132,7 @@
     let gx = 0//9.81*0.1
     let gy = -9.81
     let gz = 0//9.81*0.1;
-    let cOfR = 0.8; // Coefficient of Restitution
+    let cOfR = 0.5; // Coefficient of Restitution
 
     // runs the simulation
     d3.timer( function(duration) {

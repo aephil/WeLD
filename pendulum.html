@@ -72,7 +72,8 @@
         m:1,  // bob mass
         a:50, // amplitude
         rho:0, // z-y angle
-        theta:0, //x-y angle;
+        theta:randomNumber(-3.14159,3.14159), //x-y angle;
+        freq:0,
         z:function(){
           return (this.hz + (this.l * Math.sin(this.rho)));
         },
@@ -94,6 +95,14 @@
           }
       },
     ];
+
+    var updateVerletAngularV = function(d, g, t){
+      d.freq += (g/d.l)*Math.sin(d.theta)*t;
+    }
+
+    var updateVerletAngularP = function(d,g,t){
+      d.theta += d.freq + (g/d.l)*Math.sin(d.theta)*Math.pow(t,2);
+    }
 
     var group1 = svg.append("g");
     var string = group1.selectAll("path").data(pendulumData);
@@ -119,15 +128,18 @@
       .attr("fill","none")
       .attr("stroke","black");
 
+      var g = -9.81;
       d3.timer( function(duration) {
-        var interval = duration*0.001;
+        var interval = duration*0.0001;
         pendulum.data(function(d) {
           pendulumData.forEach(
             function (d,i,data){
-              d.theta = 0.2*Math.sin(interval);
-              //d.rho = 0.5*Math.cos(interval);
+              if(Math.abs(d.theta)>0.0001){
+                updateVerletAngularV(d,g,interval);
+                updateVerletAngularP(d,g,interval);
+              }
               string.attr("d", lineFunction(d.s()))
-              timeInfo.text(function(){return "theta: " + (d.theta).toFixed(2)})
+              timeInfo.text(function(){return "theta: " + (d.theta).toFixed(3)+ " rads"})
             }
           );
           return pendulumData;
