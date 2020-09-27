@@ -148,7 +148,7 @@ var exchangeMomenta = function(p, n, data, cOfR){
    return "rgb("+randomNumber(0,255)+","+randomNumber(0,255)+","+randomNumber(0,255)+")";
  }
 
- var zFactor = function(d,z,zp=2){
+ var zFactor = function(d,z,zp){
    return (1-((d)/Math.abs(z-zp)));
  }
 

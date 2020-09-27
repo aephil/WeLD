@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>Test of the D3 framework</title>
-  <script src="d3v3/d3.v3.min.js"></script>
-  <script src="kernel/framework.js"></script>
-  <script src="d3-path/d3-path.min.js"></script>
-  </head>
-
-  <body>
-    <script type="text/javascript">
 
     /*
       create an svg canvas
@@ -70,10 +59,10 @@
         .attr("stroke-width", 0.7)
         .attr("fill", boxColour);
     })
-    let N = 10;
+    let N = 100;
     var data = new Array;
     for (var i = 0; i < N; i++){
-      n = {
+      var n = {
         vx: randomNumber(-10,10),
         vy: randomNumber(-10,10),
         vz: randomNumber(-10,10),
@@ -105,7 +94,7 @@
       .attr("cx", function (d){ return screenToCentreX(d.px)})
       .attr("r",particleSize)
       .attr("stroke","none")
-      .attr("fill",randomColour);
+      .attr("fill","white");
 
     var timeInfo = d3.select("svg")
       .append("text")
@@ -130,7 +119,7 @@
     var globalTime = 0;
     let dt = 0.0001;
     let gx = 0//9.81*0.1
-    let gy = -9.81
+    let gy = -9.81;
     let gz = 0//9.81*0.1;
     let cOfR = 0.5; // Coefficient of Restitution
 
@@ -200,6 +189,3 @@
       });
     return false;
     });
-    </script>
-  </body>
-</html>

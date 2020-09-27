@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>Test of the D3 framework</title>
-    <script src="d3v3/d3.v3.min.js"></script>
-    <script src="kernel/framework.js"></script>
-    <script src="d3-path/d3-path.min.js"></script>
-  </head>
-
-  <body>
-    <script type="text/javascript" ,src="framework.js">
 
 
     var worldHeight = 1000;
@@ -72,11 +61,12 @@
         m:1,  // bob mass
         a:50, // amplitude
         rho:0, // z-y angle
-        theta:randomNumber(-3.14159,3.14159), //x-y angle;
+        theta:3.14159,//randomNumber(-3.14159,3.14159), //x-y angle;
         freq:0,
         z:function(){
           return (this.hz + (this.l * Math.sin(this.rho)));
         },
+
 
         scale: function(){
           return zFactor(boxDepth,this.z(),zp);
@@ -128,6 +118,7 @@
       .attr("fill","none")
       .attr("stroke","black");
 
+
       var g = -9.81;
       d3.timer( function(duration) {
         var interval = duration*0.0001;
@@ -149,9 +140,5 @@
         pendulum.attr("cy",function(d){return centreToScreenY(d.iy())});
         pendulum.attr("r", function(d){return d.ir()});
 
-
         return false;
       });
-    </script>
-  </body>
-</html>
