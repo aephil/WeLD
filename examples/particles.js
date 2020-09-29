@@ -38,7 +38,6 @@
     var outerBoxEdge = function(r){return boxDepth/2 - r;}
     var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
-      //This is the accessor function we talked about above
     var lineFunction = d3.svg.line()
       .x(function(d) { return d.x; })
       .y(function(d) { return d.y; })

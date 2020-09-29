@@ -213,3 +213,71 @@ var exchangeMomenta = function(p, n, data, cOfR){
  var createCentredCube = function(l,zp){
    return createCentredBox(l,l,l,zp);
  }
+
+ var pointLen = function(a,b){
+   return Math.sqrt(Math.pow(a.x-b.x,2)+Math.pow(a.y-b.y,2)+Math.pow(a.z-b.z,2));
+ }
+ var pointsEqual = function(a,b){
+   return a.x==b.x&&a.y==b.y&&a.z==b.z;
+ }
+ var facesEqual = function(faceA,faceB){
+   if(faceA.length!=faceB.length){return false;}
+   var numEqualPoints = 0;
+   faceA.forEach(function(a){
+     faceB.forEach(function(b){
+       if(pointsEqual(a,b)){
+         numEqualPoints++;
+       }
+     })
+   })
+   return numEqualPoints==faceB.length;
+ }
+
+
+ //for rotating a single point
+ var rotX = function(d,theta){
+   return {x:d.x,y:d.y*Math.cos(theta)-d.z*Math.sin(theta),z:d.z*Math.cos(theta)+d.y*Math.sin(theta)};
+ }
+ var rotY = function(d,rho){
+   return {x:Math.cos(rho)*d.x + Math.sin(rho)*d.z,y:d.y,z:Math.cos(rho)*d.y-Math.sin(rho)*d.x}
+ }
+ var rotZ = function(d,gamma){
+   return {x:Math.cos(gamma)*d.x - Math.sin(gamma)*d.y,y:Math.sin(gamma)*d.x+Math.cos(gamma)*d.y,z:d.z}
+ }
+
+ // for rotating entire shape (array of edges)
+ var rotateFacesX = function(faces,theta){
+   var rotatedFaces = [];
+   faces.forEach(function(face){
+     var rotatedPoints = [];
+     face.forEach(function(point){
+       rotatedPoints.push(rotX(point,theta));
+     });
+     rotatedFaces.push(rotatedPoints);
+   });
+   return rotatedFaces;
+ }
+
+ var rotateFacesY = function(faces,theta){
+   var rotatedFaces = [];
+   faces.forEach(function(face){
+     var rotatedPoints = [];
+     face.forEach(function(point){
+       rotatedPoints.push(rotY(point,theta));
+     });
+     rotatedFaces.push(rotatedPoints);
+   });
+   return rotatedFaces;
+ }
+
+ var rotateFacesZ = function(faces,theta){
+   var rotatedFaces = [];
+   faces.forEach(function(face){
+     var rotatedPoints = [];
+     face.forEach(function(point){
+       rotatedPoints.push(rotZ(point,theta));
+     });
+     rotatedFaces.push(rotatedPoints);
+   });
+   return rotatedFaces;
+ }
