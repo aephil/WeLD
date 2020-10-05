@@ -10,10 +10,10 @@ var svg = d3.select("body").append("svg")
 var boxDepth = 800;
 let zp = (2*boxDepth);
 
-var lineFunction = d3.svg.line()
+var lineFunction = d3.line()
   .x(function(d) { return d.x; })
-  .y(function(d) { return d.y; })
-  .interpolate('linear');
+  .y(function(d) { return d.y; });
+
 
 var facesToScreen = function(faces,d,z){
   var projectedFaces = [];

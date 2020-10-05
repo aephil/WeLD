@@ -28,18 +28,17 @@ var lowerBoxEdge = function(r){return -boxHeight/2 + r;}
 var outerBoxEdge = function(r){return boxDepth/2 - r;}
 var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
-var lineFunction = d3.svg.line()
+var lineFunction = d3.line()
   .x(function(d) { return d.x; })
-  .y(function(d) { return d.y; })
-  .interpolate('linear');
+  .y(function(d) { return d.y; });
 
 var a = zFactor(boxDepth,boxDepth/2,zp);
 var b = zFactor(boxDepth,-boxDepth/2,zp);
 
 var edges = createCentredCube(boxWidth,zp);
 
-var boxColour = "white";
-var boxStroke = "rgba(0,0,0,0.3)";
+var boxColour = "black";
+var boxStroke = "white";
 
 edges.slice(0,5).forEach(function(d){
   svg.append("path")
@@ -53,7 +52,7 @@ let N = 4;
 var data = new Array;
 for (var i = 0; i < N; i++){
   var n = {
-    vx: 0,
+    vx: 5,
     vy: 0,
     vz: 0,
     px: -boxWidth/2 + (i*80),
@@ -76,6 +75,7 @@ for (var i = 0; i < N; i++){
   }
   data.push(n);
 }
+
 var particleData = data;
 particleData.slice(-1)[0].vx = 5;
 var particle = d3.select("svg").selectAll("circle").data(particleData);
@@ -154,9 +154,13 @@ d3.timer( function(duration) {
     return particleData;
   });
 
-particle.attr("cx",function(d){return centreToScreenX(d.ix())});
-particle.attr("cy",function(d){return centreToScreenY(d.iy())});
-particle.attr("r", function(d) {return d.ir();})
+particle
+  .enter()
+  .selectAll("circle")
+  .merge(particle)
+  .attr("cx",function(d){return centreToScreenX(d.ix())})
+  .attr("cy",function(d){return centreToScreenY(d.iy())})
+  .attr("r", function(d) {return d.ir();});
 
 timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
 miscInfo.text(function () {

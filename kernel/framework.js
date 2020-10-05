@@ -73,33 +73,6 @@ var updateVerletP = function(d,t,ax=0, ay=0,az=0){
   d.pz += d.vz + (0.5*Math.pow(t,2)*az);
 }
 
-var onePointPerspectiveCentred = function(d,alphaZero,alphaFinal,point){
-
-  var dx = d.px - point[0];
-  var dy = d.py - point[1];
-  var dz = d.pz - point[2];
-
-  var depth = Math.abs(alphaZero[2] - alphaFinal[2]);
-
-  var r = Math.sqrt(Math.pow(dy,2) + Math.pow(dx,2));
-
-  var zFactor = Math.abs(alphaZero[2] - d.pz)/depth;
-  var theta = Math.atan(dy/dx);
-
-  var alphaX = alphaZero[0] + zFactor*Math.abs(alphaZero[0] - alphaFinal[0])
-  var alphaY = alphaZero[1] +  zFactor*Math.abs(alphaZero[1] - alphaFinal[1])
-
-  var betaX = Math.abs(d.px - alphaX)/ (2*Math.abs(alphaX));
-  var betaY = Math.abs(d.px - alphaY)/ (2*Math.abs(alphaY));
-
-  var newX = alphaX //+ betaX*Math.abs(2*alphaX);
-  var newY = alphaY //+ betaY*Math.abs(2*alphaY);
-
-  return [newX,newY,Math.abs(d.pz)];
-
-
-}
-
 var exchangeMomenta = function(p, n, data, cOfR){
   var dataLength = data.length;
   var skipOver = [n];

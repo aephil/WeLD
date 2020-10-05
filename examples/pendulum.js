@@ -30,10 +30,9 @@
     var outerBoxEdge = function(r){return boxDepth/2 - r;}
     var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
-    var lineFunction = d3.svg.line()
+    var lineFunction = d3.line()
       .x(function(d) { return d.x; })
-      .y(function(d) { return d.y; })
-      .interpolate('linear');
+      .y(function(d) { return d.y; });
 
     var a = (1-((boxDepth)/Math.abs((boxDepth/2)-zp)));
     var b = (1-((boxDepth)/Math.abs((-boxDepth/2)-zp)));
@@ -66,8 +65,6 @@
         z:function(){
           return (this.hz + (this.l * Math.sin(this.rho)));
         },
-
-
         scale: function(){
           return zFactor(boxDepth,this.z(),zp);
         },
@@ -118,7 +115,6 @@
       .attr("fill","none")
       .attr("stroke","black");
 
-
       var g = -9.81;
       d3.timer( function(duration) {
         var interval = duration*0.0001;
@@ -129,16 +125,23 @@
                 updateVerletAngularV(d,g,interval);
                 updateVerletAngularP(d,g,interval);
               }
-              string.attr("d", lineFunction(d.s()))
+              string
+                .enter()
+                .select("path")
+                .merge(string)
+                .attr("d", lineFunction(d.s()));
+              pendulum
+                .enter()
+                .select("circle")
+                .merge(pendulum)
+                .attr("cx",function(d){return centreToScreenX(d.ix())})
+                .attr("cy",function(d){return centreToScreenY(d.iy())})
+                .attr("r", function(d){return d.ir()});
               timeInfo.text(function(){return "theta: " + (d.theta).toFixed(3)+ " rads"})
             }
           );
           return pendulumData;
         });
-
-        pendulum.attr("cx",function(d){return centreToScreenX(d.ix())});
-        pendulum.attr("cy",function(d){return centreToScreenY(d.iy())});
-        pendulum.attr("r", function(d){return d.ir()});
 
         return false;
       });
