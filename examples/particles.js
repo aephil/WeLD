@@ -27,6 +27,8 @@ var lowerBoxEdge = function(r){return -boxHeight/2 + r;}
 var outerBoxEdge = function(r){return boxDepth/2 - r;}
 var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
+// coordinates of box edges
+
 // test of d3v6
 
 var svg = d3.select("body").append("svg")
@@ -50,12 +52,12 @@ edges.slice(0,5).forEach(function(d){
     .attr("fill", boxColour);
 })
 
-let N = 10;
+let N = 20;
 var data = new Array;
 for (var i = 0; i < N; i++){
   var n = {
-    vx: randomNumber(-10,10),
-    vy: randomNumber(-10,10),
+    vx: randomNumber(-0,0),
+    vy: randomNumber(-0,0),
     vz: randomNumber(-10,10),
     px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
     py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
@@ -64,6 +66,7 @@ for (var i = 0; i < N; i++){
     scale: function(){
       return zFactor(boxDepth,this.pz,zp);
     },
+    // data objects that each have duplicated functions? is this efficient?
     ix: function(){
       return this.px * this.scale();
     },
@@ -73,106 +76,96 @@ for (var i = 0; i < N; i++){
     ir: function(){
       return this.r * this.scale();
     },
-    m: randomNumber(1,4),
+    m: 1,
   }
   data.push(n);
 }
 
 
 var particleData = data;
-var particle = svg.selectAll("circle").data(particleData);
 
-particle.enter().append("circle")
-  .attr("r",particleSize)
-  .attr("stroke","none")
-  .attr("fill","white")
-  .merge(particle)
-  .attr("cy", function (d){ return screenToCentreY(d.iy())})
-  .attr("cx", function (d){ return screenToCentreX(d.ix())})
-  .attr("r", function(d) {return d.ir();})
-particle.exit().remove();
+var particles = svg.selectAll("charlesDarwin")
+  .data(particleData)
+  .enter()
+  .append("circle")
+  .attr("cx", function(d, i) {
+    return centreToScreenX(d.ix());
+  })
+  .attr("cy", function(d, i) {
+    return centreToScreenY(d.iy());
+  })
+  .attr("r", function(d, i) {
+    return d.ir();
+  })
+  .style("fill", "00ACCD");
 
 var timeInfo = d3.select("svg")
   .append("text")
-  .attr("x",screenToCentreX(boxCentreX*b))
-  .attr("y", screenToCentreY((-boxCentreY-25)*b))
+  .attr("x",centreToScreenX(boxCentreX*b))
+  .attr("y", centreToScreenY((-boxCentreY-25)*b))
   .attr("fill","none")
   .attr("stroke","black");
 
 var miscInfo = d3.select("svg")
   .append("text")
-  .attr("x",screenToCentreX(boxCentreX*b))
-  .attr("y", screenToCentreY((-boxCentreY-50)*b))
+  .attr("x",centreToScreenX(boxCentreX*b))
+  .attr("y", centreToScreenY((-boxCentreY-50)*b))
   .attr("fill","none")
   .attr("stroke","black");
 
-
-var globalTime = 0;
 let dt = 0.0001;
 let gx = 0//9.81*0.1
-let gy = -9.81;
+let gy = 0//-9.81;
 let gz = 0//9.81*0.1;
-let cOfR = 0.5; // Coefficient of Restitution
+let cOfR = 1.0; // Coefficient of Restitution
+let dof = 3;
+let kBoltzmann = 1.380649 * Math.pow(10,-23);
 
-// runs the simulation
 var timer = d3.timer( function(duration) {
   //timer.stop()
-  var interval = duration*0.0001;
+  var interval = duration*0.001;
+  var temperature = 0;
 
-  particle.data(function(d) {
-    particleData.forEach(
-      function (d,i,data){
-        updateVerletV(d,interval,gx,gy,gz);
-        updateVerletP(d,interval,gx,gy,gz);
+  particles
+    .attr("cy", function (d){
+    //  var v =  d.vy + gy*interval;
+    //  var p = d.py + d.vy*interval + (0.5*Math.pow(interval,2)*gy);
+    var upperLim = boxHeight/2 - d.r ;
+    var lowerLim = -boxHeight/2 + d.r;
+    updateVerletV(d,interval,gx,gy,gz);
+    updateVerletP(d,interval,gx,gy,gz);
+    if( d.py >= upperLim ) {
+      d.py = upperLim;
 
-        var upperLim = upperBoxEdge(d.r);
-        var lowerLim = lowerBoxEdge(d.r);
-        var leftLim = leftBoxEdge(d.r);
-        var rightLim = rightBoxEdge(d.r);
-        var outerLim = outerBoxEdge(d.r);
-        var innerLim = innerBoxEdge(d.r);
+      d.vy = -1*d.vy*cOfR;
+    };
 
-        if( d.py >= upperLim ) {
-          d.py = upperLim;
+    if( d.py <= lowerLim ) {
+      d.py = lowerLim ;
 
-          d.vy = -1*d.vy*cOfR;
-        };
+      d.vy = -1*d.vy*cOfR;
+    };
+      return centreToScreenY(d.iy());
+    })
+    .attr("cx", function (d){
 
-        if( d.py <= lowerLim ) {
-          d.py = lowerLim ;
+      updateVerletV(d,interval,gx,gy,gz);
+      updateVerletP(d,interval,gx,gy,gz);
+    //  var v =  d.vx + gx*interval;
+    //  var p = d.px + d.vx*interval + (0.5*Math.pow(interval,2)*gx);
+      var leftLim = -boxWidth/2 + d.r;
+      var rightLim = boxWidth/2 - d.r;
+      if( d.px <= leftLim ) {
+        d.px = leftLim;
+        d.vx = -1*d.vx*cOfR;
+      };
+      if( d.px >= rightLim ) {
+        d.px = rightLim;
+        d.vx = -1*d.vx*cOfR;
+      };
+      return centreToScreenX(d.ix());
+    })
 
-          d.vy = -1*d.vy*cOfR;
-        };
-
-        if( d.px <= leftLim ) {
-          d.px = leftLim;
-
-          d.vx = -1*d.vx*cOfR;
-        };
-
-        if( d.px >= rightLim ) {
-          d.px = rightLim;
-          d.vx = -1*d.vx*cOfR;
-        };
-
-        if( d.pz <= innerLim ) {
-          d.vz = -1*d.vz*cOfR;
-          d.pz = innerLim;
-        };
-
-        if( d.pz >= outerLim ) {
-          d.vz = -1*d.vz*cOfR;
-          d.pz = outerLim;
-        };
-
-        particle.enter().selectAll("circle")
-          .merge(particle)
-          .attr("cy", function (d){ return screenToCentreY(d.iy())})
-          .attr("cx", function (d){ return screenToCentreX(d.ix())})
-          .attr("r", function(d) {return d.ir();})
-      }
-    );
-    return particleData;
-  });
-  timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+   timeInfo.text(() => {return "time elapsed: " + (interval).toFixed(2) + "s"});
+   miscInfo.text(() => {return "Temp: " + (particleData[0].py).toFixed(2) +" K"});
 });

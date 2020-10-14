@@ -50,6 +50,8 @@ edges.slice(0,5).forEach(function(d){
     .attr("fill", boxColour);
 })
 
+
+
 let N = 10;
 var data = new Array;
 for (var i = 0; i < N; i++){
@@ -78,7 +80,6 @@ for (var i = 0; i < N; i++){
   data.push(n);
 }
 
-
 var particleData = data;
 var particle = svg.selectAll("circle").data(particleData);
 
@@ -92,19 +93,41 @@ particle.enter().append("circle")
   .attr("r", function(d) {return d.ir();})
 particle.exit().remove();
 
-var timeInfo = d3.select("svg")
+var timeInfo = svg
   .append("text")
   .attr("x",screenToCentreX(boxCentreX*b))
   .attr("y", screenToCentreY((-boxCentreY-25)*b))
   .attr("fill","none")
   .attr("stroke","black");
 
-var miscInfo = d3.select("svg")
+var miscInfo = svg
   .append("text")
   .attr("x",screenToCentreX(boxCentreX*b))
   .attr("y", screenToCentreY((-boxCentreY-50)*b))
   .attr("fill","none")
   .attr("stroke","black");
+
+// sliderVertical
+var slider = d3
+  .sliderHorizontal()
+  .min(0)
+  .max(100)
+  //.step(1)
+  .width(300)
+  .height(300)
+  .displayValue(false)
+  .on('onchange', (val) => {
+    d3.select('#value').text(val.toFixed(2));
+  });
+
+d3.select('#slider')
+  .append('svg')
+  .attr('width', 500)
+  .attr('height', 70)
+  .attr('transform', 'translate('+screenToCentreX(boxCentreX*b)+ ','+screenToCentreY((-boxCentreY-200)*b)+')')
+  .append('g')
+  .attr('transform', 'translate(20,20)')
+  .call(slider);
 
 
 var globalTime = 0;
@@ -115,11 +138,11 @@ let gz = 0//9.81*0.1;
 let cOfR = 0.5; // Coefficient of Restitution
 
 // runs the simulation
-var timer = d3.timer( function(duration) {
+var timer = d3.timer( (duration) => {
   //timer.stop()
   var interval = duration*0.0001;
 
-  particle.data(function(d) {
+  particle.data( (d) => {
     particleData.forEach(
       function (d,i,data){
         updateVerletV(d,interval,gx,gy,gz);
@@ -174,5 +197,5 @@ var timer = d3.timer( function(duration) {
     );
     return particleData;
   });
-  timeInfo.text(function () {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
+  timeInfo.text( () => {return "time elapsed: " + (duration*0.001).toFixed(2) + "s"})
 });
