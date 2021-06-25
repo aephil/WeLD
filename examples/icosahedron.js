@@ -1,13 +1,15 @@
 
-var worldHeight = 1000;
-var worldWidth = 1000;
+var worldHeight = 720;
+var worldWidth = 720;
 
 var svg = d3.select("body").append("svg")
+  .style('position','absolute')
   .attr("fill","black")
-  .attr("width", worldWidth)
-  .attr("height",worldHeight);
+  .attr("width", '100%')
+  .attr("height",'100%');
 
-var boxDepth = 800;
+
+var boxDepth = 0.8*worldWidth;
 let zp = (2*boxDepth);
 
 var lineFunction = d3.line()
@@ -29,8 +31,7 @@ var facesToScreen = function(faces,d,z){
 }
 
 var phi = 1.618033;
-var len = 100;
-let lemon = 20;
+var len = 0.2*worldHeight;
 
 var icosaPoints =
   [
