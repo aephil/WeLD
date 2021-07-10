@@ -50,7 +50,7 @@ edges.slice(0,5).forEach(function(d){
     .attr("fill", boxColour);
 })
 
-let N = 10;
+let N = 20;
 var data = new Array;
 for (var i = 0; i < N; i++){
   var n = {
@@ -110,9 +110,9 @@ var miscInfo = d3.select("svg")
 var globalTime = 0;
 let dt = 0.0001;
 let gx = 0//9.81*0.1
-let gy = -9.81;
+let gy = 0//-9.81;
 let gz = 0//9.81*0.1;
-let cOfR = 0.5; // Coefficient of Restitution
+let cOfR = 1; // Coefficient of Restitution
 
 // runs the simulation
 var timer = d3.timer( function(duration) {

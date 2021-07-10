@@ -1,69 +1,7 @@
 
-			///////////////////////////////////////////////////////////////////////////
-			//////////////////// Set up and initiate svg containers ///////////////////
-			///////////////////////////////////////////////////////////////////////////
-
-
-      var worldHeight = 1000;
-      var worldWidth = 1000;
-
-			//SVG container
-			var svg = d3.select('#chart')
-				.append("svg")
-				.attr("width", worldWidth)
-				.attr("height", worldHeight)
-				.append("g")
-
-			///////////////////////////////////////////////////////////////////////////
-			///////////////////////////// Create filter ///////////////////////////////
-			///////////////////////////////////////////////////////////////////////////
-
-			//SVG filter for the gooey effect
-			//Code taken from http://tympanus.net/codrops/2015/03/10/creative-gooey-effects/
-			var defs = svg.append("defs");
-			var filter = defs.append("filter").attr("id","gooeyCodeFilter");
-			filter.append("feGaussianBlur")
-				.attr("in","SourceGraphic")
-				.attr("stdDeviation","10")
-				//to fix safari: http://stackoverflow.com/questions/24295043/svg-gaussian-blur-in-safari-unexpectedly-lightens-image
-				.attr("color-interpolation-filters","sRGB")
-				.attr("result","blur");
-			filter.append("feColorMatrix")
-				.attr("in","blur")
-				.attr("mode","matrix")
-				.attr("values","1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9")
-				.attr("result","gooey");
-			//If you want the end shapes to be exactly the same size as without the filter
-			//add the feComposite below. However this will result in a less beautiful gooey effect
-			//filter.append("feBlend")
-				//.attr("in","SourceGraphic")
-				//.attr("in2","gooey");
-			//Instead of the feBlend, you can do feComposite. This will also place a sharp image on top
-			//But it will result in smaller circles
-			//filter.append("feComposite") //feBlend
-			// 	.attr("in","SourceGraphic")
-			// 	.attr("in2","gooey")
-			// 	.attr("operator","atop");
-
-		///////////////////////////////////////////////////////////////////////////
-		/////////////////////////// Create circles ////////////////////////////////
-		///////////////////////////////////////////////////////////////////////////
-
-
-		//Create a wrapper for the circles that has the Gooey effect applied to it
-		var circleWrapper = svg.append("g")
-			.style("filter", "url(#gooeyCodeFilter)");
-
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////
-
-
-    var boxWidth = 500;
-    var boxHeight = 500;
-    var boxDepth = 500;
+    var boxWidth = 800;
+    var boxHeight = 800;
+    var boxDepth = 800;
     var boxCentreX = -boxWidth/2; // in local coordinates
     var boxCentreY = boxHeight/2; // in local coordinates
     var particleSize = 20;
@@ -84,18 +22,35 @@
     var outerBoxEdge = function(r){return boxDepth/2 - r;}
     var innerBoxEdge = function(r){return (-boxDepth/2) + r;}
 
-    let N = 50;
+    var edges = createCentredCube(boxWidth,zp);
+
+    var boxColour = "rgba(0,0,0,0)";
+    var boxStroke = "black";
+
+    var lineFunction = d3.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
+
+    edges.slice(0,5).forEach(function(d){
+      circleWrapper.append("path")
+        .attr("d", lineFunction(d))
+        .attr("stroke", boxStroke)
+        .attr("stroke-width", 0.7)
+        .attr("fill", boxColour);
+    })
+
+    let N = 30;
     var data = new Array;
 
     for (var i = 0; i < N; i++){
       var n = {
-        vx: randomNumber(-10,10),
-        vy: randomNumber(-10,10),
-        vz: randomNumber(-10,10),
+        vx: randomNumber(-5,5),
+        vy: randomNumber(-5,5),
+        vz: randomNumber(-5,5),
         px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
         py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
         pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
-        r: randomNumber(10,50),
+        r: particleSize,
         scale: function(){
           return zFactor(boxDepth,this.pz,zp);
         },
@@ -135,9 +90,9 @@
     var globalTime = 0;
     let dt = 0.1;
     let gx = 0//9.81*0.1
-    let gy = 0// -9.81;
+    let gy = 0//-0.001;
     let gz = 0//9.81*0.1;
-    let cOfR = 0.7; // Coefficient of Restitution
+    let cOfR = 1; // Coefficient of Restitution
 
 // runs the simulation
 var timer = d3.timer( function(duration) {
