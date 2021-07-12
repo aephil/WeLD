@@ -1,3 +1,65 @@
+///////////////////////////////////////////////////////////////////////////
+//////////////////// Set up and initiate svg containers ///////////////////
+///////////////////////////////////////////////////////////////////////////
+
+
+var worldHeight = 1000;
+var worldWidth = 1000;
+
+//SVG container
+var svg = d3.select('#chart')
+  .append("svg")
+  .attr("width", worldWidth)
+  .attr("height", worldHeight)
+  .append("g")
+
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////// Create filter ///////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+//SVG filter for the gooey effect
+//Code taken from http://tympanus.net/codrops/2015/03/10/creative-gooey-effects/
+var defs = svg.append("defs");
+var filter = defs.append("filter").attr("id","gooeyCodeFilter");
+filter.append("feGaussianBlur")
+  .attr("in","SourceGraphic")
+  .attr("stdDeviation","10")
+  //to fix safari: http://stackoverflow.com/questions/24295043/svg-gaussian-blur-in-safari-unexpectedly-lightens-image
+  .attr("color-interpolation-filters","sRGB")
+  .attr("result","blur");
+filter.append("feColorMatrix")
+  .attr("in","blur")
+  .attr("mode","matrix")
+  .attr("values","1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9")
+  .attr("result","gooey");
+//If you want the end shapes to be exactly the same size as without the filter
+//add the feComposite below. However this will result in a less beautiful gooey effect
+//filter.append("feBlend")
+  //.attr("in","SourceGraphic")
+  //.attr("in2","gooey");
+//Instead of the feBlend, you can do feComposite. This will also place a sharp image on top
+//But it will result in smaller circles
+//filter.append("feComposite") //feBlend
+// 	.attr("in","SourceGraphic")
+// 	.attr("in2","gooey")
+// 	.attr("operator","atop");
+
+///////////////////////////////////////////////////////////////////////////
+/////////////////////////// Create circles ////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+
+//Create a wrapper for the circles that has the Gooey effect applied to it
+var circleWrapper = svg.append("g")
+.style("filter", "url(#gooeyCodeFilter)");
+
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+
 
     var boxWidth = 800;
     var boxHeight = 800;
@@ -150,7 +212,6 @@ var timer = d3.timer( function(duration) {
     return particleData;
   });
   particle.enter().selectAll("circle")
-    //.merge(particle)
     .attr("cy", function (d){ return screenToCentreY(d.iy()) })
     .attr("cx", function (d){ return screenToCentreX(d.ix())})
     .attr("r", function(d) {return d.ir();})
