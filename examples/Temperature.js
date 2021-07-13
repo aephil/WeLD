@@ -119,7 +119,7 @@ var box = svg.append("path")
   .attr("stroke-width", 0.7)
   .attr("fill", heatColGrad(temperature/100,0.4))
 
-var massA = 1
+var massA = 2
 var massB = 1
 var avgKinEn = (dof/2) * temperature // natural units
 
@@ -128,7 +128,7 @@ for (var i = 0; i < N; i++){
 
   var rnd = randomNumber(0,1);
 
-  if(randomNumber(1,1)> 0.5){
+  if(randomNumber(0,1)> 0.5){
 
     var vsquared = avgKinEn * 2 / massA
     var vxi = rnd * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
@@ -143,8 +143,8 @@ for (var i = 0; i < N; i++){
       py: randomNumber(upperBoxEdge(6), lowerBoxEdge(6)),
       r: 4,
       m: massA,
-      col:"white",
-      cofr: 1
+      col:"red",
+      cofr: 0.999
     }
     data.push(p);
   }
@@ -161,10 +161,10 @@ for (var i = 0; i < N; i++){
       vy: vyi,
       px: randomNumber(leftBoxEdge(3), rightBoxEdge(3)),
       py: randomNumber(upperBoxEdge(3), lowerBoxEdge(3)),
-      r: 4,
+      r: 2,
       m: massB,
-      col: "white",
-      cofr: 1
+      col: "blue",
+      cofr: 0.999
     }
     data.push(p);
   }
@@ -207,12 +207,14 @@ var tempButtonUp = svg
   .on("click",
     function()
     {
-      if(temperature<1000)
-      {
-        dT = 1
-        tempUpdated = true;
-        console.log("heating up.")
-        console.log("last temp: " + temperature.toString())
+      if(!tempUpdated){
+        if(temperature<1000)
+        {
+          dT = 1
+          tempUpdated = true;
+          console.log("heating up.")
+          console.log("last temp: " + temperature.toString())
+        }
       }
     }
   )
@@ -227,19 +229,22 @@ var tempButtonUp = svg
     .on("click",
       function()
       {
-        if(temperature>1)
+        if (!tempUpdated)
         {
-          dT = -1
-          tempUpdated = true;
-          console.log("cooling down.")
-          console.log("last temp: " + temperature.toString())
-        }
-        else
-        {
-          temperature = 0
-          tempUpdated = true;
-          console.log("min temp reached")
-          console.log("last temp: " + temperature.toString())
+          if(temperature>1)
+          {
+            dT = -1
+            tempUpdated = true;
+            console.log("cooling down.")
+            console.log("last temp: " + temperature.toString())
+          }
+          else
+          {
+            temperature = 0
+            tempUpdated = true;
+            console.log("min temp reached")
+            console.log("last temp: " + temperature.toString())
+          }
         }
       }
     )
@@ -256,7 +261,7 @@ let dt = 0.0001;
 let gx = 0//9.81*0.1
 let gy = 0//-.9810;
 let fps = 60
-let wcofr = 1
+let wcofr = 0.999
 
 var frames = 0; // current frame number
 
@@ -306,7 +311,7 @@ var timer = d3.timer( function(duration) {
 
         // recalculate particle trajectory
 
-        updateVerletV(d,elapsed,gx,gy);
+        //updateVerletV(d,elapsed,gx,gy);
         updateVerletP(d,elapsed,gx,gy);
         exchangeMomenta(d, particleData);
 
@@ -338,9 +343,6 @@ var timer = d3.timer( function(duration) {
         kinetic +=  0.5 * d.m * (Math.pow(d.vx,2) + Math.pow(d.vy,2));
         }
     );
-
-
-
     return particleData;
   });
 
@@ -349,6 +351,7 @@ var timer = d3.timer( function(duration) {
     tempUpdated = false;
     dT = 0;
   }
+
   temperature = ((kinetic/N) * (2/dof) / 0.634)
 
   // graphics
@@ -356,17 +359,17 @@ var timer = d3.timer( function(duration) {
   particle.enter().selectAll("circle")
     .attr("cy", function (d){ return screenToCentreY(d.py);})
     .attr("cx", function (d){ return screenToCentreX(d.px);})
-    .transition()
-    .duration(200)
-    .attr("fill", function(d){ return heatColGrad(0.5 * d.m * (Math.pow(d.vx,2) + Math.pow(d.vx,2)) / 100);})
+    //.transition()
+    //.duration(300)
+    //.attr("fill", function(d){ return heatColGrad((Math.pow(d.vy,2) + Math.pow(d.vx,2)) / (dof * 100 * 0.634 / d.m));})
     frames += 1;
   }
 
   box
   .transition()
   .duration(200)
-  .attr("fill", heatColGrad(temperature/100,0.4))
-  .attr("stroke", heatColGrad(1-(temperature/100),0.7));
-  tempInfo.text(function () {return "T: " + temperature.toFixed(2) + ""})
+  .attr("fill", heatColGrad(temperature/100,0.2))
+  .attr("stroke", "black");
+  tempInfo.text(function () {return "T: " + temperature.toFixed(2) })
   timeInfo.text(function () {return "time elapsed: " + (elapsed).toFixed(2) + "s"})
 });

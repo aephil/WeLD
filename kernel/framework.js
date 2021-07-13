@@ -194,16 +194,27 @@ var exchangeMomenta = function(p, n, data, cOfR){
    return a.x==b.x&&a.y==b.y&&a.z==b.z;
  }
  var facesEqual = function(faceA,faceB){
-   if(faceA.length!=faceB.length){return false;}
+   console.log("starting face comparison between:")
+   console.log("face A:", faceA)
+   console.log("face B:", faceB)
+   if(faceA.length!=faceB.length){
+     console.log("lengths of faces dont match!")
+     return false;
+   }
+
    var numEqualPoints = 0;
-   faceA.forEach(function(a){
-     faceB.forEach(function(b){
-       if(pointsEqual(a,b)){
+   for(i = 0; i < faceA.length-1/*last is duplicate of first*/; i++){
+     console.log("point a: ",faceA[i])
+     for(j = 0; j < faceB.length-1/*last is duplicate of first*/; j++){
+       console.log("point b: ",faceB[j])
+       if(pointsEqual(faceA[i],faceB[j])){
+         console.log("points equal!")
          numEqualPoints++;
        }
-     })
-   })
-   return numEqualPoints==faceB.length;
+     }
+   }
+   console.log("total equal pts: ", numEqualPoints)
+   return numEqualPoints==faceB.length-1;
  }
 
 

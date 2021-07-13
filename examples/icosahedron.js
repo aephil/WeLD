@@ -50,6 +50,10 @@ var icosaPoints =
 
   ]
 
+  function approx(a,b,e){
+    return Math.abs(a-b) < e
+  }
+
 var generateFaces = function(data,l){
   var faces = [];
   for(var i = 0; i<data.length;i++){
@@ -58,17 +62,20 @@ var generateFaces = function(data,l){
         var a=data[i];
         var b=data[j];
         var c=data[k];
-        if(pointLen(a,b)==pointLen(b,c)&&pointLen(b,c)==pointLen(a,c)&&pointLen(a,b)&&pointLen(a,b)){
-          var faceFound = false;
-          faces.forEach(function(f){
-            if(facesEqual(f,[a,b,c])){ faceFound==true}
-          })
-          if(!faceFound){faces.push([a,b,c]);}
+        if(pointLen(a,b)==pointLen(a,c)&&pointLen(b,c)==pointLen(a,b)){
+          if(approx(pointLen(a,b),l, 0.5))
+          {
+            var faceFound = false; // face already found
+            faces.forEach(function(f){
+              if(facesEqual(f,[a,b,c])){ faceFound==true}
+            })
+            if(!faceFound){faces.push([a,b,c]);}
+          }
         }
-
       }
     }
   }
+  console.log(faces.length)
   return faces;
 }
 
