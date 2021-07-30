@@ -79,6 +79,8 @@ var worldWidth = 800;
 
 var boxWidth = 400;
 var boxHeight = 400;
+var boxDepth = 400;
+
 
 var boxCentreX = -boxWidth/2; // in local coordinates
 var boxCentreY = boxHeight/2; // in local coordinates
@@ -99,25 +101,43 @@ var N = 100;
 var temperature = 20
 var dT = 0;
 var tempUpdated = false
-let dof = 2;
+let dof = 3;
+var theta = 0
+var rho = 0
 
 // test of d3v6
 //var svg = d3.select("body").append("svg")
 //  .attr("width", worldWidth)
 //  .attr("height",worldHeight);
 
-var edges = createCentredCube(boxWidth);
+// z-perspective value
+let zp = (-2*boxDepth);
+
+function projected(point){
+  var scale = zFactor(boxDepth,point.z,zp)*200;
+  return {x:centreToScreenX(point.x*scale),y:centreToScreenY(point.y*scale),z:point.z}
+}
+
+
+var edges = createCentredCubeZ(boxWidth,zp);
+var boxStroke = "black";
+
 
 
 var lineFunction = d3.line()
   .x(function(d) { return d.x; })
   .y(function(d) { return d.y; })
 
-var box = svg.append("path")
-  .attr("d", lineFunction(edges))
-  .attr("stroke", heatColGrad(temperature/100,0.7))
-  .attr("stroke-width", 0.7)
-  .attr("fill", heatColGrad(temperature/100,0.4))
+var box  = edges.slice(0,5);
+
+box.forEach(function(d,i){
+  circleWrapper.append("path")
+    .attr("d", lineFunction(d))
+    .attr("stroke", boxStroke)
+    .attr("stroke-width", 0.7)
+    .attr("fill", heatColGrad(temperature/100,0.2));
+})
+
 
 var massA = 2
 var massB = 1
@@ -126,21 +146,23 @@ var avgKinEn = (dof/2) * temperature // natural units
 var data = new Array;
 for (var i = 0; i < N; i++){
 
-  var rnd = randomNumber(0,1);
+  var rnd = randomNumber(0,2);
 
   if(randomNumber(0,1)> 0.5){
 
     var vsquared = avgKinEn * 2 / massA
-    var vxi = rnd * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-    var vyi = (1-rnd) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-
+    var vxi = (1/3) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    var vyi = ((1/3) /*TODO: 1/3 partitioning*/) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    var vzi = ( (1/3) /*TODO: 1/3 partitioning*/) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
     var p =
     {
       id: "a",
       vx: vxi,
       vy: vyi,
+      vz: vzi,
       px: randomNumber(leftBoxEdge(6), rightBoxEdge(6)),
       py: randomNumber(upperBoxEdge(6), lowerBoxEdge(6)),
+      pz: randomNumber(innerBoxEdge(3), outerBoxEdge(3)),
       r: 4,
       m: massA,
       col:"red",
@@ -152,15 +174,17 @@ for (var i = 0; i < N; i++){
 
     var vsquared = avgKinEn * 2 / massB
     var vxi = rnd * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-    var vyi = (1-rnd) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-
+    var vyi = ((1-rnd)* (1/3) /*TODO: 1/3 partitioning*/) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    var vzi = ((1-rnd)* (2/3) /*TODO: 1/3 partitioning*/) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
     var p =
     {
       id: "a",
       vx: vxi,
       vy: vyi,
+      vz: vzi,
       px: randomNumber(leftBoxEdge(3), rightBoxEdge(3)),
       py: randomNumber(upperBoxEdge(3), lowerBoxEdge(3)),
+      pz: randomNumber(innerBoxEdge(3), outerBoxEdge(3)),
       r: 2,
       m: massB,
       col: "blue",
@@ -175,12 +199,11 @@ var particleData = data;
 var particle = circleWrapper.selectAll("circle").data(particleData);
 
 particle.enter().append("circle")
-
   .attr("stroke","black")
   .attr("fill",function (d){ return d.col; })
-  .attr("cy", function (d){ return screenToCentreY(d.py); })
-  .attr("cx", function (d){ return screenToCentreX(d.px); })
-  .attr("r", function(d){ return d.r; })
+  .attr("cy", function (d){ return screenToCentreY(d.py * zFactor(boxDepth,d.pz,zp)); })
+  .attr("cx", function (d){ return screenToCentreX(d.px * zFactor(boxDepth,d.pz,zp)); })
+  .attr("r", function(d){ return d.r * zFactor(boxDepth,d.pz,zp); })
 particle.exit().remove();
 
 var timeInfo = svg
@@ -260,7 +283,7 @@ var globalTime = 0;
 let dt = 0.0001;
 let gx = 0//9.81*0.1
 let gy = 0//-.9810;
-let fps = 30
+let fps = 60
 let wcofr = 0.999
 
 var frames = 0; // current frame number
@@ -313,13 +336,15 @@ var timer = d3.timer( function(duration) {
 
         //updateVerletV(d,elapsed,gx,gy);
         updateVerletP(d,elapsed,gx,gy);
-        //exchangeMomenta(d, particleData);
+        exchangeMomenta(d, particleData);
 
         // correct any particle to boundary collisons
         var upperLim = upperBoxEdge(d.r);
         var lowerLim = lowerBoxEdge(d.r);
         var leftLim = leftBoxEdge(d.r);
         var rightLim = rightBoxEdge(d.r);
+        var outerLim = outerBoxEdge(d.r);
+        var innerLim = innerBoxEdge(d.r);
 
         if( d.py >= upperLim ) {
           d.py = upperLim;
@@ -340,6 +365,17 @@ var timer = d3.timer( function(duration) {
           d.px = rightLim;
           d.vx = -1*d.vx*d.cofr*wcofr;
         };
+
+        if( d.pz <= innerLim ) {
+          d.vz = -1*d.vz*d.cofr*wcofr;
+          d.pz = innerLim;
+        };
+
+        if( d.pz >= outerLim ) {
+          d.vz = -1*d.vz*d.cofr*wcofr;
+          d.pz = outerLim;
+        };
+
         kinetic +=  0.5 * d.m * (Math.pow(d.vx,2) + Math.pow(d.vy,2));
         }
     );
@@ -357,19 +393,51 @@ var timer = d3.timer( function(duration) {
   // graphics
   if(elapsed >= frames * (1/fps)){
   particle.enter().selectAll("circle")
-    .attr("cy", function (d){ return screenToCentreY(d.py);})
-    .attr("cx", function (d){ return screenToCentreX(d.px);})
+    .attr("cy", function (d){ return screenToCentreY( Math.cos(theta)-d.pz*Math.sin(theta) * zFactor(boxDepth,d.pz,zp));})
+    .attr("cx", function (d){ return screenToCentreX( Math.cos(rho)*d.px + Math.sin(rho)*d.pz * zFactor(boxDepth,d.pz,zp));})
+    //.attr("r", function(d){ return d.r * zFactor(boxDepth,d.pz,zp); })
     //.transition()
     //.duration(300)
     //.attr("fill", function(d){ return heatColGrad((Math.pow(d.vy,2) + Math.pow(d.vx,2)) / (dof * 100 * 0.634 / d.m));})
     frames += 1;
   }
 
-  box
-  .transition()
-  .duration(200)
-  .attr("fill", heatColGrad(temperature/100,0.2))
-  .attr("stroke", "black");
+
+  circleWrapper.selectAll("path").remove();
+  box.forEach(function(face){
+    circleWrapper.append("path")
+      .attr("d", function(){
+        var rotatedFace = [];
+        face.forEach(function(point){
+          rotatedFace.push(  rotY(rotX(point,theta), rho)  );
+        //  console.log(rotX(point,theta))
+        });
+        return lineFunction(rotatedFace)})
+      .attr("stroke", boxStroke)
+      .attr("stroke-width", 0.7)
+      .transition()
+      .duration(200)
+      .attr("fill", heatColGrad(temperature/100,0.2));
+  })
+
   tempInfo.text(function () {return "T: " + temperature.toFixed(2) })
   timeInfo.text(function () {return "time elapsed: " + (elapsed).toFixed(2) + "s"})
 });
+
+
+var svgClickX = 0
+var svgClickY = 0
+
+svg.call(d3.drag().on("start",function(){
+    svgClickX = d3.pointer(event)[0]
+    svgClickY = d3.pointer(event)[1]
+  })
+  .on("drag",function(){
+
+    rho = (svgClickX - d3.pointer(event)[0]) * 0.01;
+    theta = (svgClickY - d3.pointer(event)[1]) * 0.01;
+
+
+
+  })
+)

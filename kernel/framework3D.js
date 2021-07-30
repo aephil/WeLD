@@ -73,44 +73,57 @@ var updateVerletP = function(d,t,ax=0, ay=0,az=0){
   d.pz += d.vz + (0.5*Math.pow(t,2)*az);
 }
 
-var exchangeMomenta = function(p, n, data, cOfR){
-  var dataLength = data.length;
-  var skipOver = [n];
-   for(var i = 0; i < dataLength; i++ ){
-     if(!skipOver.includes(i)){
+var exchangeMomenta = function(p, data){
+   for(var i = 0; i < data.length; i++)
+   {
      var q = data[i];
 
-     var dx = p.px - q.px;
-     var dy = p.py - q.py;
-     var dz = p.pz - q.pz;
-     var r = Math.sqrt(Math.pow(dy,2) + Math.pow(dx,2) + Math.pow(dz,2));
-     if(r <= (p.r+q.r)){
-       // elastic
-       var alpha = (p.m - q.m) / (p.m + q.m);
-       var beta =  (2*q.m) / (p.m + q.m);
-       var gamma = (q.m - p.m) / (p.m + q.m);
-       var delta = (2*p.m) / (q.m + p.m);
+            // find particles within range for collision
 
-       var pvx = alpha*p.vx + beta*q.vx;
-       var pvy = alpha*p.vy + beta*q.vy;
-       var pvz =  alpha*p.vz + beta*q.vz;
+      var dx = p.px - q.px;
+      var dy = p.py - q.py;
 
-       var qvx = gamma*q.vx + delta*p.vx;
-       var qvy = gamma*q.vy + delta*p.vy;
-       var qvz = gamma*q.vz + delta*p.vz;
+      var r = Math.sqrt(Math.pow(dy,2) + Math.pow(dx,2));
+      if(r < (p.r + q.r) && p != q){
 
-       p.vx = pvx*cOfR;
-       p.vy = pvy*cOfR;
-       p.vz = pvz*cOfR;
+        /*
+         // move the particles away from each other a little
+         var speed_p =  Math.sqrt(Math.pow(p.vx,2)+Math.pow(p.vy,2));
+         p.px -= p.vx != 0 ? 0.5 * r * (speed_p/p.vx) : 0;
+         p.py -= p.vy != 0 ? 0.5 * r * (speed_p/p.vy) : 0;
 
-       data[i].vx = qvx*cOfR;
-       data[i].vy = qvy*cOfR;
-       data[i].vz = qvz*cOfR;
+         var speed_q =  Math.sqrt(Math.pow(q.vx,2)+Math.pow(q.vy,2));
+         q.px -= q.vx != 0 ? 0.5 * r * (speed_q/q.vx) * (Math.sign(q.vx)==Math.sign(p.vx) ? -1 : 1) : 0;
+         q.py -= q.vy != 0 ? 0.5 * r * (speed_q/q.vy) * (Math.sign(q.vy)==Math.sign(p.vy) ? -1 : 1) : 0;
+         */
 
-       skipOver.push(i);
-      }
-    }
-  }
+         var alpha = (p.m - q.m) / (p.m + q.m);
+         var beta =  (2*q.m) / (p.m + q.m);
+         var gamma = (q.m - p.m) / (p.m + q.m);
+         var delta = (2*p.m) / (q.m + p.m);
+
+         var pvx = alpha * p.vx + beta * q.vx;
+         var pvy = alpha * p.vy + beta * q.vy;
+         var pvz = alpha * p.vz + beta * q.vz;
+
+         var qvx = gamma * q.vx + delta * p.vx;
+         var qvy = gamma * q.vy + delta * p.vy;
+         var qvz = gamma * q.vz + delta * p.vz;
+
+
+         p.vx = pvx * p.cofr * q.cofr;
+         p.vy = pvy * p.cofr * q.cofr;
+         p.vy = pvz * p.cofr * q.cofr;
+
+         data[i].vx = qvx * p.cofr * q.cofr;
+         data[i].vy = qvy * p.cofr * q.cofr;
+         data[i].vz = qvz * p.cofr * q.cofr;
+
+         updateVerletP(p,0.00001,0,0);
+         updateVerletP(q,0.00001,0,0);
+       }
+
+   }
  }
 
  var randomNumber = function(min, max) {
@@ -183,8 +196,69 @@ var exchangeMomenta = function(p, n, data, cOfR){
 
  }
 
+ var createCentredBoxZ = function(w,h,d,zp=2){
+
+   var a = zFactor(d,d/2,zp);
+   var b = zFactor(d,-d/2,zp);
+
+   //The data for our line
+   var topEdge = [
+     { x: centreToScreenX(-w/2 * a),   y: centreToScreenY(h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(h/2 * b),z:-d/2},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(h/2 * a), z:d/2},
+   ];
+
+   var leftEdge = [
+     { x: centreToScreenX(-w/2 * a ),   y: centreToScreenY(h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(h/2 * b), z:-d/2},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(-h/2 * b), z:-d/2},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(-h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(h/2  * a), z:d/2},
+   ];
+
+   var bottomEdge = [
+     { x: centreToScreenX(-w/2 * a),   y: centreToScreenY(-h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(-h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(-h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(-h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(-h/2 * a), z:d/2},
+   ];
+
+   var rightEdge = [
+     { x: centreToScreenX(w/2 * a),   y: centreToScreenY(-h/2 * a), z:d/2},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(-h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(h/2 * a), z:d/2},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(-h/2 * a), z:d/2},
+   ];
+
+   var innerEdge = [
+     { x: centreToScreenX(-w/2 * a),   y: centreToScreenY(-h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(h/2 * a), z:d/2},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(h/2 * a), z:d/2},
+     { x: centreToScreenX(w/2 * a),  y: centreToScreenY(-h/2 * a), z:d/2},
+     { x: centreToScreenX(-w/2 * a),  y: centreToScreenY(-h/2 * a), z:d/2},
+   ]
+
+   var outerEdge = [
+     { x: centreToScreenX(-w/2 * b),   y: centreToScreenY(-h/2 * b), z:-d/2},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(h/2 * b), z:-d/2},
+     { x: centreToScreenX(w/2 * b),  y: centreToScreenY(-h/2 * b), z:-d/2},
+     { x: centreToScreenX(-w/2 * b),  y: centreToScreenY(-h/2 * b), z:-d/2},
+   ]
+
+    return [topEdge,bottomEdge,leftEdge,rightEdge,innerEdge,outerEdge]
+
+ }
+
  var createCentredCube = function(l,zp){
    return createCentredBox(l,l,l,zp);
+ }
+ var createCentredCubeZ = function(l,zp){
+   return createCentredBoxZ(l,l,l,zp);
  }
 
  var pointLen = function(a,b){
