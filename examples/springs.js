@@ -38,29 +38,159 @@
     var b = (1-((boxDepth)/Math.abs((-boxDepth/2)-zp)));
 
 
+    var yaxes = [
+      {x:centreToScreenX(0), y:centreToScreenY(1000)},
+      {x:centreToScreenX(0),y:centreToScreenY(-1000)},
+      ]
+
+    var xaxes = [
+
+            {x:centreToScreenX(1000), y:centreToScreenY(0)},
+            {x:centreToScreenX(-1000),y:centreToScreenY(0)},
+    ]
+
+/*
+    svg.append("path")
+      .attr("d", lineFunction(xaxes))
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.7)
+      .attr("fill", "none");
+
+    svg.append("path")
+      .attr("d", lineFunction(yaxes))
+      .attr("stroke", "black")
+      .attr("stroke-width", 0.7)
+      .attr("fill", "none");
+
+*/
+
+
     points = [
+      // centre
       {
         vx:0,
-        x:-45,
-        y:0,
-        r:10,
-        m:5,
-        left:1,
-        right:-1
-      },
-      {
-        vx:0,
-        x:40,
+        x:-80,
         y:0,
         r:10,
         m:5,
         left:-1,
-        right:0,
-      }
+        right:1,
+        up:3,
+        down:6,
+        col:"blue",
+      },
+      {
+        vx:0,
+        x:0,
+        y:0,
+        r:10,
+        m:5,
+        left:0,
+        right:2,
+        up:4,
+        down:7,
+        col:"red",
+      },
+      {
+        vx:0,
+        x:80,
+        y:0,
+        r:10,
+        m:5,
+        left:1,
+        right:-1,
+        up:5,
+        down:8,
+        col:"green",
+      },
+
+      // up
+      {
+        vx:0,
+        x:-80,
+        y:80,
+        r:10,
+        m:5,
+        left:-1,
+        right:4,
+        up:-1,
+        down:0,
+        col:"blue",
+      },
+      {
+        vx:0,
+        x:0,
+        y:80,
+        r:10,
+        m:5,
+        left:3,
+        right:5,
+        up:-1,
+        down:1,
+        col:"red",
+      },
+      {
+        vx:0,
+        x:80,
+        y:80,
+        r:10,
+        m:5,
+        left:5,
+        right:-1,
+        up:-1,
+        down:2,
+        col:"green",
+      },
+
+      // down
+      {
+        vx:0,
+        x:-80,
+        y:-80,
+        r:10,
+        m:5,
+        left:-1,
+        right:7,
+        up:0,
+        down:-1,
+        col:"blue",
+      },
+      {
+        vx:0,
+        x:0,
+        y:-80,
+        r:10,
+        m:5,
+        left:6,
+        right:8,
+        up:1,
+        down:-1,
+        col:"red",
+      },
+      {
+        vx:0,
+        x:80,
+        y:-80,
+        r:10,
+        m:5,
+        left:8,
+        right:-1,
+        up:2,
+        down:-1,
+        col:"green",
+      },
     ]
 
+    edgesData = []
+    var group1 = svg.append("g");
+    var edges = group1.selectAll("path").data(edgesData);
+
+
+    edges.enter()
+    .append("path")
+
     var bond = svg.selectAll("circle").data(points);
-    var k = 0.1
+    var k = 1
 
     var info = svg
       .append("text")
@@ -69,124 +199,101 @@
       .attr("fill","none")
       .attr("stroke","black");
 
+    function dragged(event, d) {
+        bond.raise().attr("cx", d.x = event.x).attr("cy", d.y = event.y);
+      }
 
     bond.enter()
       .append("circle")
       .attr("r",function(d){return d.r})
       .attr("cx",function(d){return centreToScreenX(d.x + d.lex + d.rex)})
       .attr("cy", function(d){return centreToScreenY(d.y)})
-      .attr("fill", "red");
+      .attr("fill", function(d){return d.col})
+      .call(d3.drag()
+      //.on("start", function(d))
+      .on("drag", dragged))
 
       var frames  = 0
-      var fps = 1
+      var fps = 100
       var bondLen = 80
+      var breakLen = 120
+      var vib = 0.5
 
     d3.timer(function(duration){
-      elapsed = (duration * 0.001)
+      elapsed = (duration * 0.001).toFixed(2)
       bond.data(function(d){
 
         points.forEach(function(d){
 
-          // update verlet v
+          edgesData = []
 
-          if(elapsed > frames * (1/fps))
+          d.x += randomNumber(-vib,vib)
+          d.y += randomNumber(-vib,vib)
+
+          if(d.right > -1)
           {
-            if(d.left>0)
-            {
-              ext = Math.abs(bondLen - Math.abs(screenToCentreX(d.x) - screenToCentreX(points[d.left].x)))
-              a = (k * ext / d.m )
-              d.x += (0.5*a*elapsed*elapsed)
+            ext =  Math.abs(screenToCentreX(d.x) - screenToCentreX(points[d.right].x)) - bondLen
 
+            a = (k * ext / d.m ).toFixed(2)
+            d.x += 0.5*(0.5*a)
+            points[d.right].x -= 0.5*(0.5*a)
 
-              info.text((a).toFixed(3) + ", "+ (ext).toFixed(3) +", "+ elapsed)
-            }
-            frames += 1
+            edgesData.push([
+              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
+              {x:centreToScreenX(points[d.right].x), y:centreToScreenY(points[d.right].y)}
+            ])
           }
-            //d.vx = a * interval
-        })
 
+          if(d.left > -1)
+          {
+            ext =  Math.abs(screenToCentreX(d.x) - screenToCentreX(points[d.left].x)) - bondLen
+            a = (k * ext / d.m ).toFixed(2)
+            d.x -= 0.5*(0.5*a)
+            points[d.left].x += 0.5*(0.5*a)
+
+            edgesData.push([
+              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
+              {x:centreToScreenX(points[d.left].x), y:centreToScreenY(points[d.left].y)}
+            ])
+          }
+
+          if(d.up > -1)
+          {
+            ext =  Math.abs(screenToCentreX(d.y) - screenToCentreX(points[d.up].y)) - bondLen
+            a = (k * ext / d.m ).toFixed(2)
+            d.y += 0.5*(0.5*a)
+            points[d.up].y -= 0.5*(0.5*a)
+
+            edgesData.push([
+              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
+              {x:centreToScreenX(points[d.up].x), y:centreToScreenY(points[d.up].y)}
+            ])
+          }
+
+          if(d.down > -1)
+          {
+            ext =  Math.abs(screenToCentreX(d.y) - screenToCentreX(points[d.down].y)) - bondLen
+            a = (k * ext / d.m ).toFixed(2)
+            d.y -= 0.5*(0.5*a)
+            points[d.down].y += 0.5*(0.5*a)
+            edgesData.push([
+              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
+              {x:centreToScreenX(points[d.down].x), y:centreToScreenY(points[d.down].y)}
+            ])
+          }
+        })
+        console.log(edgesData)
         return points
       })
 
-      bond
-        .enter()
-        .selectAll("circle")
-        .attr("cx",function(d){
-          return centreToScreenX(d.x)})
-    })
-
-
-/*
-    var updateVerletAngularVt = function(d, g, t){
-      d.freq += (g/d.l)*Math.sin(d.theta)*t;
-    }
-
-    var updateVerletAngularPt = function(d,g,t){
-      d.theta += d.freq + (g/d.l)*Math.sin(d.theta)*Math.pow(t,2);
-    }
-
-    var updateVerletAngularVr = function(d, g, t){
-      d.freq += (g/d.l)*Math.sin(d.rho)*t;
-    }
-
-    var updateVerletAngularPr = function(d,g,t){
-      d.theta += d.freq + (g/d.l)*Math.sin(d.rho)*Math.pow(t,2);
-    }
-
-    var group1 = svg.append("g");
-    var string = group1.selectAll("path").data(pendulumData);
-    var pendulum = svg.selectAll("circle").data(pendulumData);
-
-    pendulum.enter()
-      .append("circle")
-      .attr("r",function(d){return d.ir()})
-      .attr("cx",function(d){return centreToScreenX(d.ix())})
-      .attr("cy", function(d){return centreToScreenY(d.iy())})
-      .attr("fill", "red");
-
-    string.enter()
-      .append("path")
-      .attr("stroke", "red")
-      .attr("stroke-width", 1)
-      .attr("fill", "none");
-
-    var timeInfo = d3.select("svg")
-      .append("text")
-      .attr("x",screenToCentreX(boxCentreX*b))
-      .attr("y", screenToCentreY((-boxCentreY-25)*b))
-      .attr("fill","none")
-      .attr("stroke","black");
-
-      var g = -9.81;
-      d3.timer( function(duration) {
-        var interval = duration*0.0001;
-        pendulum.data(function(d) {
-          pendulumData.forEach(
-            function (d,i,data){
-              if(Math.abs(d.theta)>0.0001){
-                updateVerletAngularVt(d,g,interval);
-                updateVerletAngularPt(d,g,interval);
-
-              }
-              string
-                .enter()
-                .select("path")
-                //.merge(string)
-                .attr("d", lineFunction(d.s()));
-              pendulum
-                .enter()
-                .select("circle")
-              //  .merge(pendulum)
-                .attr("cx",function(d){return centreToScreenX(d.ix())})
-                .attr("cy",function(d){return centreToScreenY(d.iy())})
-                .attr("r", function(d){return d.ir()});
-              timeInfo.text(function(){return "theta: " + (d.theta).toFixed(3)+ " rads    rho: " + (d.theta).toFixed(3)+ " rads"})
-            }
-          );
-          return pendulumData;
-        });
-
-        return false;
-      });
-
-    */
+          if(elapsed > frames * (1/fps))
+          {
+            // vertices
+            bond
+              .enter()
+              .selectAll("circle")
+              .attr("cx",function(d){return centreToScreenX(d.x)})
+              .attr("cy",function(d){return centreToScreenX(d.y)})
+            frames += 1;
+          }
+        })
