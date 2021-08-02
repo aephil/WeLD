@@ -69,38 +69,31 @@
       // centre
       {
         vx:0,
-        x:-80,
+        x:-20,
         y:0,
         r:10,
         m:5,
-        left:-1,
-        right:1,
-        up:3,
-        down:6,
+        neighbours:[1,3,6],
         col:"blue",
       },
+
       {
         vx:0,
-        x:0,
+        x:20,
         y:0,
         r:10,
         m:5,
-        left:0,
-        right:2,
-        up:4,
-        down:7,
+        neighbours:[0,2,4,7],
         col:"red",
       },
+
       {
         vx:0,
         x:80,
         y:0,
         r:10,
         m:5,
-        left:1,
-        right:-1,
-        up:5,
-        down:8,
+        neighbours:[1,5,8],
         col:"green",
       },
 
@@ -111,22 +104,17 @@
         y:80,
         r:10,
         m:5,
-        left:-1,
-        right:4,
-        up:-1,
-        down:0,
+        neighbours:[0,4],
         col:"blue",
       },
+
       {
         vx:0,
         x:0,
         y:80,
         r:10,
         m:5,
-        left:3,
-        right:5,
-        up:-1,
-        down:1,
+        neighbours:[3,5,1],
         col:"red",
       },
       {
@@ -135,6 +123,7 @@
         y:80,
         r:10,
         m:5,
+        neighbours:[2,5],
         left:5,
         right:-1,
         up:-1,
@@ -149,6 +138,7 @@
         y:-80,
         r:10,
         m:5,
+        neighbours:[0,7],
         left:-1,
         right:7,
         up:0,
@@ -161,10 +151,7 @@
         y:-80,
         r:10,
         m:5,
-        left:6,
-        right:8,
-        up:1,
-        down:-1,
+        neighbours:[6,8,1],
         col:"red",
       },
       {
@@ -173,12 +160,10 @@
         y:-80,
         r:10,
         m:5,
-        left:8,
-        right:-1,
-        up:2,
-        down:-1,
+        neighbours:[8,2],
         col:"green",
       },
+
     ]
 
     edgesData = []
@@ -214,7 +199,7 @@
       .on("drag", dragged))
 
       var frames  = 0
-      var fps = 100
+      var fps = 1000
       var bondLen = 80
       var breakLen = 120
       var vib = 0.5
@@ -223,66 +208,43 @@
       elapsed = (duration * 0.001).toFixed(2)
       bond.data(function(d){
 
-        points.forEach(function(d){
+        points.forEach(function(d)
+        {
 
           edgesData = []
 
           d.x += randomNumber(-vib,vib)
           d.y += randomNumber(-vib,vib)
 
-          if(d.right > -1)
+          for(var i = 0; i < d.neighbours.length; i++)
           {
-            ext =  Math.abs(screenToCentreX(d.x) - screenToCentreX(points[d.right].x)) - bondLen
+            var neighbour = d.neighbours[i]
+            dx = Math.abs(d.x - points[neighbour].x).toFixed(2)
+            dy = Math.abs(d.y - points[neighbour].y).toFixed(2)
 
-            a = (k * ext / d.m ).toFixed(2)
-            d.x += 0.5*(0.5*a)
-            points[d.right].x -= 0.5*(0.5*a)
+            // extension
+            ext = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)) - bondLen
 
-            edgesData.push([
-              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
-              {x:centreToScreenX(points[d.right].x), y:centreToScreenY(points[d.right].y)}
-            ])
-          }
+            contract = ext > 0 ? false : true;
 
-          if(d.left > -1)
-          {
-            ext =  Math.abs(screenToCentreX(d.x) - screenToCentreX(points[d.left].x)) - bondLen
-            a = (k * ext / d.m ).toFixed(2)
-            d.x -= 0.5*(0.5*a)
-            points[d.left].x += 0.5*(0.5*a)
+            extY = dx < 0.001 ? 0 : ext * Math.sin(dy/dx)
+            extX = ext * Math.cos(dx/bondLen)
 
-            edgesData.push([
-              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
-              {x:centreToScreenX(points[d.left].x), y:centreToScreenY(points[d.left].y)}
-            ])
-          }
+            directionX = contract ? (d.x < points[neighbour].x ? -1 : 1) : (d.x < points[neighbour].x ? 1 : -1)
+            directionY = contract ? (d.y < points[neighbour].y ? -1 : 1) : (d.y < points[neighbour].y ? 1 : -1)
 
-          if(d.up > -1)
-          {
-            ext =  Math.abs(screenToCentreX(d.y) - screenToCentreX(points[d.up].y)) - bondLen
-            a = (k * ext / d.m ).toFixed(2)
-            d.y += 0.5*(0.5*a)
-            points[d.up].y -= 0.5*(0.5*a)
+            ax = (k * Math.abs(extX).toFixed(2) / d.m ).toFixed(2)
+            ay = (k * Math.abs(extY).toFixed(2) / d.m ).toFixed(2)
 
-            edgesData.push([
-              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
-              {x:centreToScreenX(points[d.up].x), y:centreToScreenY(points[d.up].y)}
-            ])
-          }
+            d.x += (0.5*ax) * directionX
+            points[neighbour].x += (0.5*ax) * (-1 * directionX)
 
-          if(d.down > -1)
-          {
-            ext =  Math.abs(screenToCentreX(d.y) - screenToCentreX(points[d.down].y)) - bondLen
-            a = (k * ext / d.m ).toFixed(2)
-            d.y -= 0.5*(0.5*a)
-            points[d.down].y += 0.5*(0.5*a)
-            edgesData.push([
-              {x:centreToScreenX(d.x), y:centreToScreenY(d.y)},
-              {x:centreToScreenX(points[d.down].x), y:centreToScreenY(points[d.down].y)}
-            ])
+            d.y += (0.5*ay) * directionY
+            points[neighbour].y += (0.5*ay) * (-1 * directionY)
+
+            info.text(extY)
           }
         })
-        console.log(edgesData)
         return points
       })
 
