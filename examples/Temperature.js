@@ -297,7 +297,10 @@ var timer = d3.timer( function(duration) {
             d.vx = rnd * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
             d.vy = (1-rnd) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
           }
-            console.log("temperature already at minimum")
+          else
+          {
+            console.log("temperature already at minimumhaha")
+          }
         }
         else
         {
@@ -311,7 +314,7 @@ var timer = d3.timer( function(duration) {
 
         // recalculate particle trajectory
 
-        //updateVerletV(d,elapsed,gx,gy);
+        updateVerletV(d,elapsed,gx,gy);
         updateVerletP(d,elapsed,gx,gy);
         //exchangeMomenta(d, particleData);
 
