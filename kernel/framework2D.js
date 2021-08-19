@@ -71,7 +71,7 @@ var updateVerletP = function(d,t,ax=0, ay=0){
   d.py += d.vy + (0.5*Math.pow(t,2)*ay);
 }
 
-var pointLen = function(a,b){
+var pointLen2D = function(a,b){
   return Math.sqrt(Math.pow(a.px-b.px,2)+Math.pow(a.py-b.py,2));
 }
 

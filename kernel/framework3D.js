@@ -261,8 +261,8 @@ var exchangeMomenta = function(p, data){
    return createCentredBoxZ(l,l,l,zp);
  }
 
- var pointLen = function(a,b){
-   return Math.sqrt(Math.pow(a.x-b.x,2)+Math.pow(a.y-b.y,2)+Math.pow(a.z-b.z,2));
+ var pointLen3D = function(a,b){
+   return Math.sqrt(Math.pow(a.px-b.px,2)+Math.pow(a.py-b.py,2)+Math.pow(a.pz-b.pz,2));
  }
  var pointsEqual = function(a,b){
    return a.x==b.x&&a.y==b.y&&a.z==b.z;
