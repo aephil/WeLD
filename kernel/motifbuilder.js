@@ -1,5 +1,5 @@
 function makePrimitive2D(numCellsX, numCellsY, a){
-  points = []
+  _points = []
   for(i = 0; i < numCellsX; i++)
   {
 
@@ -9,7 +9,7 @@ function makePrimitive2D(numCellsX, numCellsY, a){
       var cornerX = a * i
       var cornerY = a * j
 
-      points.push(
+      _points.push(
         {
           vx:0, // velocity x
           vy:0, // velocity y
@@ -28,22 +28,23 @@ function makePrimitive2D(numCellsX, numCellsY, a){
       )
     }
   }
-  return points
+  return _points
 }
 
 function makeFCC2D(numCellsX, numCellsY, a, p = false){
 
-  points = []
+  _points = []
+  _edgesData = []
+
   for(i = 0; i < numCellsX; i++)
   {
-
     for(j = 0; j < numCellsY; j++)
     {
 
       var cornerX = a * i
       var cornerY = a * j
 
-      points.push(
+      _points.push(
         {
           isonLattice: true,
           vx:0, // velocity x
@@ -62,7 +63,7 @@ function makeFCC2D(numCellsX, numCellsY, a, p = false){
         }
       )
 
-      points.push(
+      _points.push(
         {
           isonLattice: false,
           vx:0, // velocity x
@@ -80,25 +81,31 @@ function makeFCC2D(numCellsX, numCellsY, a, p = false){
           col:"red", // colour
         }
       )
-
     }
   }
 
   // create bonds based on a given predicate
 if(p!=false)
 {
-  for(k = 0; k < points.length; k++)
+  for(k = 0; k < _points.length; k++)
   {
-    for(l = 0; l < points.length; l++)
+    for(l = 0; l < _points.length; l++)
     {
-      if(p(points[k], points[l]))
+      if(p(_points[k], _points[l]))
       {
-        points[k].neighbours.push([l, pointLen3D(points[k],points[l])])
-        points[l].neighbours.push([k, pointLen3D(points[k],points[l])])
+        _edgesData.push(
+          {
+            x1:_points[l].px,
+            y1:_points[l].py,
+            x2:_points[k].px,
+            y2:_points[k].py
+          }
+        )
+        _points[k].neighbours.push([l, pointLen3D(_points[k],_points[l])])
+        _points[l].neighbours.push([k, pointLen3D(_points[k],_points[l])])
       }
     }
   }
 }
-
-  return points
+  return [_points , _edgesData]
 }

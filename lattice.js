@@ -25,6 +25,23 @@
  ///////////////////////// setup physics ///////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
+ // exponential repulsion
+
+ function repulsionExp(d){
+
+   for(var i = 0; i < d.neighbours.length; i++)
+    {
+      var neighbour = d.neighbours[i]
+      var nIndex = neighbour[0]; // index of neighbour in points
+      if(pointLen3D(i,nIndex) < 1)
+      {
+        // f = 1 / pointLen3D(i,nIndex)
+        // resolve
+      }
+    }
+
+ }
+
  // Temperature ////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
@@ -44,70 +61,77 @@
  // Springs ////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
- function springPotentials(d){var neighbour = d.neighbours[i]
- bondLen = neighbour[1]; // bonded length between neighbour and particle
- nIndex = neighbour[0]; // index of neighbour in points
- if(neighbour == null)
- {
-   return;
- }
+ function springPotentials(d){
 
- dx = Math.abs(d.px - points[nIndex].px).toFixed(2)
- dy = Math.abs(d.py - points[nIndex].py).toFixed(2)
+  for(var i = 0; i < d.neighbours.length; i++)
+   {
 
- // extension
- ext = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)) - bondLen
- //if(ext>breakLen){
- //  delete d.neighbours[nIndex];
- //  continue;
- //}
+     var neighbour = d.neighbours[i]
+     nodesLen = neighbour[1]; // nodesed length between neighbour and particle
+     nIndex = neighbour[0]; // index of neighbour in points
 
- contract = !(ext > 0);
- extY = dx < 0.001 ? 0 : ext * dy/bondLen
- extX = ext * dx/bondLen
+     dx = Math.abs(d.px - points[nIndex].px).toFixed(2)
+     dy = Math.abs(d.py - points[nIndex].py).toFixed(2)
 
- // fix one atom!
+     // extension
+     ext = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)) - nodesLen
+     if(ext>ext+0.1){
+       delete d.neighbours[nIndex];
+       continue;
+     }
 
- directionX = contract ? (d.px < points[nIndex].px ? -1 : 1) : (d.px < points[nIndex].px ? 1 : -1)
- directionY = contract ? (d.py < points[nIndex].py ? -1 : 1) : (d.py < points[nIndex].py ? 1 : -1)
+     contract = !(ext > 0);
+     extY = dx < 0.001 ? 0 : ext * dy/nodesLen
+     extX = ext * dx/nodesLen
 
- ax = (k * Math.abs(extX).toFixed(2) / d.m ).toFixed(2)
- ay = (k * Math.abs(extY).toFixed(2) / d.m ).toFixed(2)
+     // fix one atom!
 
- var px = (0.5*ax) * directionX
- var pxN = (0.5*ax) * (-1 * directionX)
+     directionX = contract ? (d.px < points[nIndex].px ? -1 : 1) : (d.px < points[nIndex].px ? 1 : -1)
+     directionY = contract ? (d.py < points[nIndex].py ? -1 : 1) : (d.py < points[nIndex].py ? 1 : -1)
 
- // new image dx
- var idx = Math.abs(px - pxN)
+     ax = (k * Math.abs(extX).toFixed(2) / d.m ).toFixed(2)
+     ay = (k * Math.abs(extY).toFixed(2) / d.m ).toFixed(2)
 
- var py = (0.5*ay) * directionY
- var pyN = (0.5*ay) * (-1 * directionY)
+     var px = (0.5*ax) * directionX
+     var pxN = (0.5*ax) * (-1 * directionX)
 
- // new image dy
- var idy = Math.abs(py - pyN)
+     // new image dx
+     var idx = Math.abs(px - pxN)
 
- // new image distance between
- var id = Math.sqrt(Math.pow(idx,2) + Math.pow(idy,2))
+     var py = (0.5*ay) * directionY
+     var pyN = (0.5*ay) * (-1 * directionY)
 
-   d.px += px
-   points[nIndex].px += pxN
+     // new image dy
+     var idy = Math.abs(py - pyN)
 
-   d.py += py
-   points[nIndex].py += pyN
+     // new image distance between
+     var id = Math.sqrt(Math.pow(idx,2) + Math.pow(idy,2))
 
- //inter-particle kinematics
- updateVerletP(d,0.01,0,0);
- //exchangeMomenta(d,points)
+       d.px += px
+       points[nIndex].px += pxN
 
- //kinetic +=  0.5 * d.m * (Math.pow(d.vx,2) + Math.pow(d.vy,2));
+       d.py += py
+       points[nIndex].py += pyN
 
-//  edgesData.push(
-//  [
-//    {x:centreToScreenX(d.px), y:centreToScreenY(d.py)},
-//    {x:centreToScreenX(points[nIndex].px), y:centreToScreenY(points[nIndex].py)}
-//  ]
-//  )
- }
+     //inter-particle kinematics
+     updateVerletP(d,0.01,0,0);
+     //exchangeMomenta(d,points)
+
+     //kinetic +=  0.5 * d.m * (Math.pow(d.vx,2) + Math.pow(d.vy,2));
+
+      edgesData.push(
+      [
+        {
+          x1:centreToScreenX(d.px),
+          y1:centreToScreenY(d.py),
+          x2:centreToScreenX(points[nIndex].px),
+          y2:centreToScreenY(points[nIndex].py)
+        }
+      ]
+     )
+
+    }
+   }
 
  ///////////////////////////////////////////////////////////////////////////
  ///////////////////////////// setup svg ///////////////////////////////////
@@ -124,6 +148,8 @@ var world = body.append("svg")
   .style("left", "2.5%")
   .style("width", "95%")
   .style("height","95%")
+  .style("border-color","black")
+  .style("border-style","solid")
   .style("background-color", "grey");
 
 // the simulation world
@@ -133,7 +159,7 @@ var sim = body
   .style("top", "2.5%")
   .style("left", "2.5%")
   .style("width", "70.5%")
-  .style("height","94.5%")
+  .style("height","95.0%")
   .style("border-color","black")
   .style("border-style","solid")
   .style("background-color", "white");
@@ -142,14 +168,23 @@ var sim = body
 ///////////////////////////// setup the lattice ///////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
+var lineFunction = d3.line()
+ .x(function(d) { return d.x; })
+ .y(function(d) { return d.y; });
+
 function testPredicate(i,j)
 {
-  // points that satisfy this condition will be bonded
+  // points that satisfy this condition will be nodesed
   return pointLen3D(i,j) <= 50 && i != j
 }
 
-points = makeFCC2D(5,5,50, testPredicate)
-var bond = sim.selectAll("circle").data(points);
+latticeData = makeFCC2D(5,5,50, testPredicate)
+points = latticeData[0]
+edgesData = latticeData[1]
+
+
+var nodes = sim.selectAll("circle").data(points);
+var edges = sim.selectAll("line").data(edgesData);
 
 ///////////////////////////////////////////////////////////////////////////
 /////////////////// setup the controls and peripherals ////////////////////
@@ -166,7 +201,7 @@ var infoContainer = body
   .style("width", "24%")
   .style("height","20%")
   .style("top", "2.5%")
-  .style("right", "2.5%")
+  .style("right", "2%")
   .style("border-color","black")
   .style("border-style","dashed")
   .style("color", "white")
@@ -174,14 +209,20 @@ var infoContainer = body
   .style("overflow-y","scroll")
   .style("overflow-x","scroll")
   .style("background-color", "black")
-  .on("scroll",function(){
-    scrolled = true
-  })
 
 function updateScroll(){
   var element = document.getElementById("info");
   element.scrollTop = element.scrollHeight;
 }
+
+function infoLog(msg)
+  {
+    infoBuffer += msg + "<br/>";
+    infoContainer.html(infoBuffer)
+    updateScroll()
+  }
+
+infoLog(vec.add(vec.v3(1,1,0), vec.v3(1,1,0)))
 
 // Temperature ////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -192,7 +233,7 @@ var tempContainer = body
   .style("width", "24%")
   .style("height","10%")
   .style("top", "22.5%")
-  .style("right", "2.5%")
+  .style("right", "2.0%")
   .style("border-color","black")
   .style("border-style","dashed")
   .style("background-color", "grey");
@@ -216,10 +257,10 @@ tempCtlBtn1
     if(temperature<1000)
     {
       temperature += 0.01
-      infoBuffer += "info: heating up." + "<br/>" + "last temp: "+ temperature.toFixed(2).toString() + "<br/>";
-      infoContainer.html(infoBuffer)
+      infoLog("info: heating up.")
+      infoLog("last temp: "+ temperature.toFixed(2).toString())
       tempCtlTextBox.html("Temp: "+temperature.toFixed(2).toString())
-      updateScroll()
+
     }
   })
 tempCtlBtn2
@@ -233,8 +274,8 @@ tempCtlBtn2
 
       infoBuffer += "info: cooling down." + "<br/>" + "last temp: "+ temperature.toFixed(2).toString() + "<br/>";
       infoContainer.html(infoBuffer)
-      tempCtlTextBox.html("Temp: "+temperature.toFixed(2).toString())
       updateScroll()
+      tempCtlTextBox.html("Temp: "+temperature.toFixed(2).toString())
     }
     else
     {
@@ -250,11 +291,11 @@ tempCtlBtn2
 
 // make nodes draggable
 function dragged(event, d) {
-  bond.raise().attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
+  nodes.raise().attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
   }
 
 // generate nodes using lattice data
-bond.enter()
+nodes.enter()
   .append("circle")
   .attr("r",function(d){return d.r})
   .attr("cx",function(d){return centreToScreenX(d.px)})
@@ -265,36 +306,46 @@ bond.enter()
   d3.drag()
   .on("drag", dragged));
 
+
+var edges = sim.selectAll("line").data(edgesData);
+edges.enter()
+  .append("line")
+  .style("stroke", "red")  // colour the line
+  .attr("x1", function(d){d.x1})     // x position of the first end of the line
+  .attr("y1", function(d){d.y1})     // y position of the first end of the line
+  .attr("x2", function(d){d.x2})     // x position of the second end of the line
+  .attr("y2", function(d){d.y2});
+
 var frames  = 0
 var fps = 30
-
 var breakLen = 1000
-var k = 0.5
-
-var lineFunction = d3.line()
-  .x(function(d) { return d.x; })
-  .y(function(d) { return d.y; });
+var k = 0.9
 
 d3.timer(function(duration){
   elapsed = (duration * 0.001).toFixed(2)
-  bond.data(function(d){
-
+  nodes.data(function(d){
       edgesData = []
       points.forEach(function(d)
       {
         updateTemperature(d)
+        springPotentials(d)
+        edgesData.push(
+          {
+            x1:d.px,
+            y1:d.py,
+            x2:points[d.neighbours[i][0]].px,
+            y2:points[d.neighbours[i][0]].py
+          }
+        )
 
-        for(var i = 0; i < d.neighbours.length; i++)
-        {
-          springPotentials(d)
-        }
       })
+      edges.data(function(){return edgesData})
     return points
   })
 
-if(elapsed > frames * (1/fps))
-{
-  bond
+  if(elapsed > frames * (1/fps))
+  {
+  nodes
     .enter()
     .selectAll("circle")
     .attr("cx",function(d){
@@ -303,17 +354,16 @@ if(elapsed > frames * (1/fps))
     .attr("cy",function(d){
       return centreToScreenY(d.py)
     })
+
+  edges
+    .enter()        // attach a line
+    .selectAll("line")
+    //.style("stroke", "red")  // colour the line
+    .attr("x1", function(d){return d.x1})     // x position of the first end of the line
+    .attr("y1", function(d){return d.y1})      // y position of the first end of the line
+    .attr("x2", function(d){return d.x2})     // x position of the second end of the line
+    .attr("y2", function(d){return d.y2});
+
   frames += 1;
-
-  //svg.selectAll("path").remove()
-  //edgesData.forEach(function(d){
-  //  svg
-  //  .append("path")
-  //  .attr("stroke", "black")
-  //  .attr("stroke-width", 1)
-  //  .attr("d", lineFunction(d))
-  //  .attr("fill", "none");
-  //})
-
-}
+  }
 })
