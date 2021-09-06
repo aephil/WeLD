@@ -61,13 +61,10 @@
  // Springs ////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
- function springPotentials(d){
-
-  for(var i = 0; i < d.neighbours.length; i++)
-   {
+ function springPotentials(d, i){
 
      var neighbour = d.neighbours[i]
-     nodesLen = neighbour[1]; // nodesed length between neighbour and particle
+     nodesLen = neighbour[1]; // node length between neighbour and particle
      nIndex = neighbour[0]; // index of neighbour in points
 
      dx = Math.abs(d.px - points[nIndex].px).toFixed(2)
@@ -75,10 +72,6 @@
 
      // extension
      ext = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)) - nodesLen
-     if(ext>ext+0.1){
-       delete d.neighbours[nIndex];
-       continue;
-     }
 
      contract = !(ext > 0);
      extY = dx < 0.001 ? 0 : ext * dy/nodesLen
@@ -130,7 +123,7 @@
       ]
      )
 
-    }
+
    }
 
  ///////////////////////////////////////////////////////////////////////////
@@ -175,10 +168,11 @@ var lineFunction = d3.line()
 function testPredicate(i,j)
 {
   // points that satisfy this condition will be nodesed
-  return pointLen3D(i,j) <= 50 && i != j
+  return vec.norm(vec.sub(i,j)) <= 50 && i != j
 }
 
-latticeData = makeFCC2D(5,5,50, testPredicate)
+latticeData = Lattice.makeFCC2D(2,2,50, testPredicate)
+
 points = latticeData[0]
 edgesData = latticeData[1]
 
@@ -196,7 +190,7 @@ var edges = sim.selectAll("line").data(edgesData);
 var infoBuffer = "";
 var infoContainer = body
   .append("div")
-  .attr("id","info")
+  .attr("id","vterm")
   .style("position", "fixed")
   .style("width", "24%")
   .style("height","20%")
@@ -221,8 +215,6 @@ function infoLog(msg)
     infoContainer.html(infoBuffer)
     updateScroll()
   }
-
-infoLog(vec.add(vec.v3(1,1,0), vec.v3(1,1,0)))
 
 // Temperature ////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -291,7 +283,9 @@ tempCtlBtn2
 
 // make nodes draggable
 function dragged(event, d) {
-  nodes.raise().attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
+  nodes.raise()
+  .selectAll("circle")
+  .attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
   }
 
 // generate nodes using lattice data
@@ -306,40 +300,35 @@ nodes.enter()
   d3.drag()
   .on("drag", dragged));
 
-
 var edges = sim.selectAll("line").data(edgesData);
 edges.enter()
   .append("line")
-  .style("stroke", "red")  // colour the line
-  .attr("x1", function(d){d.x1})     // x position of the first end of the line
-  .attr("y1", function(d){d.y1})     // y position of the first end of the line
-  .attr("x2", function(d){d.x2})     // x position of the second end of the line
-  .attr("y2", function(d){d.y2});
+  .style("stroke", "blue")  // colour the line
+  .attr("x1", function(d){return centreToScreenX(d.x1)})     // x position of the first end of the line
+  .attr("y1", function(d){return centreToScreenY(d.y1)})     // y position of the first end of the line
+  .attr("x2", function(d){return centreToScreenX(d.x2)})     // x position of the second end of the line
+  .attr("y2", function(d){return centreToScreenY(d.y2)});
 
 var frames  = 0
 var fps = 30
 var breakLen = 1000
-var k = 0.9
+var k = 0.01
 
 d3.timer(function(duration){
   elapsed = (duration * 0.001).toFixed(2)
   nodes.data(function(d){
-      edgesData = []
+      newEdgesData = []
       points.forEach(function(d)
       {
+
         updateTemperature(d)
-        springPotentials(d)
-        edgesData.push(
-          {
-            x1:d.px,
-            y1:d.py,
-            x2:points[d.neighbours[i][0]].px,
-            y2:points[d.neighbours[i][0]].py
-          }
-        )
+        //springPotentials(d)
+        physics.springPotentials(d,i)
+
 
       })
-      edges.data(function(){return edgesData})
+
+
     return points
   })
 
@@ -355,15 +344,7 @@ d3.timer(function(duration){
       return centreToScreenY(d.py)
     })
 
-  edges
-    .enter()        // attach a line
-    .selectAll("line")
-    //.style("stroke", "red")  // colour the line
-    .attr("x1", function(d){return d.x1})     // x position of the first end of the line
-    .attr("y1", function(d){return d.y1})      // y position of the first end of the line
-    .attr("x2", function(d){return d.x2})     // x position of the second end of the line
-    .attr("y2", function(d){return d.y2});
-
   frames += 1;
   }
+  d3.timer.stop()
 })

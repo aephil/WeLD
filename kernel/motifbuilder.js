@@ -109,3 +109,5 @@ if(p!=false)
 }
   return [_points , _edgesData]
 }
+
+export {makePrimitive2D, makeFCC2D}
