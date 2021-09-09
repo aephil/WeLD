@@ -39,9 +39,29 @@
  // load physics resources /////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
- // load lattice assets (basic nodes and edges data) ///////////////////////
+ physEngine = Physics.Engine;
+
+ // temperature
+ tempController = Physics.Temperature;
+    // ui controls for temperature
+    tempSlider = UserInterface.slider()
+    sliderContainer = tempSlider[0];
+    sliderInput = tempSlider[1];
+    sliderLabel =  tempSlider[2];
+
+    sliderInput.node().oninput = function(){
+      var value = sliderInput.node().value;
+      tempController.changeTemp(value * (1/100))
+      sliderLabel.html("Temperature: " + (value *(1/100)).toFixed(2) )
+    }
+
+ harmonicController = Physics.Spring;
+ physEngine.addCallBack(harmonicController.linear)
+ physEngine.addCallBack(tempController.vibrate)
+ physEngine.addCallBack(Physics.VerletP)
+
  var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= 50 && i != j}
- latticeData = Lattice.makeFCC2D(3,3,50, edgePredicate )
+ latticeData = Lattice.makeFCC2D(2,2,15, edgePredicate )
  nodesData = latticeData[0] // formatted dataset for nodes
  edgesData = latticeData[1] // formatted dataset for edges
 
@@ -54,15 +74,6 @@
 
  // bind nodes dataset with svg circle assets using d3 and draw to screen
  nodes = Lattice.draw(sim, nodesData) // handle for d3 object
- physEngine = Physics.Engine;
-
- tempController = Physics.Temperature;
- harmonicController = Physics.Spring;
-
- physEngine.addCallBack(harmonicController.linear)
- physEngine.addCallBack(tempController.vibrate)
- physEngine.addCallBack(Physics.VerletP)
-
 
  tempController.changeTemp(0.01)
  tempController.changeDOF(47 /*2N - 3*/)

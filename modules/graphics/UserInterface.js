@@ -23,6 +23,7 @@ UserInterface.VTerm = new VTerm();
 
 UserInterface.loadBasic = function()
 {
+
   var sim = d3.select("body")
     .append("svg")
     .style("position", "fixed")
@@ -33,7 +34,6 @@ UserInterface.loadBasic = function()
     .style("border-color","black")
     .style("border-style","solid")
     .style("background-color", "white");
-
 
   var vterm = d3.select("body")
     .append("div")
@@ -51,4 +51,27 @@ UserInterface.loadBasic = function()
     .style("background-color", "black")
 
   return [sim, vterm]
+}
+
+UserInterface.slider = function()
+{
+
+  var container = d3.select("body")
+    .append("div")
+    .style("position", "fixed")
+    .style("width", "25%")
+    .style("height","20%")
+    .style("top", "22.5%")
+    .style("right", "2%")
+
+  var slider = container.append("input")
+    .property("type","range")
+    .property("min",0)
+    .property("max",100)
+    .property("value",0)
+
+  var label = container.append("p")
+  
+
+    return [container, slider, label];
 }
