@@ -81,12 +81,13 @@
       }
 
  physEngine.addCallBack(harmonicController.bond)
+ physEngine.addCallBack(harmonicController.valence)
  physEngine.addCallBack(tempController.vibrate)
  physEngine.addCallBack(Physics.VerletP)
 
- var edgeLen = 20;
+ var edgeLen = 50;
  var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
- latticeData = Lattice.makeFCC2D(10,10,edgeLen, edgePredicate )
+ latticeData = Lattice.makeFCC2D(1,2,edgeLen, edgePredicate )
  //latticeData = Lattice.makePrimitive2D(10,5,edgeLen, edgePredicate )
 
  nodesData = latticeData[0] // formatted dataset for nodes
@@ -105,7 +106,7 @@
  function dragged(event, d) {
    nodes.raise()
    .selectAll("circle")
-   .attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
+   .attr("cx", d.px =  event.x - simWidth/2).attr("cy", d.py = simHeight/2 - event.y);
    }
 
  nodes

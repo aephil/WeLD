@@ -37,6 +37,14 @@ var Vector = function()
        _pz = v1.pz - v2.pz
       return {px:_px, py:_py, pz:_pz}
     }
+
+  this.cross = function(v1,v2)
+  {
+  var _px = (v1.py * v2.pz) - (v1.pz * v2.py);
+  var _py = (v1.pz * v2.px) - (v1.px * v2.pz);
+  var _pz = (v1.px * v2.py) - (v1.py * v2.px);
+  return {px:_px, py:_py, pz:_pz};
+  }
 }
 
 Physics.Vector = new Vector()

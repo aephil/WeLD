@@ -1,10 +1,10 @@
 
-// Springs ////////////////////////////////////////////////////////////////
+// Bonds ////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
-var Spring = function(){
+var Harmonic = function(){
 
-  var k = 1 // spring constant
+  var k = 1 // Spring constant
 
   this.changeK = function(n){
     k = n;
@@ -12,7 +12,7 @@ var Spring = function(){
 
   this.k = function(){return k}
 
-  this.linear = function(d, data)
+  this.bond = function(d, data)
   {
     for(var i = 0; i < d.neighbours.length; i++)
     {
@@ -64,7 +64,34 @@ var Spring = function(){
     }
   }
 
+  this.valence = function(d, data)
+  {
+    for(var i = 0; i < d.neighbours.length; i++)
+    {
+      var neighbour = d.neighbours[i]
+      nodesLen = neighbour[1]; // node length between neighbour and particle
+      nIndex = neighbour[0]; // index of neighbour in data
+
+      // need to compare angles between common neighbours
+      for(var j = 0; j < d.neighbours.length; j++)
+      {
+        if(i===j){continue;}
+
+        var neighbour2 = d.neighbours[j]
+        nodesLen2 = neighbour2[1]; // node length between neighbour and particle
+        nIndex2 = neighbour2[0]; // index of neighbour in data
+
+        var a = {px:d.px,py:d.py,pz:d.pz}
+        var b = {px:data[nIndex].px,py:data[nIndex].py,pz:data[nIndex].pz}
+        var c = {px:data[nIndex2].px,py:data[nIndex2].py,pz:data[nIndex2].pz}
+
+        //console.log(Physics.Vector.norm(Physics.Vector.cross(b,c)))
+      }
+    }
+
+  }
+
     return this;
   }
 
-Physics.Spring= new Spring();
+Physics.Harmonic = new Harmonic();
