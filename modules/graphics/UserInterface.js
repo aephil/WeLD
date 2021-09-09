@@ -53,7 +53,7 @@ UserInterface.loadBasic = function()
   return [sim, vterm]
 }
 
-UserInterface.slider = function()
+UserInterface.slider = function(min=0, max=100)
 {
 
   var container = d3.select("body")
@@ -62,16 +62,16 @@ UserInterface.slider = function()
     .style("width", "25%")
     .style("height","20%")
     .style("top", "22.5%")
-    .style("right", "2%")
+    .style("right", "1%")
 
   var slider = container.append("input")
     .property("type","range")
-    .property("min",0)
-    .property("max",100)
+    .property("min",min)
+    .property("max",max)
     .property("value",0)
 
   var label = container.append("p")
-  
+
 
     return [container, slider, label];
 }

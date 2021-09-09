@@ -9,6 +9,9 @@ var Renderer = function () {
     var data;
     var handle;
 
+    this.setFPS = function(n, vtermObj=null){fps = n; if(vtermObj!==null){vtermObj.log("fps set to "+n)}};
+    this.fps = function(){return fps;}
+
     this.addAnimation = function(u,r,h,d){
       onUpdate = u
       redraw = r
@@ -31,7 +34,8 @@ var Renderer = function () {
         // do physics callbacks here
         update()
         // update graphics here
-        if(elapsed > frames * (1/fps)){redraw(handle)}
+        if(elapsed > frames * (1/fps)){redraw(handle);   frames += 1;}
+
       })
       return timer;
     }

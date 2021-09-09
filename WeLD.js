@@ -45,23 +45,50 @@
  tempController = Physics.Temperature;
     // ui controls for temperature
     tempSlider = UserInterface.slider()
-    sliderContainer = tempSlider[0];
-    sliderInput = tempSlider[1];
-    sliderLabel =  tempSlider[2];
 
-    sliderInput.node().oninput = function(){
-      var value = sliderInput.node().value;
+    tempSliderContainer = tempSlider[0];
+    tempSliderInput = tempSlider[1];
+    tempSliderLabel =  tempSlider[2];
+
+    tempSliderInput.node().value = tempController.temp()
+    tempSliderLabel.html("Temperature: " + tempSliderInput.node().value )
+
+    tempSliderInput.node().oninput = function(){
+      var value = tempSliderInput.node().value;
       tempController.changeTemp(value * (1/100))
-      sliderLabel.html("Temperature: " + (value *(1/100)).toFixed(2) )
+      tempSliderLabel.html("Temperature: " + value )
     }
 
- harmonicController = Physics.Spring;
+    // spring constant
+    harmonicController = Physics.Spring;
+
+      // ui controls for spring constant
+      springConstSlider = UserInterface.slider(1,100)
+
+
+      springConstSliderContainer = springConstSlider[0];
+      springConstSliderContainer.style("top","30%")
+
+      springConstSliderInput = springConstSlider[1];
+      springConstSliderLabel =  springConstSlider[2];
+
+      springConstSliderInput.node().value = harmonicController.k();
+      springConstSliderLabel.html("k: " + harmonicController.k() * (1/100))
+      springConstSliderInput.node().oninput = function(){
+        var value = springConstSliderInput.node().value;
+        harmonicController.changeK(value * (1/100))
+        springConstSliderLabel.html("k: " + ((value) * (1/100)).toFixed(2))
+      }
+
  physEngine.addCallBack(harmonicController.linear)
  physEngine.addCallBack(tempController.vibrate)
  physEngine.addCallBack(Physics.VerletP)
 
- var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= 50 && i != j}
- latticeData = Lattice.makeFCC2D(2,2,15, edgePredicate )
+ var edgeLen = 20;
+ var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
+ latticeData = Lattice.makeFCC2D(10,5,edgeLen, edgePredicate )
+ //latticeData = Lattice.makePrimitive2D(10,5,edgeLen, edgePredicate )
+
  nodesData = latticeData[0] // formatted dataset for nodes
  edgesData = latticeData[1] // formatted dataset for edges
 
@@ -74,6 +101,18 @@
 
  // bind nodes dataset with svg circle assets using d3 and draw to screen
  nodes = Lattice.draw(sim, nodesData) // handle for d3 object
+
+ function dragged(event, d) {
+   nodes.raise()
+   .selectAll("circle")
+   .attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
+   }
+
+ nodes
+ .selectAll("circle")
+ .call(
+ d3.drag()
+ .on("drag", dragged));
 
  tempController.changeTemp(0.01)
  tempController.changeDOF(47 /*2N - 3*/)
@@ -93,6 +132,7 @@
  }
 
  renderer = Graphics.Renderer;
+ renderer.setFPS(30, terminalObj);
  renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
  //animation.stop()

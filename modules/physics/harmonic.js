@@ -4,7 +4,13 @@
 
 var Spring = function(){
 
-  var k = 0.1 // spring constant
+  var k = 1 // spring constant
+
+  this.changeK = function(n){
+    k = n;
+  }
+
+  this.k = function(){return k}
 
   this.linear = function(d, data)
   {

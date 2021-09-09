@@ -2,8 +2,9 @@
 
 var Lattice = {
 
-  makePrimitive2D: function(numCellsX, numCellsY, a){
+  makePrimitive2D: function(numCellsX, numCellsY, a, p){
     _points = []
+    _edgesData = []
     for(i = 0; i < numCellsX; i++)
     {
 
@@ -23,7 +24,7 @@ var Lattice = {
             py:cornerY, // position y
             pz:0, // position z
 
-            r:10,  // radius
+            r:5,  // radius
             m:5,  // mass
 
             neighbours:[], // index of other atoms
@@ -32,7 +33,31 @@ var Lattice = {
         )
       }
     }
-    return _points
+
+    // create bonds based on a given predicate
+  if(p!=false)
+  {
+    for(k = 0; k < _points.length; k++)
+    {
+      for(l = 0; l < _points.length; l++)
+      {
+        if(p(_points[k], _points[l]))
+        {
+          _edgesData.push(
+            {
+              x1:_points[l].px,
+              y1:_points[l].py,
+              x2:_points[k].px,
+              y2:_points[k].py
+            }
+          )
+          _points[k].neighbours.push([l, pointLen3D(_points[k],_points[l])])
+          _points[l].neighbours.push([k, pointLen3D(_points[k],_points[l])])
+        }
+      }
+    }
+  }
+    return [_points , _edgesData]
   },
 
   makeFCC2D: function(numCellsX, numCellsY, a, p = false){
