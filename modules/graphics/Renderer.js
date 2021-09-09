@@ -1,39 +1,42 @@
 
 var Renderer = function () {
 
-    var fps = 10; //private var
+    var fps = 30; //private var
     var frames = 0;
 
+    var update;
+    var redraw;
+    var data;
+    var handle;
 
-    this.update = ()=>{};
-    this.reDraw = function(handle, type){
+    this.addAnimation = function(u,r,h,d){
+      onUpdate = u
+      redraw = r
+      handle = h
+      data = d
+    }
 
-      handle
-        .enter()
-        .selectAll(type)
-        .attr("cx",function(d){
-          return centreToScreenX(d.px)
-        })
-        .attr("cy",function(d){
-          return centreToScreenY(d.py)
-        })
+    var update = function()
+    {
+      handle.data(function(d){
+      onUpdate(data)
+      return data
+      })
+    }
 
-    };
-    this.render = function(data, handle, type="circle") // public fn
+    this.render = function() // public fn
     {
       timer = d3.timer(function(duration){
         elapsed = (duration * 0.001).toFixed(2)
-
         // do physics callbacks here
-        this.update(data)
-
+        update()
         // update graphics here
-        if(elapsed > frames * (1/fps)){this.reDraw(handle, type)}
-
+        if(elapsed > frames * (1/fps)){redraw(handle)}
       })
-
       return timer;
     }
+
+  return this;
 };
 
 Graphics.Renderer = new Renderer();

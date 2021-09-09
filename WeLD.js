@@ -40,7 +40,8 @@
  ///////////////////////////////////////////////////////////////////////////
 
  // load lattice assets (basic nodes and edges data) ///////////////////////
- latticeData = Lattice.makeFCC2D(5,5,50, false)
+ var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= 50 && i != j}
+ latticeData = Lattice.makeFCC2D(3,3,50, edgePredicate )
  nodesData = latticeData[0] // formatted dataset for nodes
  edgesData = latticeData[1] // formatted dataset for edges
 
@@ -55,12 +56,32 @@
  nodes = Lattice.draw(sim, nodesData) // handle for d3 object
  physEngine = Physics.Engine;
 
- testFunction = function(p){
-   terminalObj.log(p.px)
+ tempController = Physics.Temperature;
+ harmonicController = Physics.Spring;
+
+ physEngine.addCallBack(harmonicController.linear)
+ physEngine.addCallBack(tempController.vibrate)
+ physEngine.addCallBack(Physics.VerletP)
+
+
+ tempController.changeTemp(0.01)
+ tempController.changeDOF(47 /*2N - 3*/)
+
+// define how the renderer should redraw to screen each frame
+ var redraw = function(handle)
+ {
+   handle
+     .enter()
+     .selectAll("circle")
+     .attr("cx",function(d){
+       return centreToScreenX(d.px)
+     })
+     .attr("cy",function(d){
+       return centreToScreenY(d.py)
+     })
  }
- physEngine.addCallBack(testFunction)
 
  renderer = Graphics.Renderer;
- renderer.update = physEngine.update
-
- renderer.render(nodesData, nodes)
+ renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
+ animation = renderer.render(nodesData, nodes)
+ //animation.stop()

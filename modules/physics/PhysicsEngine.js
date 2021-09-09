@@ -3,13 +3,16 @@
 var Engine = function () {
 
     var callBacks = []; //private var
-    this.update = function(data) // private fn
+
+    this.update = function(data) // public fn
     {
-      for(i = 0; i < callBacks.length; i++)
+      for(var i = 0; i < callBacks.length; i++)
       {
-        for(j = 0; j < data.length; j++)
+        for(var j = 0; j < data.length; j++)
         {
-          callBacks[i](data[j]);
+          fn = callBacks[i]
+          point = data[j]
+          fn(point, data);
         }
       }
     }
@@ -17,6 +20,8 @@ var Engine = function () {
     this.addCallBack = function (fn) {  //public fn
       callBacks.push(fn)
     };
+
+  return this;
 
 };
 

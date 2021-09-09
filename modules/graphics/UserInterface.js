@@ -16,7 +16,7 @@ var VTerm = function () {
       this.parent.html(buffer)
       updateScroll()
     };
-
+    return this;
 };
 
 UserInterface.VTerm = new VTerm();

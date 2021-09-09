@@ -39,7 +39,6 @@
         // resolve
       }
     }
-
  }
 
  // Temperature ////////////////////////////////////////////////////////////
@@ -191,16 +190,22 @@ var infoBuffer = "";
 var infoContainer = body
   .append("div")
   .attr("id","vterm")
+
   .style("position", "fixed")
   .style("width", "24%")
+
   .style("height","20%")
   .style("top", "2.5%")
+
   .style("right", "2%")
   .style("border-color","black")
+
   .style("border-style","dashed")
   .style("color", "white")
+
   .style("padding","1.5 em")
   .style("overflow-y","scroll")
+
   .style("overflow-x","scroll")
   .style("background-color", "black")
 

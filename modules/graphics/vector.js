@@ -1,39 +1,42 @@
-vec = {}
+var Vector = function()
+{
+  this.v3 = function()
+    {
+      return {px:0, py:0, pz:0 };
+    }
 
-vec.v3 = function()
-  {
-    return {x:0, y:0, z:0 };
-  }
+  //this.v3 = function(_px,_py,_pz)
+  //  {
+  //    return {px:_px, py:_py, pz:_pz}
+  //  }
 
-vec.v3 = function(_x,_y,_z)
-  {
-    return {x:_x, y:_y, z:_z}
-  }
+  this.dot = function(v1, v2)
+    {
+      return v1.px*v2.px + v1.py*v2.py + v1.pz*v2.pz;
+    }
 
-vec.dot = function(v1, v2)
-  {
-    return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
-  }
+  this.norm = function(v1)
+    {
+      return Math.sqrt(this.dot(v1,v1))
+    }
 
-vec.norm = function(v1)
-  {
-    return Math.sqrt(vec.dot(v1,v1))
-  }
+  this.add = function(v1, v2)
+    {
+      var _px, _py, _pz;
+       _px = v1.px + v2.px
+       _py = v1.py + v2.py
+       _pz = v1.pz + v2.pz
+      return {px:_px, py:_py, pz:_pz}
+    }
 
-vec.add = function(v1, v2)
-  {
-    var _x, _y, _z;
-     _x = v1.x + v2.x
-     _y = v1.y + v2.y
-     _z = v1.z + v2.z
-    return {x:_x, y:_y, z:_z}
-  }
+  this.sub = function(v1, v2)
+    {
+      var _px, _py, _pz;
+       _px = v1.px - v2.px
+       _py = v1.py - v2.py
+       _pz = v1.pz - v2.pz
+      return {px:_px, py:_py, pz:_pz}
+    }
+}
 
-vec.sub = function(v1, v2)
-  {
-    var _x, _y, _z;
-     _x = v1.x - v2.x
-     _y = v1.y - v2.y
-     _z = v1.z - v2.z
-    return {x:_x, y:_y, z:_z}
-  }
+Physics.Vector = new Vector()

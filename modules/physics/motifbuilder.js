@@ -116,10 +116,9 @@ var Lattice = {
 
   draw: function(parent, data)
  {
-   var handle =
-   parent
-   .selectAll("circle")
-   .data(data)
+
+   var handle = parent.selectAll("circle").data(data);
+   handle
    .enter()
    .append("circle")
    .attr("r",function(d){return d.r})
@@ -128,6 +127,6 @@ var Lattice = {
    .attr("fill", function(d){return d.col})
    .attr("stroke", "black")
 
-   return handle
+   return handle;
  }
 }
