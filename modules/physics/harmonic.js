@@ -27,7 +27,6 @@ var Harmonic = function(){
         // extension
         ext = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)) - nodesLen
 
-
         contract = !(ext > 0);
         extY = dx < 0.001 ? 0 : ext * dy/nodesLen
         extX = ext * dx/nodesLen
@@ -55,11 +54,11 @@ var Harmonic = function(){
         // new image distance between
         var id = Math.sqrt(Math.pow(idx,2) + Math.pow(idy,2))
 
-          d.px += px
-          data[nIndex].px += pxN
+        d.px += px
+        data[nIndex].px += pxN
 
-          d.py += py
-          data[nIndex].py += pyN
+        d.py += py
+        data[nIndex].py += pyN
 
     }
   }
@@ -92,18 +91,31 @@ var Harmonic = function(){
         var pc = Physics.Vector.normalise(Physics.Vector.cross(bc,Physics.Vector.cross(ba,bc)))
 
         var abc = Physics.Vector.angle(ba, bc);
-        var theta = Math.pi / 2;
+        abc = (isNaN(abc)? 0 : abc);
+        var theta = Math.PI / 2;
 
         var faFactor = (-1)*k*(abc - theta)/(Physics.Vector.norm(ba))
+        faFactor = (isNaN(faFactor)? 0 : faFactor);
         var fa = Physics.Vector.scale(faFactor, pa)
 
         var fcFactor = (-1)*k*(abc - theta)/(Physics.Vector.norm(bc))
+        fcFactor = (isNaN(fcFactor)? 0 : fcFactor);
         var fc = Physics.Vector.scale(fcFactor, pc)
 
         var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
 
-        
+        data[nIndex].px += 0.5*(fa.px/data[nIndex].m);
+        data[nIndex].py += 0.5*(fa.py/data[nIndex].m);
+        data[nIndex].pz += 0.5*(fa.pz/data[nIndex].m);
 
+        d.px += 0.5*(fb.px/d.m)
+        d.py += 0.5*(fb.py/d.m)
+        d.pz += 0.5*(fb.pz/d.m)
+
+        data[nIndex2].px += 0.5*(fc.px/data[nIndex2].m)
+        data[nIndex2].py += 0.5*(fc.py/data[nIndex2].m)
+        data[nIndex2].pz += 0.5*(fc.pz/data[nIndex2].m)
+      
       }
     }
 
