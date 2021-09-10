@@ -72,8 +72,8 @@
       springConstSliderInput = springConstSlider[1];
       springConstSliderLabel =  springConstSlider[2];
 
-      springConstSliderInput.node().value = harmonicController.k();
-      springConstSliderLabel.html("k: " + harmonicController.k() * (1/100))
+      springConstSliderInput.node().value = harmonicController.k() * 100;
+      springConstSliderLabel.html("k: " + harmonicController.k() )
       springConstSliderInput.node().oninput = function(){
         var value = springConstSliderInput.node().value;
         harmonicController.changeK(value * (1/100))
@@ -82,16 +82,69 @@
 
  physEngine.addCallBack(harmonicController.bond)
  physEngine.addCallBack(harmonicController.valence)
- physEngine.addCallBack(tempController.vibrate)
+ //physEngine.addCallBack(tempController.vibrate)
  physEngine.addCallBack(Physics.VerletP)
 
  var edgeLen = 50;
  var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
- latticeData = Lattice.makeFCC2D(1,2,edgeLen, edgePredicate )
+ nodesData = [
+   {
+     vx:0, // velocity x
+     vy:0, // velocity y
+     vz:0, // velocity z
+
+     px:0, // position x
+     py:0, // position y
+     pz:0, // position z
+
+     r:5,  // radius
+     m:1,  // mass
+
+     neighbours:[[1,edgeLen],[2,edgeLen]], // index of other atoms
+     col:"red", // colour
+   },
+
+   {
+     vx:0, // velocity x
+     vy:0, // velocity y
+     vz:0, // velocity z
+
+     px: edgeLen* Math.cos(Math.PI/12), // position x
+     py:-1*edgeLen * Math.sin(Math.PI/12), // position y
+     pz:0, // position z
+
+     r:5,  // radius
+     m:1,  // mass
+
+     neighbours:[[0,edgeLen]], // index of other atoms
+     col:"blue", // colour
+   },
+
+   {
+     vx:0, // velocity x
+     vy:0, // velocity y
+     vz:0, // velocity z
+
+     px:(edgeLen) * Math.cos(Math.PI/12), // position x
+     py: edgeLen * Math.sin(Math.PI/12), // position y
+     pz:0, // position z
+
+     r:5,  // radius
+     m:1,  // mass
+
+     neighbours:[[0,edgeLen]], // index of other atoms
+     col:"green", // colour
+   },
+
+ ]
+
+ edgesData = []
+
+ //latticeData = Lattice.makeFCC2D(5,5,edgeLen, edgePredicate )
  //latticeData = Lattice.makePrimitive2D(10,5,edgeLen, edgePredicate )
 
- nodesData = latticeData[0] // formatted dataset for nodes
- edgesData = latticeData[1] // formatted dataset for edges
+ //nodesData = latticeData[0] // formatted dataset for nodes
+ //edgesData = latticeData[1] // formatted dataset for edges
 
  terminalObj.log("loaded nodes and edges")
  terminalObj.log("num nodes: " + nodesData.length)
@@ -133,7 +186,8 @@
  }
 
  renderer = Graphics.Renderer;
- renderer.setFPS(15, terminalObj);
+ //renderer.setFPS(60, terminalObj);
+ //renderer.setSpeed(1, terminalObj);
  renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
  //animation.stop()

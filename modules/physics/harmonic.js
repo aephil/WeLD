@@ -104,18 +104,26 @@ var Harmonic = function(){
 
         var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
 
-        data[nIndex].px += 0.5*(fa.px/data[nIndex].m);
-        data[nIndex].py += 0.5*(fa.py/data[nIndex].m);
-        data[nIndex].pz += 0.5*(fa.pz/data[nIndex].m);
+        console.log("1: "+data[nIndex].px)
 
-        d.px += 0.5*(fb.px/d.m)
-        d.py += 0.5*(fb.py/d.m)
-        d.pz += 0.5*(fb.pz/d.m)
+        // scaling by 500 at the moment is for test purposes
+        // so that it is visible in the animation. TODO: fix this
 
-        data[nIndex2].px += 0.5*(fc.px/data[nIndex2].m)
-        data[nIndex2].py += 0.5*(fc.py/data[nIndex2].m)
-        data[nIndex2].pz += 0.5*(fc.pz/data[nIndex2].m)
-      
+        data[nIndex].px += 500*(fa.px/data[nIndex].m);
+        data[nIndex].py += 500*(fa.py/data[nIndex].m);
+        data[nIndex].pz += 500*(fa.pz/data[nIndex].m);
+
+        console.log("2: "+data[nIndex].px)
+
+
+        d.px += 500*(fb.px/d.m)
+        d.py += 500*(fb.py/d.m)
+        d.pz += 500*(fb.pz/d.m)
+
+        data[nIndex2].px += 500*(fc.px/data[nIndex2].m)
+        data[nIndex2].py += 500*(fc.py/data[nIndex2].m)
+        data[nIndex2].pz += 500*(fc.pz/data[nIndex2].m)
+
       }
     }
 

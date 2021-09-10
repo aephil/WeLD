@@ -1,6 +1,6 @@
 var Temperature = function()
 {
-  var temperature = 1;
+  var temperature = 0;
   var dof = 2;
   var kinetic = 0
   var avgKinEn = (dof/2) * temperature // natural units
