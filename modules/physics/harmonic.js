@@ -81,11 +81,29 @@ var Harmonic = function(){
         nodesLen2 = neighbour2[1]; // node length between neighbour and particle
         nIndex2 = neighbour2[0]; // index of neighbour in data
 
-        var a = {px:d.px,py:d.py,pz:d.pz}
-        var b = {px:data[nIndex].px,py:data[nIndex].py,pz:data[nIndex].pz}
-        var c = {px:data[nIndex2].px,py:data[nIndex2].py,pz:data[nIndex2].pz}
+        var a = Physics.Vector.makeV3(data[nIndex])
+        var b = Physics.Vector.makeV3(d)
+        var c = Physics.Vector.makeV3(data[nIndex2])
 
-        //console.log(Physics.Vector.norm(Physics.Vector.cross(b,c)))
+        var ba = Physics.Vector.sub(b,a);
+        var bc = Physics.Vector.sub(b,c);
+
+        var pa = Physics.Vector.normalise(Physics.Vector.cross(ba,Physics.Vector.cross(ba,bc)))
+        var pc = Physics.Vector.normalise(Physics.Vector.cross(bc,Physics.Vector.cross(ba,bc)))
+
+        var abc = Physics.Vector.angle(ba, bc);
+        var theta = Math.pi / 2;
+
+        var faFactor = (-1)*k*(abc - theta)/(Physics.Vector.norm(ba))
+        var fa = Physics.Vector.scale(faFactor, pa)
+
+        var fcFactor = (-1)*k*(abc - theta)/(Physics.Vector.norm(bc))
+        var fc = Physics.Vector.scale(fcFactor, pc)
+
+        var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
+
+        
+
       }
     }
 

@@ -1,14 +1,35 @@
 var Vector = function()
 {
+  this.normalise = function(v)
+  {
+    var norm = this.norm(v);
+
+    if(norm===0){return v;}
+
+    v.px /= norm;
+    v.py /= norm;
+    v.pz /= norm;
+    return v;
+  }
+
+  this.scale = function(scalar, v)
+    {
+      return {px:v.px*scalar, py:v.py*scalar, pz:v.pz*scalar};
+    }
+
+  this.angle = function(v1, v2)
+    {
+      return Math.acos( (this.dot(v1,v2)) / ( this.norm(v1) * this.norm(v2) ))
+    }
   this.v3 = function()
     {
       return {px:0, py:0, pz:0 };
     }
 
-  //this.v3 = function(_px,_py,_pz)
-  //  {
-  //    return {px:_px, py:_py, pz:_pz}
-  //  }
+  this.makeV3 = function(d)
+    {
+      return {px:d.px, py:d.py, pz:d.pz}
+    }
 
   this.dot = function(v1, v2)
     {
