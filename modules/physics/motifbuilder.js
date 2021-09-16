@@ -20,9 +20,9 @@ var Lattice = {
             vy:0, // velocity y
             vz:0, // velocity z
 
-            px:cornerX, // position x
-            py:cornerY, // position y
-            pz:0, // position z
+            x:cornerX, // position x
+            y:cornerY, // position y
+            z:1, // position z
 
             r:5,  // radius
             m:5,  // mass
@@ -45,10 +45,10 @@ var Lattice = {
         {
           _edgesData.push(
             {
-              x1:_points[l].px,
-              y1:_points[l].py,
-              x2:_points[k].px,
-              y2:_points[k].py
+              x1:_points[l].x,
+              y1:_points[l].y,
+              x2:_points[k].x,
+              y2:_points[k].y
             }
           )
           _points[k].neighbours.push([l, pointLen3D(_points[k],_points[l])])
@@ -80,9 +80,9 @@ var Lattice = {
             vy:0, // velocity y
             vz:0, // velocity z
 
-            px:cornerX, // position x
-            py:cornerY, // position y
-            pz:0, // position z
+            x:cornerX, // position x
+            y:cornerY, // position y
+            z:1, // position z
 
             r:5,  // radius
             m:1,  // mass
@@ -99,9 +99,9 @@ var Lattice = {
             vy:0, // velocity y
             vz:0, // velocity z
 
-            px:cornerX + (a*0.5) , // position x
-            py:cornerY + (a*0.5), // position y
-            pz:0, // position z
+            x:cornerX + (a*0.5) , // position x
+            y:cornerY + (a*0.5), // position y
+            z:1, // position z
 
             r:5,  // radius
             m:1,  // mass
@@ -124,14 +124,14 @@ var Lattice = {
         {
           _edgesData.push(
             {
-              x1:_points[l].px,
-              y1:_points[l].py,
-              x2:_points[k].px,
-              y2:_points[k].py
+              x1:_points[l].x,
+              y1:_points[l].y,
+              x2:_points[k].x,
+              y2:_points[k].y
             }
           )
-          _points[k].neighbours.push([l, pointLen3D(_points[k],_points[l])])
-          _points[l].neighbours.push([k, pointLen3D(_points[k],_points[l])])
+          _points[k].neighbours.push([l, Physics.Vector.distance(_points[k],_points[l])])
+          _points[l].neighbours.push([k, Physics.Vector.distance(_points[k],_points[l])])
         }
       }
     }
@@ -147,8 +147,8 @@ var Lattice = {
    .enter()
    .append("circle")
    .attr("r",function(d){return d.r})
-   .attr("cx",function(d){return centreToScreenX(d.px, simWidth)})
-   .attr("cy", function(d){return centreToScreenY(d.py, simHeight)})
+   .attr("cx",function(d){return centreToScreenX(d.x, simWidth)})
+   .attr("cy", function(d){return centreToScreenY(d.y, simHeight)})
    .attr("fill", function(d){return d.col})
    .attr("stroke", "black")
 

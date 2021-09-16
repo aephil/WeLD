@@ -6,15 +6,15 @@ var Vector = function()
 
     if(norm===0){return v;}
 
-    v.px /= norm;
-    v.py /= norm;
-    v.pz /= norm;
+    v.x /= norm;
+    v.y /= norm;
+    v.z /= norm;
     return v;
   }
 
   this.scale = function(scalar, v)
     {
-      return {px:v.px*scalar, py:v.py*scalar, pz:v.pz*scalar};
+      return {x:v.x*scalar, y:v.y*scalar, z:v.z*scalar};
     }
 
   this.angle = function(v1, v2)
@@ -26,17 +26,17 @@ var Vector = function()
 
   this.v3 = function()
     {
-      return {px:0, py:0, pz:0};
+      return {x:0, y:0, z:0};
     }
 
   this.makeV3 = function(d)
     {
-      return {px:d.px, py:d.py, pz:d.pz}
+      return {x:d.x, y:d.y, z:d.z}
     }
 
   this.dot = function(v1, v2)
     {
-      return v1.px*v2.px + v1.py*v2.py + v1.pz*v2.pz;
+      return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
     }
 
   this.norm = function(v1)
@@ -46,28 +46,40 @@ var Vector = function()
 
   this.add = function(v1, v2)
     {
-      var _px, _py, _pz;
-       _px = v1.px + v2.px
-       _py = v1.py + v2.py
-       _pz = v1.pz + v2.pz
-      return {px:_px, py:_py, pz:_pz}
+      var _x, _y, _z;
+       _x = v1.x + v2.x
+       _y = v1.y + v2.y
+       _z = v1.z + v2.z
+      return {x:_x, y:_y, z:_z}
     }
 
   this.sub = function(v1, v2)
     {
-      var _px, _py, _pz;
-       _px = v1.px - v2.px
-       _py = v1.py - v2.py
-       _pz = v1.pz - v2.pz
-      return {px:_px, py:_py, pz:_pz}
+      var _x, _y, _z;
+       _x = v1.x - v2.x
+       _y = v1.y - v2.y
+       _z = v1.z - v2.z
+      return {x:_x, y:_y, z:_z}
     }
 
   this.cross = function(v1,v2)
   {
-    var _px = (v1.py * v2.pz) - (v1.pz * v2.py);
-    var _py = (v1.pz * v2.px) - (v1.px * v2.pz);
-    var _pz = (v1.px * v2.py) - (v1.py * v2.px);
-    return {px:_px, py:_py, pz:_pz};
+    var _x = (v1.y * v2.z) - (v1.z * v2.y);
+    var _y = (v1.z * v2.x) - (v1.x * v2.z);
+    var _z = (v1.x * v2.y) - (v1.y * v2.x);
+    return {x:_x, y:_y, z:_z};
+  }
+
+  this.distance = function(v1,v2)
+  {
+    return this.norm(this.sub(v1,v2))
+  }
+
+  this.unitVector = function(v)
+  {
+    n = Physics.Vector.norm(v);
+    u = Physics.Vector.scale(1/n, v)
+    return u;
   }
 }
 

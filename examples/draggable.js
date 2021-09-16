@@ -60,7 +60,6 @@ var icosaPoints =
     {x:-0.5,y:0.5,z:0.5},
     {x:-0.5,y:-0.5,z:0.5},
     {x:-0.5,y:0.5,z:-0.5},
-
   ]
 
   function approx(a,b,e){
@@ -77,40 +76,40 @@ var generateFaces = function(data,l){
         var b=data[j];
         var c=data[k];
 
-        if(pointLen(a,b)==pointLen(a,c)&&approx( pointLen(a,b), l, 0.1)/*&&pointLen(b,c)==pointLen(a,b)&& pointLen(b,c)==pointLen(a,b)&&pointLen(a,b) == l && pointLen(c,b) == l*/){
+        if(pointLen3D(a,b)==pointLen3D(a,c)&&approx( pointLen3D(a,b), l, 0.1)/*&&pointLen(b,c)==pointLen(a,b)&& pointLen(b,c)==pointLen(a,b)&&pointLen(a,b) == l && pointLen(c,b) == l*/){
 
             var faceUnique = true; // assume true at first
             for (f = 0; f < faces.length; f++){
               if(facesEqual(faces[f],[a,b,c,a]))
               {
-                console.log("duplicate faces found!")
-                console.log("points: ")
+              //  console.log("duplicate faces found!")
+              //  console.log("points: ")
 
-                console.log("A1: ",a)
-                console.log("B1: ",b)
-                console.log("C1: ",c)
+              //  console.log("A1: ",a)
+              //  console.log("B1: ",b)
+              //  console.log("C1: ",c)
 
-                console.log("A2: ",f[0])
-                console.log("B2: ",f[1])
-                console.log("C2: ",f[2])
+              //  console.log("A2: ",f[0])
+              //  console.log("B2: ",f[1])
+              //  console.log("C2: ",f[2])
 
                 faceUnique=false
               }
             }
 
             if(faceUnique){
-              console.log("unique was face found!")
-              console.log("points: ")
-              console.log("A: ",a)
-              console.log("B: ",b)
-              console.log("C: ",c)
-              faces.push([a,b,c,a]);
+            //  console.log("unique was face found!")
+            //  console.log("points: ")
+            //  console.log("A: ",a)
+            //  console.log("B: ",b)
+            //  console.log("C: ",c)
+            faces.push([a,b,c,a])
             }
-            console.log("total triangles: ",faces.length)
-            console.log("finding new triangle...")
+            //console.log("total triangles: ",faces.length)
+            //console.log("finding new triangle...")
         } else {
-          console.log("points did not match criteria")
-          console.log("finding new face...")
+          //console.log("points did not match criteria")
+          //console.log("finding new face...")
         }
       }
     }
@@ -144,9 +143,10 @@ var info2 = d3.select("svg")
   .attr("fill","white")
   .attr("stroke","none");
 
-var edgeLen = /*pointLen({x:0.5,y:0.5,z:0.5},{x:0.5,y:-0.5,z:0.5})*/Math.sqrt(Math.pow(phi,2)+Math.pow(1,2)+Math.pow(phi-1,2));
+var edgeLen = /*pointLen({x:0.5,y:0.5,z:0.5},{x:0.5,y:-0.5,z:0.5})*/ Math.sqrt(Math.pow(phi,2)+Math.pow(1,2)+Math.pow(phi-1,2));
 var test = generateFaces(icosaPoints,edgeLen);
 
+console.log(test)
 var grp = svg.append("g");
 
 var theta = Math.PI*Math.cos(0);
@@ -177,7 +177,6 @@ var icosa = facesToScreen(test,boxDepth,zp);
 
     rho = (svgClickX - d3.pointer(event)[0]) * 0.01;
     theta = (svgClickY - d3.pointer(event)[1]) * 0.01;
-
 
     // update the window
     var rotated = rotateFacesY(rotateFacesX(test,theta),rho);

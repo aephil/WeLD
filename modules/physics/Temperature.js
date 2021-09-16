@@ -15,13 +15,16 @@ var Temperature = function()
     dof = n;
   }
   this.vibrate = function (d, data){
-    var rnd = randomNumber(0,1);
+    var partition0 = randomNumber(0,1);
+    var partition1 = randomNumber(0,1) * (1 - partition0)
+    var partition2 = 1 - partition1 - partition0
+
     avgKinEn = (dof/2) * (temperature) * 0.634; // new target K.E
     var vsquared = avgKinEn * 2 / d.m;
-    d.vx = rnd * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-    d.vy = (1-rnd) * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    d.vx = partition0 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    d.vy = partition1 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    d.vz = partition2 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
   }
-
   return this;
 }
 

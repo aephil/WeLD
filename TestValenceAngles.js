@@ -2,7 +2,7 @@
 /**
  * WeLD.js
  *
- * Copyright (C) 06-09-2021, Author Takudzwa Makoni
+ * Coyright (C) 06-09-2021, Author Takudzwa Makoni
  * <https://github.com/aephil/WeLD>
  *
  * This Program is free software: you can redistribute
@@ -15,7 +15,7 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a coy of the GNU General Public License
  * along with This Program. If not, see <http://www.gnu.org/licenses/>.
  *
  * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
@@ -81,21 +81,23 @@
       }
 
  physEngine.addCallBack(harmonicController.bond)
- physEngine.addCallBack(harmonicController.valence)
- //physEngine.addCallBack(tempController.vibrate)
+ //physEngine.addCallBack(harmonicController.valence)
+ physEngine.addCallBack(tempController.vibrate)
  physEngine.addCallBack(Physics.VerletP)
 
- var edgeLen = 50;
+ var edgeLen = 35;
  var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
+
+/*
  nodesData = [
    {
      vx:0, // velocity x
      vy:0, // velocity y
      vz:0, // velocity z
 
-     px:0, // position x
-     py:0, // position y
-     pz:0, // position z
+     x:0, // position x
+     y:0, // position y
+     z:0, // position z
 
      r:5,  // radius
      m:1,  // mass
@@ -109,9 +111,9 @@
      vy:0, // velocity y
      vz:0, // velocity z
 
-     px: edgeLen* Math.cos(Math.PI/12), // position x
-     py:-1*edgeLen * Math.sin(Math.PI/12), // position y
-     pz:0, // position z
+     x: edgeLen* Math.cos(Math.PI/12), // position x
+     y:-1*edgeLen * Math.sin(Math.PI/12), // position y
+     z:0, // position z
 
      r:5,  // radius
      m:1,  // mass
@@ -125,9 +127,9 @@
      vy:0, // velocity y
      vz:0, // velocity z
 
-     px:(edgeLen) * Math.cos(Math.PI/12), // position x
-     py: edgeLen * Math.sin(Math.PI/12), // position y
-     pz:0, // position z
+     x:(edgeLen) * Math.cos(Math.PI/12), // position x
+     y: edgeLen * Math.sin(Math.PI/12), // position y
+     z:0, // position z
 
      r:5,  // radius
      m:1,  // mass
@@ -137,14 +139,14 @@
    },
 
  ]
-
  edgesData = []
+*/
 
- //latticeData = Lattice.makeFCC2D(5,5,edgeLen, edgePredicate )
- //latticeData = Lattice.makePrimitive2D(10,5,edgeLen, edgePredicate )
+ latticeData = Lattice.makeFCC2D(5,5, edgeLen, edgePredicate)
+ //latticeData = Lattice.makePrimitive2D(10, 5, edgeLen, edgePredicate)
 
- //nodesData = latticeData[0] // formatted dataset for nodes
- //edgesData = latticeData[1] // formatted dataset for edges
+ nodesData = latticeData[0] // formatted dataset for nodes
+ edgesData = latticeData[1] // formatted dataset for edges
 
  terminalObj.log("loaded nodes and edges")
  terminalObj.log("num nodes: " + nodesData.length)
@@ -157,19 +159,41 @@
  nodes = Lattice.draw(sim, nodesData) // handle for d3 object
 
  function dragged(event, d) {
+   terminalObj.log("here")
+
    nodes.raise()
    .selectAll("circle")
-   .attr("cx", d.px =  event.x - simWidth/2).attr("cy", d.py = simHeight/2 - event.y);
+   .attr("cx", d.x =  event.x - simWidth/2).attr("cy", d.y = simHeight/2 - event.y);
    }
 
- nodes
- .selectAll("circle")
- .call(
- d3.drag()
- .on("drag", dragged));
+   nodes
+   .selectAll("circle")
+   .call(
+     d3.drag()
+   .on("drag", dragged));
 
- tempController.changeTemp(0.01)
  tempController.changeDOF(47 /*2N - 3*/)
+
+ var svgClickX = 0
+ var svgClickY = 0
+ var rho = 0;
+ var theta = 0;
+
+ d3.select("svg").call(d3.drag().on("start",function(){
+   svgClickX = d3.pointer(event)[0]
+   svgClickY = d3.pointer(event)[1]
+ })
+ .on("drag",function(){
+
+   rho = (svgClickX - d3.pointer(event)[0]) * 0.01;
+   theta = (svgClickY - d3.pointer(event)[1]) * 0.01;
+
+   terminalObj.log("rho: "+rho)
+   terminalObj.log("theta: "+theta)
+
+    //update the window
+
+   }));
 
 // define how the renderer should redraw to screen each frame
  var redraw = function(handle)
@@ -178,16 +202,21 @@
      .enter()
      .selectAll("circle")
      .attr("cx",function(d){
-       return centreToScreenX(d.px)
+       var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
+       return centreToScreenX(x)
      })
      .attr("cy",function(d){
-       return centreToScreenY(d.py)
+       var y = d.y*Math.cos(theta)-d.z*Math.sin(theta);
+       return centreToScreenY(y)
+     })
+     .attr("r",function(d){
+       return d.r
      })
  }
 
  renderer = Graphics.Renderer;
  //renderer.setFPS(60, terminalObj);
- //renderer.setSpeed(1, terminalObj);
+ renderer.setSpeed(60, terminalObj);
  renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
  //animation.stop()

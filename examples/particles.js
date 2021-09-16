@@ -8,7 +8,7 @@ var boxHeight = 800;
 var boxDepth = 800;
 var boxCentreX = -boxWidth/2; // in local coordinates
 var boxCentreY = boxHeight/2; // in local coordinates
-var particleSize = 8;
+var particleSize = 10;
 var particleSizeMin = particleSize/4;
 
 // z-perspective value
@@ -57,18 +57,18 @@ for (var i = 0; i < N; i++){
     vx: randomNumber(-10,10),
     vy: randomNumber(-10,10),
     vz: randomNumber(-10,10),
-    px: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
-    py: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
-    pz: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+    x: randomNumber(leftBoxEdge(particleSize), rightBoxEdge(particleSize)),
+    y: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
+    z: randomNumber(upperBoxEdge(particleSize), lowerBoxEdge(particleSize)),
     r: particleSize,
     scale: function(){
-      return zFactor(boxDepth,this.pz,zp);
+      return zFactor(boxDepth,this.z,zp);
     },
     ix: function(){
-      return this.px * this.scale();
+      return this.x * this.scale();
     },
     iy: function(){
-      return this.py * this.scale();
+      return this.y * this.scale();
     },
     ir: function(){
       return this.r * this.scale();
@@ -87,9 +87,9 @@ particle.enter().append("circle")
   .attr("stroke","none")
   .attr("fill","white")
   .merge(particle)
-  .attr("cy", function (d){ return screenToCentreY(d.iy())})
-  .attr("cx", function (d){ return screenToCentreX(d.ix())})
-  .attr("r", function(d) {return d.ir();})
+  .attr("cy", function (d){ return screenToCentreY(d.y / d.z )})
+  .attr("cx", function (d){ return screenToCentreX(d.x / d.z)})
+  .attr("r", function(d) {return d.r / d.z;})
 particle.exit().remove();
 
 var timeInfo = d3.select("svg")
@@ -132,44 +132,44 @@ var timer = d3.timer( function(duration) {
         var outerLim = outerBoxEdge(d.r);
         var innerLim = innerBoxEdge(d.r);
 
-        if( d.py >= upperLim ) {
-          d.py = upperLim;
+        if( d.y >= upperLim ) {
+          d.y = upperLim;
 
           d.vy = -1*d.vy*cOfR;
         };
 
-        if( d.py <= lowerLim ) {
-          d.py = lowerLim ;
+        if( d.y <= lowerLim ) {
+          d.y = lowerLim ;
 
           d.vy = -1*d.vy*cOfR;
         };
 
-        if( d.px <= leftLim ) {
-          d.px = leftLim;
+        if( d.x <= leftLim ) {
+          d.x = leftLim;
 
           d.vx = -1*d.vx*cOfR;
         };
 
-        if( d.px >= rightLim ) {
-          d.px = rightLim;
+        if( d.x >= rightLim ) {
+          d.x = rightLim;
           d.vx = -1*d.vx*cOfR;
         };
 
-        if( d.pz <= innerLim ) {
+        if( d.z <= innerLim ) {
           d.vz = -1*d.vz*cOfR;
-          d.pz = innerLim;
+          d.z = innerLim;
         };
 
-        if( d.pz >= outerLim ) {
+        if( d.z >= outerLim ) {
           d.vz = -1*d.vz*cOfR;
-          d.pz = outerLim;
+          d.z = outerLim;
         };
 
         particle.enter().selectAll("circle")
           .merge(particle)
-          .attr("cy", function (d){ return screenToCentreY(d.iy())})
-          .attr("cx", function (d){ return screenToCentreX(d.ix())})
-          .attr("r", function(d) {return d.ir();})
+          .attr("cy", function (d){ return screenToCentreY(d.y / d.z)})
+          .attr("cx", function (d){ return screenToCentreX(d.x / d.z )})
+          .attr("r", function (d){ return d.r / d.z;})
       }
     );
     return particleData;
