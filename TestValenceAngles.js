@@ -216,7 +216,7 @@
 
  renderer = Graphics.Renderer;
  //renderer.setFPS(60, terminalObj);
- renderer.setSpeed(60, terminalObj);
+ renderer.setSpeed(10, terminalObj);
  renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
  //animation.stop()
