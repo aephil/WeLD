@@ -28,7 +28,7 @@ var Lattice = {
             m:5,  // mass
 
             neighbours:[], // index of other atoms
-            col:"red", // colour
+            col:"white", // colour
           }
         )
       }
@@ -76,9 +76,9 @@ var Lattice = {
         _points.push(
           {
             isonLattice: true,
-            vx:0, // velocity x
-            vy:0, // velocity y
-            vz:0, // velocity z
+            vx:0.1, // velocity x
+            vy:0.3, // velocity y
+            vz:0.4, // velocity z
 
             x:cornerX, // position x
             y:cornerY, // position y
@@ -88,7 +88,7 @@ var Lattice = {
             m:1,  // mass
 
             neighbours:[], // index of other atoms
-            col:"red", // colour
+            col:"white", // colour
           }
         )
 
@@ -107,7 +107,7 @@ var Lattice = {
             m:1,  // mass
 
             neighbours:[], // index of other atoms
-            col:"red", // colour
+            col:"white", // colour
           }
         )
       }

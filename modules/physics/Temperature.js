@@ -21,9 +21,11 @@ var Temperature = function()
 
     avgKinEn = (dof/2) * (temperature) * 0.634; // new target K.E
     var vsquared = avgKinEn * 2 / d.m;
-    d.vx = partition0 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-    d.vy = partition1 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
-    d.vz = partition2 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+
+    // verlet calculation
+    d.x += partition0 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    d.y += partition1 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
+    d.z += partition2 * Math.sqrt(vsquared) * (randomNumber(0,1) > 0.5 ? -1 : 1);
   }
   return this;
 }

@@ -28,6 +28,8 @@
  sim = ui[0];
  vterm = ui[1];
 
+ sim.style("background-color","black");
+ d3.select("body").style("background-color","grey")
  sim.attr("id", "sim")
  simWidth = document.getElementById('sim').clientWidth
  simHeight = document.getElementById('sim').clientHeight
@@ -63,7 +65,7 @@
     harmonicController = Physics.Harmonic;
 
       // ui controls for spring constant
-      springConstSlider = UserInterface.slider(1,100)
+      springConstSlider = UserInterface.slider(1,200)
 
 
       springConstSliderContainer = springConstSlider[0];
@@ -83,10 +85,17 @@
  physEngine.addCallBack(harmonicController.bond)
  //physEngine.addCallBack(harmonicController.valence)
  physEngine.addCallBack(tempController.vibrate)
- physEngine.addCallBack(Physics.VerletP)
 
- var edgeLen = 35;
- var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
+ var edgeLen = 70;
+
+ // checks if i includes j as a neighbour;
+ function hasNeighbour(i,j){
+   i.neighbours.forEach(function(el, i){
+     if(j[0]==el[0]){return true};
+   })
+   return false;
+ }
+ var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !hasNeighbour(j,i)}
 
 /*
  nodesData = [
@@ -142,11 +151,12 @@
  edgesData = []
 */
 
- latticeData = Lattice.makeFCC2D(5,5, edgeLen, edgePredicate)
- //latticeData = Lattice.makePrimitive2D(10, 5, edgeLen, edgePredicate)
+ //latticeData = Lattice.makeFCC2D(5,5, edgeLen, edgePredicate)
+ latticeData = Lattice.makePrimitive2D(5, 5, edgeLen, edgePredicate)
 
  nodesData = latticeData[0] // formatted dataset for nodes
  edgesData = latticeData[1] // formatted dataset for edges
+ edgesGroup = sim.append("svg");
 
  terminalObj.log("loaded nodes and edges")
  terminalObj.log("num nodes: " + nodesData.length)
@@ -185,11 +195,15 @@
  })
  .on("drag",function(){
 
-   rho = (svgClickX - d3.pointer(event)[0]) * 0.01;
-   theta = (svgClickY - d3.pointer(event)[1]) * 0.01;
+   rho = ((svgClickX - d3.pointer(event)[0]) * 0.01)
+   theta = ((svgClickY - d3.pointer(event)[1]) * 0.01)
+  // rho %= Math.PI * 2
+  // theta %= Math.PI * 2
+
 
    terminalObj.log("rho: "+rho)
    terminalObj.log("theta: "+theta)
+
 
     //update the window
 
@@ -198,16 +212,40 @@
 // define how the renderer should redraw to screen each frame
  var redraw = function(handle)
  {
+
+   edgesGroup.remove();
+   edgesGroup = sim.append("svg");
+
    handle
      .enter()
      .selectAll("circle")
      .attr("cx",function(d){
-       var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
+
+       d.neighbours.forEach(function(el){
+         edgesGroup.append("path")
+         .attr("d", function(){
+           var x1 = centreToScreenX(rotY(rotX(d,theta),rho).x);
+           var y1 = centreToScreenY(rotY(rotX(d,theta),rho).y);
+           var x2 = centreToScreenX(rotY(rotX(nodesData[el[0]],theta),rho).x);
+           var y2 = centreToScreenY(rotY(rotX(nodesData[el[0]],theta),rho).y);
+           var line =  lineFunction([{x:x1,y:y1},{x:x2,y:y2}]);
+           return line;
+         })
+
+         .attr("stroke", "white")
+         .attr("stroke-width", 0.1)
+        // .attr("fill", "rgb(0,255,255,0.2)");
+        })
+
+
+       //var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
+       var x = rotY(rotX(d,theta),rho).x
        return centreToScreenX(x)
      })
      .attr("cy",function(d){
-       var y = d.y*Math.cos(theta)-d.z*Math.sin(theta);
-       return centreToScreenY(y)
+       //var y = d.y*Math.cos(theta)-d.z*Math.sin(theta);
+       var y = rotY(rotX(d,theta),rho).y;
+       return centreToScreenY(y);
      })
      .attr("r",function(d){
        return d.r
@@ -216,7 +254,7 @@
 
  renderer = Graphics.Renderer;
  //renderer.setFPS(60, terminalObj);
- renderer.setSpeed(10, terminalObj);
+ renderer.setSpeed(30, terminalObj);
  renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
  //animation.stop()
