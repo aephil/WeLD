@@ -28,7 +28,6 @@
  sim = ui[0];
  vterm = ui[1];
 
- sim.style("background-color","black");
  d3.select("body").style("background-color","grey")
  sim.attr("id", "sim")
  simWidth = document.getElementById('sim').clientWidth
@@ -66,27 +65,42 @@
 
       // ui controls for spring constant
       springConstSlider = UserInterface.slider(1,200)
-
-
       springConstSliderContainer = springConstSlider[0];
       springConstSliderContainer.style("top","30%")
 
       springConstSliderInput = springConstSlider[1];
       springConstSliderLabel =  springConstSlider[2];
 
-      springConstSliderInput.node().value = harmonicController.k() * 100;
-      springConstSliderLabel.html("k: " + harmonicController.k() )
+      springConstSliderInput.node().value = harmonicController.kSpring() * 100;
+      springConstSliderLabel.html("k (spring): " + harmonicController.kSpring() )
       springConstSliderInput.node().oninput = function(){
         var value = springConstSliderInput.node().value;
-        harmonicController.changeK(value * (1/100))
-        springConstSliderLabel.html("k: " + ((value) * (1/100)).toFixed(2))
+        harmonicController.changeKSpring(value * (1/100))
+        springConstSliderLabel.html("k (spring): " + ((value) * (1/100)).toFixed(2))
+      }
+
+      // ui controls for valence angle constant
+      valenceConstSlider = UserInterface.slider(0,500)
+      valenceConstSliderContainer = valenceConstSlider[0];
+      valenceConstSliderContainer.style("top","40%")
+
+      valenceConstSliderInput = valenceConstSlider[1];
+      valenceConstSliderLabel = valenceConstSlider[2];
+
+      valenceConstSliderInput.node().value = harmonicController.kValence();
+      valenceConstSliderLabel.html("k (valence): " + harmonicController.kValence() )
+      valenceConstSliderInput.node().oninput = function(){
+        var value = valenceConstSliderInput.node().value;
+        harmonicController.changeKValence(value);
+        console.log(value);
+        valenceConstSliderLabel.html("k (valence): " + value);
       }
 
  physEngine.addCallBack(harmonicController.bond)
- //physEngine.addCallBack(harmonicController.valence)
+ physEngine.addCallBack(harmonicController.valence)
  physEngine.addCallBack(tempController.vibrate)
 
- var edgeLen = 70;
+ var edgeLen = 20;
 
  // checks if i includes j as a neighbour;
  function hasNeighbour(i,j){
@@ -95,7 +109,6 @@
    })
    return false;
  }
- var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !hasNeighbour(j,i)}
 
 /*
  nodesData = [
@@ -152,7 +165,9 @@
 */
 
  //latticeData = Lattice.makeFCC2D(5,5, edgeLen, edgePredicate)
- latticeData = Lattice.makePrimitive2D(5, 5, edgeLen, edgePredicate)
+  lattice = Physics.Lattice;
+  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !hasNeighbour(j,i)});
+  latticeData =  lattice.makePrimitive2D(10, 10, edgeLen);
 
  nodesData = latticeData[0] // formatted dataset for nodes
  edgesData = latticeData[1] // formatted dataset for edges
@@ -166,7 +181,7 @@
  ///////////////////////////////////////////////////////////////////////////
 
  // bind nodes dataset with svg circle assets using d3 and draw to screen
- nodes = Lattice.draw(sim, nodesData) // handle for d3 object
+ nodes = lattice.draw(sim, nodesData) // handle for d3 object
 
  function dragged(event, d) {
    terminalObj.log("here")
@@ -184,14 +199,29 @@
 
  tempController.changeDOF(47 /*2N - 3*/)
 
- var svgClickX = 0
- var svgClickY = 0
+ var svgClickX = 0;
+ var svgClickY = 0;
  var rho = 0;
  var theta = 0;
 
+ var info = sim
+   .append("text")
+   .attr("x",50)
+   .attr("y", 50)
+   .attr("fill","black")
+   .attr("stroke","none");
+
+ var info2 = sim
+   .append("text")
+   .attr("x",50)
+   .attr("y", 70)
+   .attr("fill","black")
+   .attr("stroke","none");
+
+
  d3.select("svg").call(d3.drag().on("start",function(){
-   svgClickX = d3.pointer(event)[0]
-   svgClickY = d3.pointer(event)[1]
+   svgClickX = d3.pointer(event)[0];
+   svgClickY = d3.pointer(event)[1];
  })
  .on("drag",function(){
 
@@ -199,11 +229,6 @@
    theta = ((svgClickY - d3.pointer(event)[1]) * 0.01)
   // rho %= Math.PI * 2
   // theta %= Math.PI * 2
-
-
-   terminalObj.log("rho: "+rho)
-   terminalObj.log("theta: "+theta)
-
 
     //update the window
 
@@ -213,29 +238,33 @@
  var redraw = function(handle)
  {
 
-   edgesGroup.remove();
-   edgesGroup = sim.append("svg");
+  // edgesGroup.remove();
+  // edgesGroup = sim.append("svg");
+
+  info.text(function(){return "theta (x): " + theta.toFixed(2)+ " rad"})
+  info2.text(function(){return "rho (y): " + rho.toFixed(2)+ " rad"})
+
 
    handle
      .enter()
      .selectAll("circle")
      .attr("cx",function(d){
 
-       d.neighbours.forEach(function(el){
-         edgesGroup.append("path")
-         .attr("d", function(){
-           var x1 = centreToScreenX(rotY(rotX(d,theta),rho).x);
-           var y1 = centreToScreenY(rotY(rotX(d,theta),rho).y);
-           var x2 = centreToScreenX(rotY(rotX(nodesData[el[0]],theta),rho).x);
-           var y2 = centreToScreenY(rotY(rotX(nodesData[el[0]],theta),rho).y);
-           var line =  lineFunction([{x:x1,y:y1},{x:x2,y:y2}]);
-           return line;
-         })
+  //     d.neighbours.forEach(function(el){
+  //       edgesGroup.append("path")
+  //       .attr("d", function(){
+  //         var x1 = centreToScreenX(rotY(rotX(d,theta),rho).x);
+  //         var y1 = centreToScreenY(rotY(rotX(d,theta),rho).y);
+  //         var x2 = centreToScreenX(rotY(rotX(nodesData[el[0]],theta),rho).x);
+  //         var y2 = centreToScreenY(rotY(rotX(nodesData[el[0]],theta),rho).y);
+  //         var line =  lineFunction([{x:x1,y:y1},{x:x2,y:y2}]);
+  //         return line;
+  //       })
 
-         .attr("stroke", "white")
-         .attr("stroke-width", 0.1)
+  //       .attr("stroke", "black")
+  //       .attr("stroke-width", 0.1)
         // .attr("fill", "rgb(0,255,255,0.2)");
-        })
+  //      })
 
 
        //var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
@@ -254,7 +283,7 @@
 
  renderer = Graphics.Renderer;
  //renderer.setFPS(60, terminalObj);
- renderer.setSpeed(30, terminalObj);
+ renderer.setSpeed(60, terminalObj);
  renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
  //animation.stop()
