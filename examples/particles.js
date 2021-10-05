@@ -50,7 +50,7 @@ edges.slice(0,5).forEach(function(d){
     .attr("fill", boxColour);
 })
 
-let N = 20;
+let N = 10;
 var data = new Array;
 for (var i = 0; i < N; i++){
   var n = {
@@ -167,9 +167,9 @@ var timer = d3.timer( function(duration) {
 
         particle.enter().selectAll("circle")
           .merge(particle)
-          .attr("cy", function (d){ return screenToCentreY(d.y / d.z)})
-          .attr("cx", function (d){ return screenToCentreX(d.x / d.z )})
-          .attr("r", function (d){ return d.r / d.z;})
+          .attr("cy", function (d){ return screenToCentreY(d.iy())})
+          .attr("cx", function (d){ return screenToCentreX(d.ix() )})
+          .attr("r", function (d){ return d.ir()})
       }
     );
     return particleData;

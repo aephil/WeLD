@@ -30,6 +30,7 @@
 
  d3.select("body").style("background-color","grey")
  sim.attr("id", "sim")
+ sim.style("background-color","rgba(0,0,100,0.1)")
  simWidth = document.getElementById('sim').clientWidth
  simHeight = document.getElementById('sim').clientHeight
 
@@ -167,7 +168,7 @@
  //latticeData = Lattice.makeFCC2D(5,5, edgeLen, edgePredicate)
   lattice = Physics.Lattice;
   lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !hasNeighbour(j,i)});
-  latticeData =  lattice.makePrimitive2D(10, 10, edgeLen);
+  latticeData =  lattice.makePrimitive2D(100, 10, edgeLen);
 
  nodesData = latticeData[0] // formatted dataset for nodes
  edgesData = latticeData[1] // formatted dataset for edges
@@ -181,6 +182,7 @@
  ///////////////////////////////////////////////////////////////////////////
 
  // bind nodes dataset with svg circle assets using d3 and draw to screen
+/*
  nodes = lattice.draw(sim, nodesData) // handle for d3 object
 
  function dragged(event, d) {
@@ -197,7 +199,9 @@
      d3.drag()
    .on("drag", dragged));
 
+   */
  tempController.changeDOF(47 /*2N - 3*/)
+
 
  var svgClickX = 0;
  var svgClickY = 0;
@@ -238,6 +242,7 @@
  var redraw = function(handle)
  {
 
+/*
   // edgesGroup.remove();
   // edgesGroup = sim.append("svg");
 
@@ -250,21 +255,21 @@
      .selectAll("circle")
      .attr("cx",function(d){
 
-  //     d.neighbours.forEach(function(el){
-  //       edgesGroup.append("path")
-  //       .attr("d", function(){
-  //         var x1 = centreToScreenX(rotY(rotX(d,theta),rho).x);
-  //         var y1 = centreToScreenY(rotY(rotX(d,theta),rho).y);
-  //         var x2 = centreToScreenX(rotY(rotX(nodesData[el[0]],theta),rho).x);
-  //         var y2 = centreToScreenY(rotY(rotX(nodesData[el[0]],theta),rho).y);
-  //         var line =  lineFunction([{x:x1,y:y1},{x:x2,y:y2}]);
-  //         return line;
-  //       })
+      // d.neighbours.forEach(function(el){
+      //   edgesGroup.append("path")
+      //   .attr("d", function(){
+      //     var x1 = centreToScreenX(rotY(rotX(d,theta),rho).x);
+      //     var y1 = centreToScreenY(rotY(rotX(d,theta),rho).y);
+      //     var x2 = centreToScreenX(rotY(rotX(nodesData[el[0]],theta),rho).x);
+      //     var y2 = centreToScreenY(rotY(rotX(nodesData[el[0]],theta),rho).y);
+      //     var line =  lineFunction([{x:x1,y:y1},{x:x2,y:y2}]);
+      //     return line;
+      //   })
 
-  //       .attr("stroke", "black")
-  //       .attr("stroke-width", 0.1)
-        // .attr("fill", "rgb(0,255,255,0.2)");
-  //      })
+      //   .attr("stroke", "black")
+      //   .attr("stroke-width", 0.1)
+      //   .attr("fill", "rgb(0,255,255,0.2)");
+      // })
 
 
        //var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
@@ -279,11 +284,35 @@
      .attr("r",function(d){
        return d.r
      })
+
+     */
  }
 
- renderer = Graphics.Renderer;
+ //renderer = Graphics.Renderer;
  //renderer.setFPS(60, terminalObj);
- renderer.setSpeed(60, terminalObj);
- renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
- animation = renderer.render(nodesData, nodes)
+ //renderer.setSpeed(10, terminalObj);
+ //renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
+ //animation = renderer.render(nodesData, nodes)
+
  //animation.stop()
+
+var arr = []
+var simN = document.getElementById("sim")
+
+
+ for(let p = 0; p < 10; p++){
+   var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+   newNode.setAttribute("cx",+centreToScreenX(p));
+   newNode.setAttribute("cy",+centreToScreenY(0));
+   newNode.setAttribute("r",+10);
+   newNode.setAttribute("stroke","red");
+   newNode.setAttribute("fill","red");
+   simN.appendChild(newNode);
+   arr.push(newNode);
+ }
+
+ var timer = d3.timer(function(duration){
+   arr.forEach(function(el){
+    el.setAttribute("cx",+(el.getAttribute("cx")) + 1)
+   })
+ })

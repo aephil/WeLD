@@ -119,6 +119,7 @@ var Harmonic = function(){
       data[node2Idx].y += (fc.y/data[node2Idx].m)
       data[node2Idx].z += (fc.z/data[node2Idx].m)
 
+
       /*
 
       var neighbour = d.neighbours[i]
