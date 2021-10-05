@@ -272,7 +272,7 @@
       // })
 
 
-       //var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
+      // var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
        var x = rotY(rotX(d,theta),rho).x
        return centreToScreenX(x)
      })

@@ -13,7 +13,7 @@ var VTerm = function () {
 
     this.log = function (msg) {  //public fn
       buffer += " WelD/: " + msg + "<br/>";
-      this.parent.html(buffer)
+      document.getElementById("vterm").innerHTML = buffer
       updateScroll()
     };
     return this;
@@ -24,31 +24,32 @@ UserInterface.VTerm = new VTerm();
 UserInterface.loadBasic = function()
 {
 
-  var sim = d3.select("body")
-    .append("svg")
-    .style("position", "fixed")
-    .style("top", "2.5%")
-    .style("left", "2.5%")
-    .style("width", "70%")
-    .style("height","95%")
-    .style("border-color","black")
-    .style("border-style","solid")
-    .style("background-color", "white");
+  var sim = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  document.body.appendChild(sim);
+  sim.style.position = "fixed";
+  sim.style.top = "2.5%"
+  sim.style.left = "2.5%"
+  sim.style.width = "70%"
+  sim.style.height = "95%"
+  sim.style.borderColor = "black"
+  sim.style.borderStyle = "solid"
+  sim.style.backgroundColor = "white"
 
-  var vterm = d3.select("body")
-    .append("div")
-    .attr("id","vterm")
-    .style("position", "fixed")
-    .style("width", "25%")
-    .style("height","20%")
-    .style("top", "2.5%")
-    .style("right", "2%")
-    .style("color", "white")
-    .style("font-family","monospace")
-    .style("padding","2.5 em")
-    .style("overflow-y","scroll")
-    .style("overflow-x","scroll")
-    .style("background-color", "black")
+  var vterm = document.createElement("div");
+  document.body.appendChild(vterm);
+  vterm.setAttribute("id","vterm");
+  vterm.style.position = "fixed";
+  vterm.style.top = "2.5%"
+  vterm.style.right = "2%"
+  vterm.style.width = "25%"
+  vterm.style.height = "20%"
+  vterm.style.color = "white"
+  vterm.style.padding = "2.5 em"
+  vterm.style.fontFamily = "monospace"
+  vterm.style.backgroundColor = "black"
+  vterm.style.overflowX = "scroll"
+  vterm.style.overflowY = "scroll"
+
 
   return [sim, vterm]
 }

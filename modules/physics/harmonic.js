@@ -84,7 +84,6 @@ var Harmonic = function(){
       var node1Idx = d.valencePairs[i][0];
       var node2Idx = d.valencePairs[i][1];
       var eqAngle = d.valencePairs[i][2];
-      console.log(eqAngle * 57.3);
 
       var a = Physics.Vector.makeV3(data[node1Idx]);
       var b = Physics.Vector.makeV3(d);//central node
