@@ -67,8 +67,8 @@ var updateVerletV = function(d,t,ax=0,ay=0){
 }
 
 var updateVerletP = function(d,t,ax=0, ay=0){
-  d.px += d.vx + (0.5*Math.pow(t,2)*ax);
-  d.py += d.vy + (0.5*Math.pow(t,2)*ay);
+  d.px += d.vx * t + (0.5*Math.pow(t,2)*ax);
+  d.py += d.vy * t + (0.5*Math.pow(t,2)*ay);
 }
 
 var pointLen2D = function(a,b){
