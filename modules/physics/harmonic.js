@@ -40,11 +40,11 @@ var Harmonic = function(){
         equilibrium = Physics.Vector.scale(nodesLen, uVec);
         extVec = Physics.Vector.sub(equilibrium, vec);
 
+        // begin debug here
+
         extY = extVec.y
         extX = extVec.x
         extZ = extVec.z
-
-        // fix one atom!
 
         ax = (kSpring * extX / d.m )
         ay = (kSpring * extY / d.m )
@@ -58,7 +58,6 @@ var Harmonic = function(){
 
         var z = (0.5*az)
         var zN = z * (-1)
-
 
         d.x += x
         data[nIndex].x += xN
