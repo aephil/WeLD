@@ -13,6 +13,7 @@ var Engine = function () {
           fn = callBacks[i]
           point = data[j]
           fn(point, data);
+          console.log("running...")
         }
       }
     }

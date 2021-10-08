@@ -2,7 +2,7 @@
 /**
  * WeLD.js
  *
- * Copyright (C) 06-09-2021, Author Takudzwa Makoni
+ * Coyright (C) 06-09-2021, Author Takudzwa Makoni
  * <https://github.com/aephil/WeLD>
  *
  * This Program is free software: you can redistribute
@@ -15,7 +15,7 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a coy of the GNU General Public License
  * along with This Program. If not, see <http://www.gnu.org/licenses/>.
  *
  * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
@@ -105,7 +105,7 @@
  function dragged(event, d) {
    nodes.raise()
    .selectAll("circle")
-   .attr("cx", d.px =  event.x - worldWidth/2).attr("cy", d.py = worldHeight/2 - event.y);
+   .attr("cx", d.x =  event.x - worldWidth/2).attr("cy", d.y = worldHeight/2 - event.y);
    }
 
  nodes
@@ -124,10 +124,10 @@
      .enter()
      .selectAll("circle")
      .attr("cx",function(d){
-       return centreToScreenX(d.px)
+       return centreToScreenX(d.x)
      })
      .attr("cy",function(d){
-       return centreToScreenY(d.py)
+       return centreToScreenY(d.y)
      })
  }
 

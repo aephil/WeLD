@@ -4,13 +4,21 @@
 
 var Harmonic = function(){
 
-  var k = 1 // Spring constant
+  var kSpring = 1 // Spring constant
+  var kValence = 1
 
-  this.changeK = function(n){
-    k = n;
+  this.changeKSpring = function(n){
+    kSpring = n;
   }
 
-  this.k = function(){return k}
+  this.changeKValence = function(n){
+    kValence = n;
+  }
+
+
+  this.kSpring = function(){return kSpring}
+
+  this.kValence = function(){return kValence}
 
   this.bond = function(d, data)
   {
@@ -21,52 +29,98 @@ var Harmonic = function(){
         nodesLen = neighbour[1]; // node length between neighbour and particle
         nIndex = neighbour[0]; // index of neighbour in data
 
-        dx = Math.abs(d.px - data[nIndex].px).toFixed(2)
-        dy = Math.abs(d.py - data[nIndex].py).toFixed(2)
+        dx = Math.abs(d.x - data[nIndex].x);
+        dy = Math.abs(d.y - data[nIndex].y);
+        dz = Math.abs(d.z - data[nIndex].z);
 
-        // extension
-        ext = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2)) - nodesLen
+        // get unit vector of the vector (dx, dy, dz)
+        vec = {x:dx,y:dy,z:dz};
+        uVec = Physics.Vector.unitVector(vec);
 
-        contract = !(ext > 0);
-        extY = dx < 0.001 ? 0 : ext * dy/nodesLen
-        extX = ext * dx/nodesLen
+        equilibrium = Physics.Vector.scale(nodesLen, uVec);
+        extVec = Physics.Vector.sub(equilibrium, vec);
+
+        //contract = !(ext > 0);
+        extY = extVec.y
+        extX = extVec.x
+        extZ = extVec.z
 
         // fix one atom!
 
-        directionX = contract ? (d.px < data[nIndex].px ? -1 : 1) : (d.px < data[nIndex].px ? 1 : -1)
-        directionY = contract ? (d.py < data[nIndex].py ? -1 : 1) : (d.py < data[nIndex].py ? 1 : -1)
+        //directionX = contract ? (d.x < data[nIndex].x ? -1 : 1) : (d.x < data[nIndex].x ? 1 : -1)
+        //directionY = contract ? (d.y < data[nIndex].y ? -1 : 1) : (d.y < data[nIndex].y ? 1 : -1)
 
-        ax = (k * Math.abs(extX).toFixed(2) / d.m ).toFixed(2)
-        ay = (k * Math.abs(extY).toFixed(2) / d.m ).toFixed(2)
+        ax = (kSpring * extX / d.m )
+        ay = (kSpring * extY / d.m )
+        az = (kSpring * extZ / d.m )
 
-        var px = (0.5*ax) * directionX
-        var pxN = (0.5*ax) * (-1 * directionX)
+        var x = (0.5*ax)
+        var xN = x * (-1)
 
-        // new image dx
-        var idx = Math.abs(px - pxN)
+        var y = (0.5*ay)
+        var yN = y * (-1)
 
-        var py = (0.5*ay) * directionY
-        var pyN = (0.5*ay) * (-1 * directionY)
+        var z = (0.5*az)
+        var zN = z * (-1)
 
-        // new image dy
-        var idy = Math.abs(py - pyN)
 
-        // new image distance between
-        var id = Math.sqrt(Math.pow(idx,2) + Math.pow(idy,2))
+        d.x += x
+        data[nIndex].x += xN
 
-        d.px += px
-        data[nIndex].px += pxN
+        d.y += y
+        data[nIndex].y += yN
 
-        d.py += py
-        data[nIndex].py += pyN
+        d.z += z
+        data[nIndex].z += zN
 
     }
   }
 
   this.valence = function(d, data)
   {
-    for(var i = 0; i < d.neighbours.length; i++)
+    for(var i = 0; i < d.valencePairs.length; i++)
     {
+
+      var node1Idx = d.valencePairs[i][0];
+      var node2Idx = d.valencePairs[i][1];
+      var eqAngle = d.valencePairs[i][2];
+
+      var a = Physics.Vector.makeV3(data[node1Idx]);
+      var b = Physics.Vector.makeV3(d);//central node
+      var c = Physics.Vector.makeV3(data[node2Idx]);
+
+      var ba = Physics.Vector.sub(b,a);
+      var bc = Physics.Vector.sub(b,c);
+
+      var abc = Physics.Vector.angle(ba, bc);
+
+      var pa = Physics.Vector.normalise(Physics.Vector.cross(ba,Physics.Vector.cross(ba,bc)));
+      var pc = Physics.Vector.normalise(Physics.Vector.cross(bc,Physics.Vector.cross(ba,bc)));
+
+      var faFactor = (-1)*kValence*(abc - eqAngle)/(Physics.Vector.norm(ba))
+      faFactor = (isNaN(faFactor)? 0 : faFactor);
+      var fa = Physics.Vector.scale(faFactor, pa);
+
+      var fcFactor = (-1)*kValence*(abc - eqAngle)/(Physics.Vector.norm(bc))
+      fcFactor = (isNaN(fcFactor)? 0 : fcFactor);
+      var fc = Physics.Vector.scale(fcFactor, pc)
+      var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
+
+      data[node1Idx].x += (fa.x/data[node1Idx].m);
+      data[node1Idx].y += (fa.y/data[node1Idx].m);
+      data[node1Idx].z += (fa.z/data[node1Idx].m);
+
+      d.x += (fb.x/d.m)
+      d.y += (fb.y/d.m)
+      d.z += (fb.z/d.m)
+
+      data[node2Idx].x += (fc.x/data[node2Idx].m)
+      data[node2Idx].y += (fc.y/data[node2Idx].m)
+      data[node2Idx].z += (fc.z/data[node2Idx].m)
+
+
+      /*
+
       var neighbour = d.neighbours[i]
       nodesLen = neighbour[1]; // node length between neighbour and particle
       nIndex = neighbour[0]; // index of neighbour in data
@@ -76,55 +130,54 @@ var Harmonic = function(){
       {
         if(i===j){continue;}
 
-        var neighbour2 = d.neighbours[j]
+        var neighbour2 = d.neighbours[j];
         nodesLen2 = neighbour2[1]; // node length between neighbour and particle
         nIndex2 = neighbour2[0]; // index of neighbour in data
 
-        var a = Physics.Vector.makeV3(data[nIndex])
-        var b = Physics.Vector.makeV3(d)
-        var c = Physics.Vector.makeV3(data[nIndex2])
+        var a = Physics.Vector.makeV3(data[nIndex]);
+        var b = Physics.Vector.makeV3(d);
+        var c = Physics.Vector.makeV3(data[nIndex2]);
 
         var ba = Physics.Vector.sub(b,a);
         var bc = Physics.Vector.sub(b,c);
 
-        var pa = Physics.Vector.normalise(Physics.Vector.cross(ba,Physics.Vector.cross(ba,bc)))
-        var pc = Physics.Vector.normalise(Physics.Vector.cross(bc,Physics.Vector.cross(ba,bc)))
-
         var abc = Physics.Vector.angle(ba, bc);
+
+        if(abc===0 || abc===Math.PI*2){continue;}
+
+        var pa = Physics.Vector.normalise(Physics.Vector.cross(ba,Physics.Vector.cross(ba,bc)));
+        var pc = Physics.Vector.normalise(Physics.Vector.cross(bc,Physics.Vector.cross(ba,bc)));
+
+
         abc = (isNaN(abc)? 0 : abc);
         var theta = Math.PI / 2;
 
         var faFactor = (-1)*k*(abc - theta)/(Physics.Vector.norm(ba))
         faFactor = (isNaN(faFactor)? 0 : faFactor);
-        var fa = Physics.Vector.scale(faFactor, pa)
+        var fa = Physics.Vector.scale(faFactor, pa);
 
         var fcFactor = (-1)*k*(abc - theta)/(Physics.Vector.norm(bc))
         fcFactor = (isNaN(fcFactor)? 0 : fcFactor);
         var fc = Physics.Vector.scale(fcFactor, pc)
-
         var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
-
-        console.log("1: "+data[nIndex].px)
 
         // scaling by 500 at the moment is for test purposes
         // so that it is visible in the animation. TODO: fix this
 
-        data[nIndex].px += 500*(fa.px/data[nIndex].m);
-        data[nIndex].py += 500*(fa.py/data[nIndex].m);
-        data[nIndex].pz += 500*(fa.pz/data[nIndex].m);
+        data[nIndex].x += 10*(fa.x/data[nIndex].m);
+        data[nIndex].y += 10*(fa.y/data[nIndex].m);
+        data[nIndex].z += 10*(fa.z/data[nIndex].m);
 
-        console.log("2: "+data[nIndex].px)
+        d.x += 10*(fb.x/d.m)
+        d.y += 10*(fb.y/d.m)
+        d.z += 10*(fb.z/d.m)
 
-
-        d.px += 500*(fb.px/d.m)
-        d.py += 500*(fb.py/d.m)
-        d.pz += 500*(fb.pz/d.m)
-
-        data[nIndex2].px += 500*(fc.px/data[nIndex2].m)
-        data[nIndex2].py += 500*(fc.py/data[nIndex2].m)
-        data[nIndex2].pz += 500*(fc.pz/data[nIndex2].m)
+        data[nIndex2].x += 10*(fc.x/data[nIndex2].m)
+        data[nIndex2].y += 10*(fc.y/data[nIndex2].m)
+        data[nIndex2].z += 10*(fc.z/data[nIndex2].m)
 
       }
+      */
     }
 
   }

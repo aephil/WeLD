@@ -2,7 +2,7 @@
 /**
  * WeLD.js
  *
- * Copyright (C) 06-09-2021, Author Takudzwa Makoni
+ * Coyright (C) 06-09-2021, Author Takudzwa Makoni
  * <https://github.com/aephil/WeLD>
  *
  * This Program is free software: you can redistribute
@@ -15,7 +15,7 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a coy of the GNU General Public License
  * along with This Program. If not, see <http://www.gnu.org/licenses/>.
  *
  * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
@@ -28,7 +28,9 @@
  sim = ui[0];
  vterm = ui[1];
 
+ d3.select("body").style("background-color","grey")
  sim.attr("id", "sim")
+ sim.style("background-color","rgba(0,0,100,0.1)")
  simWidth = document.getElementById('sim').clientWidth
  simHeight = document.getElementById('sim').clientHeight
 
@@ -63,39 +65,62 @@
     harmonicController = Physics.Harmonic;
 
       // ui controls for spring constant
-      springConstSlider = UserInterface.slider(1,100)
-
-
+      springConstSlider = UserInterface.slider(1,200)
       springConstSliderContainer = springConstSlider[0];
       springConstSliderContainer.style("top","30%")
 
       springConstSliderInput = springConstSlider[1];
       springConstSliderLabel =  springConstSlider[2];
 
-      springConstSliderInput.node().value = harmonicController.k() * 100;
-      springConstSliderLabel.html("k: " + harmonicController.k() )
+      springConstSliderInput.node().value = harmonicController.kSpring() * 100;
+      springConstSliderLabel.html("k (spring): " + harmonicController.kSpring() )
       springConstSliderInput.node().oninput = function(){
         var value = springConstSliderInput.node().value;
-        harmonicController.changeK(value * (1/100))
-        springConstSliderLabel.html("k: " + ((value) * (1/100)).toFixed(2))
+        harmonicController.changeKSpring(value * (1/100))
+        springConstSliderLabel.html("k (spring): " + ((value) * (1/100)).toFixed(2))
+      }
+
+      // ui controls for valence angle constant
+      valenceConstSlider = UserInterface.slider(0,500)
+      valenceConstSliderContainer = valenceConstSlider[0];
+      valenceConstSliderContainer.style("top","40%")
+
+      valenceConstSliderInput = valenceConstSlider[1];
+      valenceConstSliderLabel = valenceConstSlider[2];
+
+      valenceConstSliderInput.node().value = harmonicController.kValence();
+      valenceConstSliderLabel.html("k (valence): " + harmonicController.kValence() )
+      valenceConstSliderInput.node().oninput = function(){
+        var value = valenceConstSliderInput.node().value;
+        harmonicController.changeKValence(value);
+        console.log(value);
+        valenceConstSliderLabel.html("k (valence): " + value);
       }
 
  physEngine.addCallBack(harmonicController.bond)
  physEngine.addCallBack(harmonicController.valence)
- //physEngine.addCallBack(tempController.vibrate)
- physEngine.addCallBack(Physics.VerletP)
+ physEngine.addCallBack(tempController.vibrate)
 
- var edgeLen = 50;
- var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
+ var edgeLen = 20;
+
+ // checks if i includes j as a neighbour;
+ function hasNeighbour(i,j){
+   i.neighbours.forEach(function(el, i){
+     if(j[0]==el[0]){return true};
+   })
+   return false;
+ }
+
+/*
  nodesData = [
    {
      vx:0, // velocity x
      vy:0, // velocity y
      vz:0, // velocity z
 
-     px:0, // position x
-     py:0, // position y
-     pz:0, // position z
+     x:0, // position x
+     y:0, // position y
+     z:0, // position z
 
      r:5,  // radius
      m:1,  // mass
@@ -109,9 +134,9 @@
      vy:0, // velocity y
      vz:0, // velocity z
 
-     px: edgeLen* Math.cos(Math.PI/12), // position x
-     py:-1*edgeLen * Math.sin(Math.PI/12), // position y
-     pz:0, // position z
+     x: edgeLen* Math.cos(Math.PI/12), // position x
+     y:-1*edgeLen * Math.sin(Math.PI/12), // position y
+     z:0, // position z
 
      r:5,  // radius
      m:1,  // mass
@@ -125,9 +150,9 @@
      vy:0, // velocity y
      vz:0, // velocity z
 
-     px:(edgeLen) * Math.cos(Math.PI/12), // position x
-     py: edgeLen * Math.sin(Math.PI/12), // position y
-     pz:0, // position z
+     x:(edgeLen) * Math.cos(Math.PI/12), // position x
+     y: edgeLen * Math.sin(Math.PI/12), // position y
+     z:0, // position z
 
      r:5,  // radius
      m:1,  // mass
@@ -137,14 +162,17 @@
    },
 
  ]
-
  edgesData = []
+*/
 
- //latticeData = Lattice.makeFCC2D(5,5,edgeLen, edgePredicate )
- //latticeData = Lattice.makePrimitive2D(10,5,edgeLen, edgePredicate )
+ //latticeData = Lattice.makeFCC2D(5,5, edgeLen, edgePredicate)
+  lattice = Physics.Lattice;
+  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !hasNeighbour(j,i)});
+  latticeData =  lattice.makePrimitive2D(100, 10, edgeLen);
 
- //nodesData = latticeData[0] // formatted dataset for nodes
- //edgesData = latticeData[1] // formatted dataset for edges
+ nodesData = latticeData[0] // formatted dataset for nodes
+ edgesData = latticeData[1] // formatted dataset for edges
+ edgesGroup = sim.append("svg");
 
  terminalObj.log("loaded nodes and edges")
  terminalObj.log("num nodes: " + nodesData.length)
@@ -154,40 +182,137 @@
  ///////////////////////////////////////////////////////////////////////////
 
  // bind nodes dataset with svg circle assets using d3 and draw to screen
- nodes = Lattice.draw(sim, nodesData) // handle for d3 object
+/*
+ nodes = lattice.draw(sim, nodesData) // handle for d3 object
 
  function dragged(event, d) {
+   terminalObj.log("here")
+
    nodes.raise()
    .selectAll("circle")
-   .attr("cx", d.px =  event.x - simWidth/2).attr("cy", d.py = simHeight/2 - event.y);
+   .attr("cx", d.x =  event.x - simWidth/2).attr("cy", d.y = simHeight/2 - event.y);
    }
 
- nodes
- .selectAll("circle")
- .call(
- d3.drag()
- .on("drag", dragged));
+   nodes
+   .selectAll("circle")
+   .call(
+     d3.drag()
+   .on("drag", dragged));
 
- tempController.changeTemp(0.01)
+   */
  tempController.changeDOF(47 /*2N - 3*/)
+
+
+ var svgClickX = 0;
+ var svgClickY = 0;
+ var rho = 0;
+ var theta = 0;
+
+ var info = sim
+   .append("text")
+   .attr("x",50)
+   .attr("y", 50)
+   .attr("fill","black")
+   .attr("stroke","none");
+
+ var info2 = sim
+   .append("text")
+   .attr("x",50)
+   .attr("y", 70)
+   .attr("fill","black")
+   .attr("stroke","none");
+
+
+ d3.select("svg").call(d3.drag().on("start",function(){
+   svgClickX = d3.pointer(event)[0];
+   svgClickY = d3.pointer(event)[1];
+ })
+ .on("drag",function(){
+
+   rho = ((svgClickX - d3.pointer(event)[0]) * 0.01)
+   theta = ((svgClickY - d3.pointer(event)[1]) * 0.01)
+  // rho %= Math.PI * 2
+  // theta %= Math.PI * 2
+
+    //update the window
+
+   }));
 
 // define how the renderer should redraw to screen each frame
  var redraw = function(handle)
  {
+
+/*
+  // edgesGroup.remove();
+  // edgesGroup = sim.append("svg");
+
+  info.text(function(){return "theta (x): " + theta.toFixed(2)+ " rad"})
+  info2.text(function(){return "rho (y): " + rho.toFixed(2)+ " rad"})
+
+
    handle
      .enter()
      .selectAll("circle")
      .attr("cx",function(d){
-       return centreToScreenX(d.px)
+
+      // d.neighbours.forEach(function(el){
+      //   edgesGroup.append("path")
+      //   .attr("d", function(){
+      //     var x1 = centreToScreenX(rotY(rotX(d,theta),rho).x);
+      //     var y1 = centreToScreenY(rotY(rotX(d,theta),rho).y);
+      //     var x2 = centreToScreenX(rotY(rotX(nodesData[el[0]],theta),rho).x);
+      //     var y2 = centreToScreenY(rotY(rotX(nodesData[el[0]],theta),rho).y);
+      //     var line =  lineFunction([{x:x1,y:y1},{x:x2,y:y2}]);
+      //     return line;
+      //   })
+
+      //   .attr("stroke", "black")
+      //   .attr("stroke-width", 0.1)
+      //   .attr("fill", "rgb(0,255,255,0.2)");
+      // })
+
+
+      // var x = Math.cos(rho)*d.x + Math.sin(rho)*d.z
+       var x = rotY(rotX(d,theta),rho).x
+       return centreToScreenX(x)
      })
      .attr("cy",function(d){
-       return centreToScreenY(d.py)
+       //var y = d.y*Math.cos(theta)-d.z*Math.sin(theta);
+       var y = rotY(rotX(d,theta),rho).y;
+       return centreToScreenY(y);
      })
+     .attr("r",function(d){
+       return d.r
+     })
+
+     */
  }
 
- renderer = Graphics.Renderer;
+ //renderer = Graphics.Renderer;
  //renderer.setFPS(60, terminalObj);
- //renderer.setSpeed(1, terminalObj);
- renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
- animation = renderer.render(nodesData, nodes)
+ //renderer.setSpeed(10, terminalObj);
+ //renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
+ //animation = renderer.render(nodesData, nodes)
+
  //animation.stop()
+
+var arr = []
+var simN = document.getElementById("sim")
+
+
+ for(let p = 0; p < 10; p++){
+   var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+   newNode.setAttribute("cx",+centreToScreenX(p));
+   newNode.setAttribute("cy",+centreToScreenY(0));
+   newNode.setAttribute("r",+10);
+   newNode.setAttribute("stroke","red");
+   newNode.setAttribute("fill","red");
+   simN.appendChild(newNode);
+   arr.push(newNode);
+ }
+
+ var timer = d3.timer(function(duration){
+   arr.forEach(function(el){
+    el.setAttribute("cx",+(el.getAttribute("cx")) + 1)
+   })
+ })

@@ -1,4 +1,8 @@
 
+var lineFunction = d3.line()
+  .x(function(d) { return d.x; })
+  .y(function(d) { return d.y; });
+
 
 // returns the screen x coordinate equivalent of the user defined coordinate system
 var screenToCentreX = function(x, worldWidth = 1000){
@@ -68,9 +72,9 @@ var updateVerletV = function(d,t,ax=0,ay=0,az=0){
 }
 
 var updateVerletP = function(d,t,ax=0, ay=0,az=0){
-  d.px += d.vx + (0.5*Math.pow(t,2)*ax);
-  d.py += d.vy + (0.5*Math.pow(t,2)*ay);
-  d.pz += d.vz + (0.5*Math.pow(t,2)*az);
+  d.x += d.vx + (0.5*Math.pow(t,2)*ax);
+  d.y += d.vy + (0.5*Math.pow(t,2)*ay);
+  d.z += d.vz + (0.5*Math.pow(t,2)*az);
 }
 
 var exchangeMomenta = function(p, data){
@@ -80,8 +84,8 @@ var exchangeMomenta = function(p, data){
 
             // find particles within range for collision
 
-      var dx = p.px - q.px;
-      var dy = p.py - q.py;
+      var dx = p.x - q.x;
+      var dy = p.y - q.y;
 
       var r = Math.sqrt(Math.pow(dy,2) + Math.pow(dx,2));
       if(r < (p.r + q.r) && p != q){
@@ -89,12 +93,12 @@ var exchangeMomenta = function(p, data){
         /*
          // move the particles away from each other a little
          var speed_p =  Math.sqrt(Math.pow(p.vx,2)+Math.pow(p.vy,2));
-         p.px -= p.vx != 0 ? 0.5 * r * (speed_p/p.vx) : 0;
-         p.py -= p.vy != 0 ? 0.5 * r * (speed_p/p.vy) : 0;
+         p.x -= p.vx != 0 ? 0.5 * r * (speed_p/p.vx) : 0;
+         p.y -= p.vy != 0 ? 0.5 * r * (speed_p/p.vy) : 0;
 
          var speed_q =  Math.sqrt(Math.pow(q.vx,2)+Math.pow(q.vy,2));
-         q.px -= q.vx != 0 ? 0.5 * r * (speed_q/q.vx) * (Math.sign(q.vx)==Math.sign(p.vx) ? -1 : 1) : 0;
-         q.py -= q.vy != 0 ? 0.5 * r * (speed_q/q.vy) * (Math.sign(q.vy)==Math.sign(p.vy) ? -1 : 1) : 0;
+         q.x -= q.vx != 0 ? 0.5 * r * (speed_q/q.vx) * (Math.sign(q.vx)==Math.sign(p.vx) ? -1 : 1) : 0;
+         q.y -= q.vy != 0 ? 0.5 * r * (speed_q/q.vy) * (Math.sign(q.vy)==Math.sign(p.vy) ? -1 : 1) : 0;
          */
 
          var alpha = (p.m - q.m) / (p.m + q.m);
@@ -109,7 +113,6 @@ var exchangeMomenta = function(p, data){
          var qvx = gamma * q.vx + delta * p.vx;
          var qvy = gamma * q.vy + delta * p.vy;
          var qvz = gamma * q.vz + delta * p.vz;
-
 
          p.vx = pvx * p.cofr * q.cofr;
          p.vy = pvy * p.cofr * q.cofr;
@@ -262,7 +265,7 @@ var exchangeMomenta = function(p, data){
  }
 
  var pointLen3D = function(a,b){
-   return Math.sqrt(Math.pow(a.px-b.px,2)+Math.pow(a.py-b.py,2)+Math.pow(a.pz-b.pz,2));
+   return Math.sqrt(Math.pow(a.x-b.x,2)+Math.pow(a.y-b.y,2)+Math.pow(a.z-b.z,2));
  }
  var pointsEqual = function(a,b){
    return a.x==b.x&&a.y==b.y&&a.z==b.z;
@@ -282,7 +285,7 @@ var exchangeMomenta = function(p, data){
      for(j = 0; j < faceB.length-1/*last is duplicate of first*/; j++){
        console.log("point b: ",faceB[j])
        if(pointsEqual(faceA[i],faceB[j])){
-         console.log("points equal!")
+         console.log("points equal!");
          numEqualPoints++;
        }
      }
@@ -293,6 +296,19 @@ var exchangeMomenta = function(p, data){
 
 
  //for rotating a single point
+ var inlineRotX = function(d,theta){
+    d.y=d.y*Math.cos(theta)-d.z*Math.sin(theta);
+    d.z=d.z*Math.cos(theta)+d.y*Math.sin(theta);
+ }
+ var inlineRotY = function(d,rho){
+    d.x=Math.cos(rho)*d.x + Math.sin(rho)*d.z;
+    d.z=Math.cos(rho)*d.y-Math.sin(rho)*d.x
+ }
+ var inlineRotZ = function(d,gamma){
+   d.x=Math.cos(gamma)*d.x - Math.sin(gamma)*d.y;
+   d.y=Math.sin(gamma)*d.x+Math.cos(gamma)*d.y;
+ }
+
  var rotX = function(d,theta){
    return {x:d.x,y:d.y*Math.cos(theta)-d.z*Math.sin(theta),z:d.z*Math.cos(theta)+d.y*Math.sin(theta)};
  }
@@ -341,5 +357,5 @@ var exchangeMomenta = function(p, data){
  }
 
  ///////////////////////////////////////////////////////////////////////////
- ///////////////////////// vectors /////////////////////////////////////////
+ //////////////////////////////// vectors //////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
