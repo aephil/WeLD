@@ -44,13 +44,13 @@
     tempSliderInput = tempSlider[1];
     tempSliderLabel =  tempSlider[2];
 
-    tempSliderInput.node().value = tempController.temp()
-    tempSliderLabel.html("Temperature: " + tempSliderInput.node().value )
+    tempSliderInput.value = tempController.temp()
+    tempSliderLabel.innerHTML = "Temperature: " + tempSliderInput.value;
 
-    tempSliderInput.node().oninput = function(){
-      var value = tempSliderInput.node().value;
+    tempSliderInput.oninput = function(){
+      var value = tempSliderInput.value;
       tempController.changeTemp(value * (1/100))
-      tempSliderLabel.html("Temperature: " + value )
+      tempSliderLabel.innerHTML = "Temperature: " + value;
     }
 
     // spring constant
@@ -59,34 +59,33 @@
       // ui controls for spring constant
       springConstSlider = UserInterface.slider(1,200)
       springConstSliderContainer = springConstSlider[0];
-      springConstSliderContainer.style("top","30%")
+      springConstSliderContainer.style.top = "30%";
 
       springConstSliderInput = springConstSlider[1];
       springConstSliderLabel =  springConstSlider[2];
 
-      springConstSliderInput.node().value = harmonicController.kSpring() * 100;
-      springConstSliderLabel.html("k (spring): " + harmonicController.kSpring() )
-      springConstSliderInput.node().oninput = function(){
-        var value = springConstSliderInput.node().value;
+      springConstSliderInput.value = harmonicController.kSpring() * 100;
+      springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
+      springConstSliderInput.oninput = function(){
+        var value = springConstSliderInput.value;
         harmonicController.changeKSpring(value * (1/100))
-        springConstSliderLabel.html("k (spring): " + ((value) * (1/100)).toFixed(2))
+        springConstSliderLabel.innerHTML = "k (spring): " + ((value) * (1/100)).toFixed(2);
       }
 
       // ui controls for valence angle constant
       valenceConstSlider = UserInterface.slider(0,500)
       valenceConstSliderContainer = valenceConstSlider[0];
-      valenceConstSliderContainer.style("top","40%")
+      valenceConstSliderContainer.style.top = "40%";
 
       valenceConstSliderInput = valenceConstSlider[1];
       valenceConstSliderLabel = valenceConstSlider[2];
 
-      valenceConstSliderInput.node().value = harmonicController.kValence();
-      valenceConstSliderLabel.html("k (valence): " + harmonicController.kValence() )
-      valenceConstSliderInput.node().oninput = function(){
-        var value = valenceConstSliderInput.node().value;
+      valenceConstSliderInput.value = harmonicController.kValence();
+      valenceConstSliderLabel.innerHTML = "k (valence): " + harmonicController.kValence();
+      valenceConstSliderInput.oninput = function(){
+        var value = valenceConstSliderInput.value;
         harmonicController.changeKValence(value);
-        console.log(value);
-        valenceConstSliderLabel.html("k (valence): " + value);
+        valenceConstSliderLabel.innerHTML = "k (valence): " + value;
       }
 
   // setup physics resources ////////////////////////////////////////////////
@@ -97,7 +96,7 @@
   lattice = Physics.Lattice;
   lattice.terminalObj = terminalObj;
   lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !lattice.hasNeighbour(j,i)});
-  latticeData =  lattice.makePrimitive3D(10,10,10, edgeLen);
+  latticeData =  lattice.makePrimitive3D(5,5,5, edgeLen);
 
   var nodes = []
   nodesData = latticeData[0] // formatted dataset for nodes

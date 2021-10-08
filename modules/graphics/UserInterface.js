@@ -40,16 +40,16 @@ UserInterface.loadBasic = function()
   document.body.appendChild(vterm);
   vterm.setAttribute("id","vterm");
   vterm.style.position = "fixed";
-  vterm.style.top = "2.5%"
-  vterm.style.right = "2%"
-  vterm.style.width = "25%"
-  vterm.style.height = "20%"
-  vterm.style.color = "white"
-  vterm.style.padding = "2.5 em"
-  vterm.style.fontFamily = "monospace"
-  vterm.style.backgroundColor = "black"
-  vterm.style.overflowX = "scroll"
-  vterm.style.overflowY = "scroll"
+  vterm.style.top = "2.5%";
+  vterm.style.right = "2%";
+  vterm.style.width = "25%";
+  vterm.style.height = "20%";
+  vterm.style.color = "white";
+  vterm.style.padding = "2.5 em";
+  vterm.style.fontFamily = "monospace";
+  vterm.style.backgroundColor = "black";
+  vterm.style.overflowX = "scroll";
+  vterm.style.overflowY = "scroll";
 
 
   return [sim, vterm]
@@ -60,21 +60,25 @@ UserInterface.slider = function(min=0, max=100)
 
   // TODO remove d3 here too
 
-  var container = d3.select("body")
-    .append("div")
-    .style("position", "fixed")
-    .style("width", "25%")
-    .style("height","20%")
-    .style("top", "22.5%")
-    .style("right", "1%")
+  var container = document.createElement("div");
+  document.body.appendChild(container);
+  container.style.position = "fixed";
+  container.style.width = "25%";
+  container.style.height = "20%";
+  container.style.top = "22.5%";
+  container.style.right = "1%";
 
-  var slider = container.append("input")
-    .property("type","range")
-    .property("min",min)
-    .property("max",max)
-    .property("value",0)
 
-  var label = container.append("p")
+  var slider = document.createElement("input");
+  container.appendChild(slider);
+  slider.setAttribute("type","range");
+  slider.setAttribute("min",min);
+  slider.setAttribute("max",max);
+  slider.setAttribute("value",min);
+
+
+  var label = document.createElement("p");
+  container.appendChild(label);
 
 
     return [container, slider, label];
