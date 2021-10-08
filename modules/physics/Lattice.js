@@ -1,6 +1,8 @@
 var Lattice = function()
   {
 
+    var nodeR = false;
+    var nodeCol = false;
     this.terminalObj = false;
     var predicate = false;
 
@@ -81,12 +83,12 @@ var Lattice = function()
                 y:cornerY, // position y
                 z:1, // position z
 
-                r:5,  // radius
+                r:(nodeCol?nodeR():5),  // radius
                 m:5,  // mass
 
                 neighbours:[], // index of other atoms
                 valencePairs:[],
-                col:"black", // colour
+                col:(nodeCol?nodeCol():"red"), // colour
               }
             )
           }
@@ -185,14 +187,144 @@ var Lattice = function()
                 y:cornerY, // position y
                 z:cornerZ, // position z
 
-                r:1,  // radius
-                m:5,  // mass
+                r:(nodeR?nodeR():5),  // radius
+                m:1,  // mass
 
                 neighbours:[], // index of other atoms
                 valencePairs:[],
-                col:"black", // colour
+                col:(nodeCol?nodeCol():"red"), // colour
               }
             )
+          }
+        }
+      }
+
+      // create bonds based on a given predicate
+      if(predicate!=false)
+      {
+        makeBonds(_points);
+        _points.forEach(function(node){calcNeighbourAngles(node,_points)})
+      }
+      if(terminalObj)
+      {
+        terminalObj.log("total of "+_edgesData.length+" bonds were formed.");
+        terminalObj.log("total of "+_points.length+" nodes were formed.");
+      }
+      return [_points , _edgesData]
+
+    }
+
+    this.makePerovskite3D = function(cellsX, cellsY, cellsZ, a)
+    {
+      _points = []
+      _edgesData = []
+      for(h=0; h < cellsZ; h++){
+        for(i = 0; i < cellsX; i++)
+        {
+          for(j = 0; j < cellsY; j++)
+          {
+
+            // A cation
+
+            var cornerXA = a * i
+            var cornerYA = a * j
+            var cornerZA = a * h
+
+            _points.push(
+              {
+                x:cornerXA, // position x
+                y:cornerYA, // position y
+                z:cornerZA, // position z
+
+                r:(nodeR?nodeR():3),  // radius
+                m:1,  // mass
+
+                neighbours:[], // index of other atoms
+                valencePairs:[],
+                col:(nodeCol?nodeCol():"blue"), // colour
+              }
+            )
+
+            // B cation
+
+            var cornerXB = (a * i) + (a * 0.5)
+            var cornerYB = (a * j) + (a * 0.5)
+            var cornerZB = (a * h) + (a * 0.5)
+
+            _points.push(
+              {
+                x:cornerXB, // position x
+                y:cornerYB, // position y
+                z:cornerZB, // position z
+
+                r:(nodeR?nodeR():5),  // radius
+                m:1,  // mass
+
+                neighbours:[], // index of other atoms
+                valencePairs:[],
+                col:(nodeCol?nodeCol():"orange"), // colour
+              }
+            )
+
+            // O anion
+
+            var cornerXO1 = (a * i) + (a * 0.5)
+            var cornerYO1 = (a * j) + (a * 0.5)
+            var cornerZO1 = (a * h)
+
+            _points.push(
+              {
+                x:cornerXO1, // position x
+                y:cornerYO1, // position y
+                z:cornerZO1, // position z
+
+                r:(nodeR?nodeR():7),  // radius
+                m:1,  // mass
+
+                neighbours:[], // index of other atoms
+                valencePairs:[],
+                col:(nodeCol?nodeCol():"red"), // colour
+              }
+            )
+
+            var cornerXO2 = (a * i) + (a * 0.5)
+            var cornerYO2 = (a * j)
+            var cornerZO2 = (a * h) + (a * 0.5)
+
+            _points.push(
+              {
+                x:cornerXO2, // position x
+                y:cornerYO2, // position y
+                z:cornerZO2, // position z
+
+                r:(nodeR?nodeR():7),  // radius
+                m:1,  // mass
+
+                neighbours:[], // index of other atoms
+                valencePairs:[],
+                col:(nodeCol?nodeCol():"red"), // colour
+              }
+            )
+
+            var cornerXO3 = (a * i)
+            var cornerYO3 = (a * j) + (a * 0.5)
+            var cornerZO3 = (a * h) + (a * 0.5)
+
+            _points.push(
+              {
+                x:cornerXO3, // position x
+                y:cornerYO3, // position y
+                z:cornerZO3, // position z
+
+                r:(nodeR?nodeR():7),  // radius
+                m:1,  // mass
+
+                neighbours:[], // index of other atoms
+                valencePairs:[],
+                col:(nodeCol?nodeCol():"red"), // colour
+              }
+            )
+
           }
         }
       }

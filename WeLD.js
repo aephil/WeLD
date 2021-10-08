@@ -91,12 +91,12 @@
   // setup physics resources ////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-    var edgeLen = 20;
+    var edgeLen = 50;
 
   lattice = Physics.Lattice;
   lattice.terminalObj = terminalObj;
-  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !lattice.hasNeighbour(j,i)});
-  latticeData =  lattice.makePrimitive3D(5,5,5, edgeLen);
+  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j && !lattice.hasNeighbour(j,i) && i.col == j.col && i.col!=="orange"});
+  latticeData =  lattice.makePerovskite3D(5,5,5, edgeLen);
 
   var nodes = []
   nodesData = latticeData[0] // formatted dataset for nodes
@@ -104,9 +104,6 @@
   for(let i = 0; i < nodesData.length; i++)
   {
     var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    newNode.setAttribute("r",+2);
-    newNode.setAttribute("stroke","red");
-    newNode.setAttribute("fill","red");
     sim.appendChild(newNode);
     nodes.push(newNode);
   }
@@ -118,7 +115,6 @@
 
   // set up camera controls
   sim.setAttribute("onload","makeDraggable(evt)");
-
 
   // camera angles
   var rho = 0;
@@ -147,8 +143,8 @@
       if (selectedElement)
       {
         evt.preventDefault();
-        rho = ((svgDragStartPosX - evt.clientX) * 0.01)
-        theta = ((svgDragStartPosY - evt.clientY) * 0.01)
+        rho = ((svgDragStartPosX - evt.clientX) * 0.01);
+        theta = ((svgDragStartPosY - evt.clientY) * 0.01);
       }
     }
     function endDrag(evt) {
@@ -157,18 +153,21 @@
   }
 
 
-var cameraX = function(d){
-  return rotY(rotX(d,theta),rho).x
+var camera = function(d){
+  return rotY(rotX(d,theta),rho)
 }
 
-var cameraY = function(d){
-  return rotY(rotX(d,theta),rho).y;
-}
 
  var redraw = function(node,datapoint)
  {
-   node.setAttribute("cx", centreToScreenX(cameraX(datapoint)) )
-   node.setAttribute("cy", centreToScreenY(cameraY(datapoint)) )
+   var imagePos = camera(datapoint);
+
+   node.setAttribute("cx", centreToScreenX(imagePos.x) );
+   node.setAttribute("cy", centreToScreenY(imagePos.y) );
+   node.setAttribute("fill", datapoint.col );
+   node.setAttribute("stroke", "black" );
+   node.setAttribute("r", datapoint.r );
+
  }
 
  renderer = Graphics.Renderer;
@@ -185,22 +184,20 @@ container.setAttribute("id","weld");
 document.body.appendChild(container);
 
 container.style.position = "fixed";
-container.style.bottom = "2.5%"
-container.style.right = "1.5%"
-container.style.width = "25%"
-container.style.height = "20%"
-container.style.color = "white"
-container.style.padding = "2.5 em"
-container.style.fontFamily = "monospace"
-container.style.backgroundColor = "white"
-container.style.overflowX = "scroll"
-container.style.overflowY = "scroll"
-
+container.style.bottom = "2.5%";
+container.style.right = "1.5%";
+container.style.width = "25%";
+container.style.height = "20%";
+container.style.color = "white";
+container.style.padding = "2.5 em";
+container.style.fontFamily = "monospace";
+container.style.backgroundColor = "white";
+container.style.overflowX = "scroll";
+container.style.overflowY = "scroll";
 
 var img = document.createElement("img");
-img.style.maxWidth = "100%"
-img.style.maxHeight = "100%"
+img.style.maxWidth = "100%";
+img.style.maxHeight = "100%";
 
 img.src = "weld.png";
-
 document.getElementById("weld").appendChild(img);
