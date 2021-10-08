@@ -1,4 +1,3 @@
-
 /**
  * WeLD.js
  *
@@ -28,18 +27,13 @@
  sim = ui[0];
  vterm = ui[1];
 
- sim.attr("id", "sim")
- simWidth = document.getElementById('sim').clientWidth
- simHeight = document.getElementById('sim').clientHeight
-
  terminalObj = UserInterface.VTerm;
  terminalObj.parent = vterm;
  terminalObj.log("User Interface is setup!");
 
- // load physics resources /////////////////////////////////////////////////
- ///////////////////////////////////////////////////////////////////////////
 
- physEngine = Physics.Engine;
+ // load physics controls  /////////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////
 
  // temperature
  tempController = Physics.Temperature;
@@ -63,76 +57,151 @@
     harmonicController = Physics.Harmonic;
 
       // ui controls for spring constant
-      springConstSlider = UserInterface.slider(1,100)
-
-
+      springConstSlider = UserInterface.slider(1,200)
       springConstSliderContainer = springConstSlider[0];
       springConstSliderContainer.style("top","30%")
 
       springConstSliderInput = springConstSlider[1];
       springConstSliderLabel =  springConstSlider[2];
 
-      springConstSliderInput.node().value = harmonicController.k();
-      springConstSliderLabel.html("k: " + harmonicController.k() * (1/100))
+      springConstSliderInput.node().value = harmonicController.kSpring() * 100;
+      springConstSliderLabel.html("k (spring): " + harmonicController.kSpring() )
       springConstSliderInput.node().oninput = function(){
         var value = springConstSliderInput.node().value;
-        harmonicController.changeK(value * (1/100))
-        springConstSliderLabel.html("k: " + ((value) * (1/100)).toFixed(2))
+        harmonicController.changeKSpring(value * (1/100))
+        springConstSliderLabel.html("k (spring): " + ((value) * (1/100)).toFixed(2))
       }
 
- physEngine.addCallBack(harmonicController.bond)
- physEngine.addCallBack(tempController.vibrate)
- physEngine.addCallBack(Physics.VerletP)
+      // ui controls for valence angle constant
+      valenceConstSlider = UserInterface.slider(0,500)
+      valenceConstSliderContainer = valenceConstSlider[0];
+      valenceConstSliderContainer.style("top","40%")
 
- var edgeLen = 20;
- var edgePredicate = function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i != j}
- latticeData = Lattice.makeFCC2D(10,10,edgeLen, edgePredicate )
- //latticeData = Lattice.makePrimitive2D(10,5,edgeLen, edgePredicate )
+      valenceConstSliderInput = valenceConstSlider[1];
+      valenceConstSliderLabel = valenceConstSlider[2];
 
- nodesData = latticeData[0] // formatted dataset for nodes
- edgesData = latticeData[1] // formatted dataset for edges
+      valenceConstSliderInput.node().value = harmonicController.kValence();
+      valenceConstSliderLabel.html("k (valence): " + harmonicController.kValence() )
+      valenceConstSliderInput.node().oninput = function(){
+        var value = valenceConstSliderInput.node().value;
+        harmonicController.changeKValence(value);
+        console.log(value);
+        valenceConstSliderLabel.html("k (valence): " + value);
+      }
 
- terminalObj.log("loaded nodes and edges")
- terminalObj.log("num nodes: " + nodesData.length)
- terminalObj.log("num edges: " + edgesData.length)
+  // setup physics resources ////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////
 
- // setup graphics /////////////////////////////////////////////////////////
- ///////////////////////////////////////////////////////////////////////////
+    var edgeLen = 20;
 
- // bind nodes dataset with svg circle assets using d3 and draw to screen
- nodes = Lattice.draw(sim, nodesData) // handle for d3 object
+  lattice = Physics.Lattice;
+  lattice.terminalObj = terminalObj;
+  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !lattice.hasNeighbour(j,i)});
+  latticeData =  lattice.makePrimitive3D(10,10,10, edgeLen);
 
- function dragged(event, d) {
-   nodes.raise()
-   .selectAll("circle")
-   .attr("cx", d.x =  event.x - worldWidth/2).attr("cy", d.y = worldHeight/2 - event.y);
-   }
+  var nodes = []
+  nodesData = latticeData[0] // formatted dataset for nodes
 
- nodes
- .selectAll("circle")
- .call(
- d3.drag()
- .on("drag", dragged));
+  for(let i = 0; i < nodesData.length; i++)
+  {
+    var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    newNode.setAttribute("r",+2);
+    newNode.setAttribute("stroke","red");
+    newNode.setAttribute("fill","red");
+    sim.appendChild(newNode);
+    nodes.push(newNode);
+  }
 
- tempController.changeTemp(0.01)
- tempController.changeDOF(47 /*2N - 3*/)
+  var physics = [harmonicController.bond, harmonicController.valence, tempController.vibrate];
 
-// define how the renderer should redraw to screen each frame
- var redraw = function(handle)
+  // setup graphics resources ///////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////
+
+  // set up camera controls
+  sim.setAttribute("onload","makeDraggable(evt)");
+
+
+  // camera angles
+  var rho = 0;
+  var theta = 0;
+
+  var svgDragStartPosX = 0;
+  var svgDragStartPosY = 0;
+
+  var selectedElement = false;
+
+  function makeDraggable(evt) {
+    var svg = evt.target;
+    svg.addEventListener('mousedown', startDrag);
+    svg.addEventListener('mousemove', drag);
+    svg.addEventListener('mouseup', endDrag);
+    svg.addEventListener('mouseleave', endDrag);
+    function startDrag(evt) {
+      if (evt.target.classList.contains('sim'))
+      {
+        selectedElement = evt.target;
+        svgDragStartPosX = evt.clientX;
+        svgDragStartPosY = evt.clientY;
+      }
+    }
+    function drag(evt) {
+      if (selectedElement)
+      {
+        evt.preventDefault();
+        rho = ((svgDragStartPosX - evt.clientX) * 0.01)
+        theta = ((svgDragStartPosY - evt.clientY) * 0.01)
+      }
+    }
+    function endDrag(evt) {
+      selectedElement = null;
+    }
+  }
+
+
+var cameraX = function(d){
+  return rotY(rotX(d,theta),rho).x
+}
+
+var cameraY = function(d){
+  return rotY(rotX(d,theta),rho).y;
+}
+
+ var redraw = function(node,datapoint)
  {
-   handle
-     .enter()
-     .selectAll("circle")
-     .attr("cx",function(d){
-       return centreToScreenX(d.x)
-     })
-     .attr("cy",function(d){
-       return centreToScreenY(d.y)
-     })
+   node.setAttribute("cx", centreToScreenX(cameraX(datapoint)) )
+   node.setAttribute("cy", centreToScreenY(cameraY(datapoint)) )
  }
 
  renderer = Graphics.Renderer;
- renderer.setFPS(15, terminalObj);
- renderer.addAnimation(physEngine.update, redraw, nodes, nodesData )
+ renderer.setFPS(60, terminalObj);
+// renderer.setSpeed(60, terminalObj);
+ renderer.addAnimation(physics, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
- //animation.stop()
+
+
+ // non-essential WeLD banner //////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////
+var container = document.createElement("div");
+container.setAttribute("id","weld");
+document.body.appendChild(container);
+
+container.style.position = "fixed";
+container.style.bottom = "2.5%"
+container.style.right = "1.5%"
+container.style.width = "25%"
+container.style.height = "20%"
+container.style.color = "white"
+container.style.padding = "2.5 em"
+container.style.fontFamily = "monospace"
+container.style.backgroundColor = "white"
+container.style.overflowX = "scroll"
+container.style.overflowY = "scroll"
+
+
+var img = document.createElement("img");
+img.style.maxWidth = "100%"
+img.style.maxHeight = "100%"
+
+img.src = "weld.png";
+
+document.getElementById("weld").appendChild(img);
