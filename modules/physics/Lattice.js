@@ -48,10 +48,11 @@ var Lattice = function()
             // check they are not already considered neighbours
             if(!(areNeighbours(data[k],data[l])))
             {
+              var newLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+              document.getElementsByClassName('sim');
               _edgesData.push(
                 [
-                  {x:data[l].x,y:data[l].y},
-                  {x:data[k].x,y:data[k].y}
+                  k, l,
                 ]
               )
               _points[k].neighbours.push([l, Physics.Vector.distance(_points[k],_points[l])]);
