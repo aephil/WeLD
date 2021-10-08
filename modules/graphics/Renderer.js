@@ -74,20 +74,6 @@ var Renderer = function () {
       if(elapsed > frames * (1/fps)){ redraw(); frames += 1;}
     }, 1/(freq*1000));
 
-      /*
-      timer = d3.timer(function(duration){
-        elapsed = (duration * 0.001).toFixed(2)
-        // do physics callbacks here
-        if(elapsed > seconds * (1/freq))
-        {
-          update()
-          seconds +=1;
-        }
-        // update graphics here
-        if(elapsed > frames * (1/fps)){redraw(handle);   frames += 1;}
-
-      })
-      */
       return timer;
     }
 

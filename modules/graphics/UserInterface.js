@@ -12,7 +12,7 @@ var VTerm = function () {
     }
 
     this.log = function (msg) {  //public fn
-      buffer += " WelD/: " + msg + "<br/>";
+      buffer += " WeLD => " + msg + "<br/>";
       document.getElementById("vterm").innerHTML = buffer
       updateScroll()
     };
@@ -26,6 +26,7 @@ UserInterface.loadBasic = function()
 
   var sim = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   document.body.appendChild(sim);
+  sim.setAttribute("class","sim");
   sim.style.position = "fixed";
   sim.style.top = "2.5%"
   sim.style.left = "2.5%"
@@ -56,6 +57,8 @@ UserInterface.loadBasic = function()
 
 UserInterface.slider = function(min=0, max=100)
 {
+
+  // TODO remove d3 here too
 
   var container = d3.select("body")
     .append("div")

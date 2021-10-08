@@ -32,10 +32,8 @@
  terminalObj.log("User Interface is setup!");
 
 
- // load physics resources /////////////////////////////////////////////////
+ // load physics controls  /////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
-
- physEngine = Physics.Engine;
 
  // temperature
  tempController = Physics.Temperature;
@@ -91,43 +89,119 @@
         valenceConstSliderLabel.html("k (valence): " + value);
       }
 
+  // setup physics resources ////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////
+
     var edgeLen = 20;
 
-    function hasNeighbour(i,j){
-      i.neighbours.forEach(function(el, i){
-        if(j[0]==el[0]){return true};
-      })
-      return false;
-    }
-
   lattice = Physics.Lattice;
-  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !hasNeighbour(j,i)});
-  latticeData =  lattice.makePrimitive2D(100, 10, edgeLen);
+  lattice.terminalObj = terminalObj;
+  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && !lattice.hasNeighbour(j,i)});
+  latticeData =  lattice.makePrimitive3D(10,10,10, edgeLen);
 
   var nodes = []
   nodesData = latticeData[0] // formatted dataset for nodes
+
   for(let i = 0; i < nodesData.length; i++)
   {
     var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    newNode.setAttribute("r",+5);
+    newNode.setAttribute("r",+2);
     newNode.setAttribute("stroke","red");
     newNode.setAttribute("fill","red");
     sim.appendChild(newNode);
     nodes.push(newNode);
   }
 
-    var physics = [harmonicController.bond, harmonicController.valence, tempController.vibrate];
+  var physics = [harmonicController.bond, harmonicController.valence, tempController.vibrate];
 
- /////////
+  // setup graphics resources ///////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////
+
+  // set up camera controls
+  sim.setAttribute("onload","makeDraggable(evt)");
+
+
+  // camera angles
+  var rho = 0;
+  var theta = 0;
+
+  var svgDragStartPosX = 0;
+  var svgDragStartPosY = 0;
+
+  var selectedElement = false;
+
+  function makeDraggable(evt) {
+    var svg = evt.target;
+    svg.addEventListener('mousedown', startDrag);
+    svg.addEventListener('mousemove', drag);
+    svg.addEventListener('mouseup', endDrag);
+    svg.addEventListener('mouseleave', endDrag);
+    function startDrag(evt) {
+      if (evt.target.classList.contains('sim'))
+      {
+        selectedElement = evt.target;
+        svgDragStartPosX = evt.clientX;
+        svgDragStartPosY = evt.clientY;
+      }
+    }
+    function drag(evt) {
+      if (selectedElement)
+      {
+        evt.preventDefault();
+        rho = ((svgDragStartPosX - evt.clientX) * 0.01)
+        theta = ((svgDragStartPosY - evt.clientY) * 0.01)
+      }
+    }
+    function endDrag(evt) {
+      selectedElement = null;
+    }
+  }
+
+
+var cameraX = function(d){
+  return rotY(rotX(d,theta),rho).x
+}
+
+var cameraY = function(d){
+  return rotY(rotX(d,theta),rho).y;
+}
 
  var redraw = function(node,datapoint)
  {
-   node.setAttribute("cx", centreToScreenX(datapoint.x) )
-   node.setAttribute("cy", centreToScreenY(datapoint.y) )
+   node.setAttribute("cx", centreToScreenX(cameraX(datapoint)) )
+   node.setAttribute("cy", centreToScreenY(cameraY(datapoint)) )
  }
 
  renderer = Graphics.Renderer;
-// renderer.setFPS(60, terminalObj);
- renderer.setSpeed(30, terminalObj);
+ renderer.setFPS(60, terminalObj);
+// renderer.setSpeed(60, terminalObj);
  renderer.addAnimation(physics, redraw, nodes, nodesData )
  animation = renderer.render(nodesData, nodes)
+
+
+ // non-essential WeLD banner //////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////
+var container = document.createElement("div");
+container.setAttribute("id","weld");
+document.body.appendChild(container);
+
+container.style.position = "fixed";
+container.style.bottom = "2.5%"
+container.style.right = "1.5%"
+container.style.width = "25%"
+container.style.height = "20%"
+container.style.color = "white"
+container.style.padding = "2.5 em"
+container.style.fontFamily = "monospace"
+container.style.backgroundColor = "white"
+container.style.overflowX = "scroll"
+container.style.overflowY = "scroll"
+
+
+var img = document.createElement("img");
+img.style.maxWidth = "100%"
+img.style.maxHeight = "100%"
+
+img.src = "weld.png";
+
+document.getElementById("weld").appendChild(img);

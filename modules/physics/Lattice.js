@@ -1,19 +1,20 @@
 var Lattice = function()
   {
+
+    this.terminalObj = false;
     var predicate = false;
 
-    function areNeighbours(i,j,data)
-    {
-      var node1 = data[i];
-      var node2 = data[j];
-      node1.neighbours.forEach(function(neighbour){
-        if(neighbour[0]===j){  console.log("here!1"); return true;};
-
-      })
-      node2.neighbours.forEach(function(neighbour){
-        if(neighbour[0]===i){   console.log("here!2"); return true;};
+    // returns true if node i considers node j a neighbour.
+     function hasNeighbour(i,j){
+      i.neighbours.forEach(function(el){
+        if(j[0]==el[0]){return true};
       })
       return false;
+    }
+
+    function areNeighbours(i,j)
+    {
+      return hasNeighbour(i,j) || hasNeighbour(j,i);
     };
 
     function calcNeighbourAngles(node, data)
@@ -43,9 +44,8 @@ var Lattice = function()
           if(predicate(data[k], data[l]))
           {
             // check they are not already considered neighbours
-            if(!(areNeighbours(k,l,data)))
+            if(!(areNeighbours(data[k],data[l])))
             {
-
               _edgesData.push(
                 [
                   {x:data[l].x,y:data[l].y},
@@ -53,12 +53,15 @@ var Lattice = function()
                 ]
               )
               _points[k].neighbours.push([l, Physics.Vector.distance(_points[k],_points[l])]);
-
-              //_points[l].neighbours.push([k, Physics.Vector.distance(_points[k],_points[l])]);
             }
           }
         }
       }
+    }
+
+    // returns true if node i considers node j a neighbour.
+     this.hasNeighbour = function(i,j){
+      return hasNeighbour(i,j);
     }
 
     this.makePrimitive2D = function(cellsX, cellsY, a)
@@ -74,8 +77,6 @@ var Lattice = function()
 
             _points.push(
               {
-
-
                 x:cornerX, // position x
                 y:cornerY, // position y
                 z:1, // position z
@@ -97,216 +98,122 @@ var Lattice = function()
           makeBonds(_points);
           _points.forEach(function(node){calcNeighbourAngles(node,_points)})
         }
+        if(terminalObj)
+        {
+          terminalObj.log("total of "+_edgesData.length+" bonds were formed.");
+          terminalObj.log("total of "+_points.length+" nodes were formed.");
+        }
         return [_points , _edgesData]
       }
 
-    this.draw = function(parent, data)
+    this.makeFCC2D = function(cellsX, cellsY, a)
     {
+      _points = []
+      _edgesData = []
 
-     var handle = parent.selectAll("circle").data(data);
-     handle
-     .enter()
-     .append("circle")
-     .attr("r",function(d){return d.r})
-     .attr("cx",function(d){return centreToScreenX(d.x, simWidth)})
-     .attr("cy", function(d){return centreToScreenY(d.y, simHeight)})
-     .attr("fill", function(d){return d.col})
-     .attr("stroke", "black")
+      for(i = 0; i < cellsX; i++)
+      {
+        for(j = 0; j < cellsY; j++)
+        {
 
-     return handle;
-   }
+          var cornerX = a * i
+          var cornerY = a * j
+
+          _points.push(
+            {
+              x:cornerX, // position x
+              y:cornerY, // position y
+              z:1, // position z
+
+              r:5,  // radius
+              m:1,  // mass
+
+              neighbours:[], // index of other atoms
+              valencePairs:[],
+              col:"black", // colour
+            }
+          )
+
+          _points.push(
+            {
+              x:cornerX + (a*0.5) , // position x
+              y:cornerY + (a*0.5), // position y
+              z:1, // position z
+
+              r:5,  // radius
+              m:1,  // mass
+
+              neighbours:[],
+              valencePairs:[],
+              col:"black", // colour
+            }
+          )
+        }
+      }
+
+      // create bonds based on a given predicate
+      if(predicate!=false)
+      {
+        makeBonds(_points);
+        _points.forEach(function(node){calcNeighbourAngles(node,_points)})
+      }
+      if(terminalObj)
+      {
+        terminalObj.log("total of "+_edgesData.length+" bonds were formed.");
+        terminalObj.log("total of "+_points.length+" nodes were formed.");
+      }
+
+      return [_points , _edgesData]
+    }
+
+    this.makePrimitive3D = function(cellsX, cellsY, cellsZ, a)
+    {
+      _points = []
+      _edgesData = []
+      for(h =0; h < cellsZ; h++){
+        for(i = 0; i < cellsX; i++)
+        {
+          for(j = 0; j < cellsY; j++)
+          {
+            var cornerX = a * i
+            var cornerY = a * j
+            var cornerZ = a * h
+
+            _points.push(
+              {
+                x:cornerX, // position x
+                y:cornerY, // position y
+                z:cornerZ, // position z
+
+                r:1,  // radius
+                m:5,  // mass
+
+                neighbours:[], // index of other atoms
+                valencePairs:[],
+                col:"black", // colour
+              }
+            )
+          }
+        }
+      }
+
+      // create bonds based on a given predicate
+      if(predicate!=false)
+      {
+        makeBonds(_points);
+        _points.forEach(function(node){calcNeighbourAngles(node,_points)})
+      }
+      if(terminalObj)
+      {
+        terminalObj.log("total of "+_edgesData.length+" bonds were formed.");
+        terminalObj.log("total of "+_points.length+" nodes were formed.");
+      }
+      return [_points , _edgesData]
+
+    }
 
    this.setPredicate = function(p){predicate = p}
 
   }
 
 Physics.Lattice = new Lattice();
-
-/*
-var Lattice = {
-
-  areNeighbours:function(i,j,data){
-    var node1 = data[i];
-    var node2 = data[j];
-    node1.neighbours.forEach(function(neighbour){
-      if(neighbour[0]===j){  console.log("here!1"); return true;};
-
-    })
-    node2.neighbours.forEach(function(neighbour){
-      if(neighbour[0]===i){   console.log("here!2"); return true;};
-    })
-    return false;
-  },
-
-  makePrimitive2D: function(numCellsX, numCellsY, a, p){
-    _points = []
-    _edgesData = []
-    for(i = 0; i < numCellsX; i++)
-    {
-      for(j = 0; j < numCellsY; j++)
-      {
-        var cornerX = a * i
-        var cornerY = a * j
-
-        _points.push(
-          {
-            vx:0, // velocity x
-            vy:0, // velocity y
-            vz:0, // velocity z
-
-            x:cornerX, // position x
-            y:cornerY, // position y
-            z:1, // position z
-
-            r:5,  // radius
-            m:5,  // mass
-
-            neighbours:[], // index of other atoms
-            col:"black", // colour
-          }
-        )
-      }
-    }
-
-    // create bonds based on a given predicate
-  if(p!=false)
-  {
-    for(k = 0; k < _points.length; k++)
-    {
-      for(l = 0; l < _points.length; l++)
-      {
-        if(p(_points[k], _points[l]))
-        {
-          // check they are not already considered neighbours
-          if(!(this.areNeighbours(k,l,_points)))
-          {
-
-            _edgesData.push(
-              {
-                x:_points[l].x,
-                y:_points[l].y,
-              }
-            )
-
-            _edgesData.push(
-              {
-                x:_points[k].x,
-                y:_points[k].y
-              })
-              for(m = 0; m < _points.length)
-            _points[k].neighbours.push([l, Physics.Vector.distance(_points[k],_points[l])]);
-            //_points[l].neighbours.push([k, Physics.Vector.distance(_points[k],_points[l])]);
-          }
-        }
-      }
-    }
-  }
-    return [_points , _edgesData]
-  },
-
-  makeFCC2D: function(numCellsX, numCellsY, a, p = false){
-
-    _points = []
-    _edgesData = []
-
-    for(i = 0; i < numCellsX; i++)
-    {
-      for(j = 0; j < numCellsY; j++)
-      {
-
-        var cornerX = a * i
-        var cornerY = a * j
-
-        _points.push(
-          {
-            isonLattice: true,
-            vx:0.1, // velocity x
-            vy:0.3, // velocity y
-            vz:0.4, // velocity z
-
-            x:cornerX, // position x
-            y:cornerY, // position y
-            z:1, // position z
-
-            r:5,  // radius
-            m:1,  // mass
-
-            neighbours:[], // index of other atoms
-            col:"black", // colour
-          }
-        )
-
-        _points.push(
-          {
-            isonLattice: false,
-            vx:0, // velocity x
-            vy:0, // velocity y
-            vz:0, // velocity z
-
-            x:cornerX + (a*0.5) , // position x
-            y:cornerY + (a*0.5), // position y
-            z:1, // position z
-
-            r:5,  // radius
-            m:1,  // mass
-
-            neighbours:[],
-            col:"black", // colour
-          }
-        )
-      }
-    }
-
-    // create bonds based on a given predicate
-  if(p!=false)
-  {
-    for(k = 0; k < _points.length; k++)
-    {
-      for(l = 0; l < _points.length; l++)
-      {
-        if(p(_points[k], _points[l]))
-        {
-          // check they are not already considered neighbours
-          if(!(this.areNeighbours(k,l,_points)))
-          {
-            _edgesData.push(
-              {
-                x:_points[l].x,
-                y:_points[l].y,
-              }
-            )
-
-            _edgesData.push(
-              {
-                x:_points[k].x,
-                y:_points[k].y
-              })
-
-            _points[k].neighbours.push([l, Physics.Vector.distance(_points[k],_points[l])]);
-            //_points[l].neighbours.push([k, Physics.Vector.distance(_points[k],_points[l])]);
-          }
-
-        }
-      }
-    }
-  }
-    return [_points , _edgesData]
-  },
-
-  draw: function(parent, data)
- {
-
-   var handle = parent.selectAll("circle").data(data);
-   handle
-   .enter()
-   .append("circle")
-   .attr("r",function(d){return d.r})
-   .attr("cx",function(d){return centreToScreenX(d.x, simWidth)})
-   .attr("cy", function(d){return centreToScreenY(d.y, simHeight)})
-   .attr("fill", function(d){return d.col})
-   .attr("stroke", "black")
-
-   return handle;
- }
-}
-*/
