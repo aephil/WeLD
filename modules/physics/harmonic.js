@@ -4,8 +4,8 @@
 
 var Harmonic = function(){
 
-  var kSpring = 1 // Spring constant
-  var kValence = 1
+  var kSpring = 0 // Spring constant
+  var kValence = 0
 
   this.changeKSpring = function(n){
     kSpring = n;
@@ -20,7 +20,7 @@ var Harmonic = function(){
 
   this.kValence = function(){return kValence}
 
-  this.bond = function(d, data)
+  this.spring = function(d, data)
   {
     for(var i = 0; i < d.neighbours.length; i++)
     {
@@ -40,11 +40,15 @@ var Harmonic = function(){
         equilibrium = Physics.Vector.scale(nodesLen, uVec);
         extVec = Physics.Vector.sub(equilibrium, vec);
 
+        // begin debug here
+
         extY = extVec.y
         extX = extVec.x
         extZ = extVec.z
 
-        // fix one atom!
+        //console.log(extX)
+        //console.log(extY)
+        //console.log(extZ)
 
         ax = (kSpring * extX / d.m )
         ay = (kSpring * extY / d.m )
@@ -58,7 +62,6 @@ var Harmonic = function(){
 
         var z = (0.5*az)
         var zN = z * (-1)
-
 
         d.x += x
         data[nIndex].x += xN
@@ -106,17 +109,15 @@ var Harmonic = function(){
       data[node1Idx].y += (fa.y/data[node1Idx].m);
       data[node1Idx].z += (fa.z/data[node1Idx].m);
 
-      d.x += (fb.x/d.m)
-      d.y += (fb.y/d.m)
-      d.z += (fb.z/d.m)
+      d.x += (fb.x/d.m);
+      d.y += (fb.y/d.m);
+      d.z += (fb.z/d.m);
 
       data[node2Idx].x += (fc.x/data[node2Idx].m)
       data[node2Idx].y += (fc.y/data[node2Idx].m)
       data[node2Idx].z += (fc.z/data[node2Idx].m)
     }
-
   }
-
     return this;
   }
 

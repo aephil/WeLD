@@ -29,7 +29,7 @@
 
  terminalObj = UserInterface.VTerm;
  terminalObj.parent = vterm;
- terminalObj.log("User Interface is setup!");
+ terminalObj.log("User Interface is setup.");
 
 
  // load physics controls  /////////////////////////////////////////////////
@@ -38,18 +38,18 @@
  // temperature
  tempController = Physics.Temperature;
     // ui controls for temperature
-    tempSlider = UserInterface.slider()
+    tempSlider = UserInterface.slider(0,1,0.001)
 
     tempSliderContainer = tempSlider[0];
     tempSliderInput = tempSlider[1];
     tempSliderLabel =  tempSlider[2];
 
-    tempSliderInput.value = tempController.temp()
+    tempSliderInput.value = tempController.temp();
     tempSliderLabel.innerHTML = "Temperature: " + tempSliderInput.value;
 
     tempSliderInput.oninput = function(){
       var value = tempSliderInput.value;
-      tempController.changeTemp(value * (1/100))
+      tempController.changeTemp(value);
       tempSliderLabel.innerHTML = "Temperature: " + value;
     }
 
@@ -57,31 +57,29 @@
     harmonicController = Physics.Harmonic;
 
       // ui controls for spring constant
-      springConstSlider = UserInterface.slider(1,200)
+      springConstSlider = UserInterface.slider(0,1,0.01)
       springConstSliderContainer = springConstSlider[0];
       springConstSliderContainer.style.top = "30%";
 
       springConstSliderInput = springConstSlider[1];
       springConstSliderLabel =  springConstSlider[2];
 
-      springConstSliderInput.value = harmonicController.kSpring() * 100;
-      springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
+      springConstSliderLabel.innerHTML = "k (spring): " + 0;
       springConstSliderInput.oninput = function(){
         var value = springConstSliderInput.value;
-        harmonicController.changeKSpring(value * (1/100))
-        springConstSliderLabel.innerHTML = "k (spring): " + ((value) * (1/100)).toFixed(2);
+        harmonicController.changeKSpring(value);
+        springConstSliderLabel.innerHTML = "k (spring): " + value;
       }
 
       // ui controls for valence angle constant
-      valenceConstSlider = UserInterface.slider(0,500)
+      valenceConstSlider = UserInterface.slider(0,1, 0.01)
       valenceConstSliderContainer = valenceConstSlider[0];
-      valenceConstSliderContainer.style.top = "40%";
+      valenceConstSliderContainer.style.top = "38%";
 
       valenceConstSliderInput = valenceConstSlider[1];
       valenceConstSliderLabel = valenceConstSlider[2];
 
-      valenceConstSliderInput.value = harmonicController.kValence();
-      valenceConstSliderLabel.innerHTML = "k (valence): " + harmonicController.kValence();
+      valenceConstSliderLabel.innerHTML = "k (valence): " + 0;
       valenceConstSliderInput.oninput = function(){
         var value = valenceConstSliderInput.value;
         harmonicController.changeKValence(value);
@@ -91,24 +89,19 @@
   // setup physics resources ////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-    var edgeLen = 50;
+  var edgeLen = 50;
 
   lattice = Physics.Lattice;
-  lattice.terminalObj = terminalObj;
-  lattice.setPredicate(function(i,j){ return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j && !lattice.hasNeighbour(j,i) && i.col == j.col && i.col!=="orange"});
-  latticeData =  lattice.makePerovskite3D(5,5,5, edgeLen);
+  lattice.setTerminal(terminalObj);
+  lattice.setShowEdges(false);
 
-  var nodes = []
-  nodesData = latticeData[0] // formatted dataset for nodes
+  lattice.setPredicate(
+    function(i,j){
+      return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && i.col == j.col && i.col!=="orange"
+    });
 
-  for(let i = 0; i < nodesData.length; i++)
-  {
-    var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    sim.appendChild(newNode);
-    nodes.push(newNode);
-  }
-
-  var physics = [harmonicController.bond, harmonicController.valence, tempController.vibrate];
+  lattice.makePrimitive3D(5,5,5, edgeLen, sim);
+  var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
@@ -116,66 +109,43 @@
   // set up camera controls
   sim.setAttribute("onload","makeDraggable(evt)");
 
-  // camera angles
-  var rho = 0;
-  var theta = 0;
-
   var svgDragStartPosX = 0;
   var svgDragStartPosY = 0;
-
   var selectedElement = false;
 
-  function makeDraggable(evt) {
-    var svg = evt.target;
-    svg.addEventListener('mousedown', startDrag);
-    svg.addEventListener('mousemove', drag);
-    svg.addEventListener('mouseup', endDrag);
-    svg.addEventListener('mouseleave', endDrag);
-    function startDrag(evt) {
-      if (evt.target.classList.contains('sim'))
-      {
-        selectedElement = evt.target;
-        svgDragStartPosX = evt.clientX;
-        svgDragStartPosY = evt.clientY;
-      }
-    }
-    function drag(evt) {
-      if (selectedElement)
-      {
-        evt.preventDefault();
-        rho = ((svgDragStartPosX - evt.clientX) * 0.01);
-        theta = ((svgDragStartPosY - evt.clientY) * 0.01);
-      }
-    }
-    function endDrag(evt) {
-      selectedElement = null;
-    }
-  }
+  renderer = Graphics.Renderer;
+  renderer.setTerminal(terminalObj);
+  renderer.setFPS(60);
 
-
-var camera = function(d){
-  return rotY(rotX(d,theta),rho)
-}
-
-
- var redraw = function(node,datapoint)
- {
-   var imagePos = camera(datapoint);
-
-   node.setAttribute("cx", centreToScreenX(imagePos.x) );
-   node.setAttribute("cy", centreToScreenY(imagePos.y) );
-   node.setAttribute("fill", datapoint.col );
-   node.setAttribute("stroke", "black" );
-   node.setAttribute("r", datapoint.r );
-
+ function makeDraggable(evt) {
+   var svg = evt.target;
+   svg.addEventListener('mousedown', startDrag);
+   svg.addEventListener('mousemove', drag);
+   svg.addEventListener('mouseup', endDrag);
+   svg.addEventListener('mouseleave', endDrag);
+   function startDrag(evt) {
+     if (evt.target.classList.contains('sim'))
+     {
+       selectedElement = evt.target;
+       svgDragStartPosX = evt.clientX;
+       svgDragStartPosY = evt.clientY;
+     }
+   }
+   function drag(evt) {
+     if (selectedElement)
+     {
+       evt.preventDefault();
+       renderer.setRho( ((svgDragStartPosX - evt.clientX) * 0.01) );
+       renderer.setTheta( ((svgDragStartPosY - evt.clientY) * 0.01) );
+     }
+   }
+   function endDrag(evt) {
+     selectedElement = null;
+   }
  }
 
- renderer = Graphics.Renderer;
- renderer.setFPS(60, terminalObj);
-// renderer.setSpeed(60, terminalObj);
- renderer.addAnimation(physics, redraw, nodes, nodesData )
- animation = renderer.render(nodesData, nodes)
-
+ renderer.addAnimation(physics, false, lattice )
+ animation = renderer.render(lattice)
 
  // non-essential WeLD banner //////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
