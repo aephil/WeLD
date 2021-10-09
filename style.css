@@ -1,0 +1,35 @@
+
+body{
+  font-family: Monospace;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    background-color: silver;
+    width: 50%;
+    height:20px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+     -webkit-appearance: none;
+    background-color: black;
+    opacity: 0.5;
+    width: 10px;
+    height: 26px;
+}
+
+text.red {
+  color: red;
+}
+
+text.green {
+  color: green;
+}
+
+text.orange {
+  color: orange;
+}
+
+text.blue {
+  color: blue;
+}

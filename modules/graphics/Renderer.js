@@ -1,78 +1,159 @@
 
 var Renderer = function () {
 
+    // camera
+    var rho = 0;
+    var theta = 0;
+    var terminalObj = false;
+    var showInfo = true;
+
+    this.setRho = function(angle){rho=angle;}
+    this.setTheta = function(angle){theta=angle;}
+    this.setTerminal = function(termObj)
+    {
+      // typescript to check type maybe?
+      terminalObj = termObj;
+    }
+
+    var cameraView = function(d){
+      return rotY(rotX(d,theta),rho)
+    }
+
     var fps = 30; //private var
     var frames = 0;
-
-    var freq = 1000;
-    var seconds = 0;
+    var freq = 1;
+    var elapsed = 0;
 
     var updates;
     var redraw;
-    var data;
-    var nodes;
+    var lattice;
 
-    this.setSpeed = function(n, vtermObj=null){
+    this.setSpeed = function(n, terminalObj=null){
       freq = n;
-      if(fps>n){
-        if(vtermObj!==null)
-        {
-          vtermObj.log("fps cannot be less than frequency. setting fps to new frequency.")
-          vtermObj.log("fps set to "+n)
-          vtermObj.log("frequency set to "+n)
-        }
-        fps = n;
-    } else {
-      if(vtermObj!==null)
+      if(terminalObj!==null)
       {
-        vtermObj.log("frequency set to "+n)
+        terminalObj.log("frequency set to "+n +"/ms")
       }
-    }
     };
-    this.setFPS = function(n, vtermObj=null){fps = n; if(vtermObj!==null){vtermObj.log("fps set to "+n)}};
+    this.setFPS = function(n){
+      fps = n;
+      if(terminalObj){
+        terminalObj.log("fps set to "+(n>=60?terminalObj.colouredText(n,"red"):terminalObj.colouredText(n,"green")))}};
+
     this.fps = function(){return fps;}
 
-    this.addAnimation = function(u,r,n,d){
+    this.addAnimation = function(u,r,l){
 
-      if(d.length !== n.length){
-        console.log("ERR: data and nodes must be same length.");
+      lattice = l;
+
+      if(l.data().length !== l.nodes().length){
+        terminalObj.log(terminalObj.colouredText("ERR:", "red") +" data and nodes must be same length.");
         return;
       }
-
       updates = u
       drawCall = r
-      nodes = n
-      data = d
     }
 
     var update = function()
     {
-      data.forEach((d) => {
+      lattice.data().forEach((d) => {
         updates.forEach((fn) => {
-          fn(d,data);
+          fn(d,lattice.data());
         });
       });
+    }
 
+    var initInfo = function(){
+        var infoBox = document.createElement("div");
+        infoBox.setAttribute("id", "infoBox");
+        infoBox.style.position = "fixed";
+        infoBox.style.padding = "2.5px";
+        infoBox.style.backgroundColor = "black";
+        infoBox.style.width = "25%";
+        infoBox.style.color = "rgb(173,172,173)";
+        infoBox.style.height = "10%";
+        infoBox.style.top = lattice.nodes()[0].parentNode.style.top;
+        infoBox.style.left = lattice.nodes()[0].parentNode.style.left;
+        infoBox.style.zIndex = lattice.nodes()[0].parentNode.style.zIndex + 1;
+        document.body.appendChild(infoBox);
 
     }
 
+  var drawInfo = function(){
+    var infoBox = document.getElementById("infoBox");
+    infoBox.innerHTML = "Rho: " + parseFloat(rho).toFixed(2) +"</br> "
+    infoBox.innerHTML += "Theta: " + parseFloat(theta).toFixed(2) + "</br>";
+    var realFPS = (frames / elapsed).toFixed(2);
+    var fpsRatio = (realFPS/fps)
+    var fpsDisplay;
+    if(fpsRatio > 0.7){
+      fpsDisplay = "<text class='green'>"+realFPS+"</text>"
+    } else if(fpsRatio > 0.5){
+      fpsDisplay = "<text class='orange'>"+realFPS+"</text>"
+    } else {
+      fpsDisplay = "<text class='red'>"+realFPS+"</text>"
+    }
+    infoBox.innerHTML += "fps: " + fpsDisplay + "</br>";
+  }
+
+    var defaultDrawCall = function(node,datapoint)
+    {
+       var data = lattice.data();
+       var imagePos = cameraView(datapoint);
+
+       if(lattice.showEdges())
+       {
+         datapoint.valencePairs.forEach((vp, i) => {
+           var nodeLine1 = vp[3];
+           var nodeLine2 = vp[4];
+
+           var imagePos1 = cameraView(data[vp[0]])
+           var imagePos2 = cameraView(data[vp[1]])
+
+           nodeLine1.setAttribute("stroke", datapoint.col);
+           nodeLine2.setAttribute("stroke", datapoint.col);
+           nodeLine1.setAttribute("stroke-width", 2);
+           nodeLine2.setAttribute("stroke-width", 2);
+
+           nodeLine1.setAttribute("x1",centreToScreenX(imagePos.x))
+           nodeLine1.setAttribute("y1",centreToScreenY(imagePos.y))
+           nodeLine1.setAttribute("x2",centreToScreenX(imagePos1.x))
+           nodeLine1.setAttribute("y2",centreToScreenY(imagePos1.y))
+
+           nodeLine2.setAttribute("x1",centreToScreenX(imagePos.x))
+           nodeLine2.setAttribute("y1",centreToScreenY(imagePos.y))
+           nodeLine2.setAttribute("x2",centreToScreenX(imagePos2.x))
+           nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
+         });
+       }
+          node.style.zIndex = datapoint.z;
+          node.setAttribute("cx", centreToScreenX(imagePos.x) );
+          node.setAttribute("cy", centreToScreenY(imagePos.y) );
+          node.setAttribute("fill", datapoint.col );
+          node.setAttribute("r", datapoint.r );
+     }
+
     var redraw = function()
     {
-      nodes.forEach((node, i) => {
-        drawCall(node,data[i]);
+      lattice.nodes().forEach((node, i) => {
+        if(drawCall){
+          drawCall(node, lattice.data()[i]);
+        } else {
+          defaultDrawCall(node, lattice.data()[i]);
+        }
       });
-
     }
 
     this.render = function() // public fn
     {
+      if (showInfo) initInfo();
       var start = performance.now();
       var timer = window.setInterval(function(){
         /// call your function here
       update();
       elapsed = (performance.now() - start) / 1000;
-      if(elapsed > frames * (1/fps)){ redraw(); frames += 1;}
-    }, 1/(freq*1000));
+      if(elapsed > frames * (1/fps)){ redraw(); if (showInfo) drawInfo(); frames += 1;}
+    }, freq);
 
       return timer;
     }
