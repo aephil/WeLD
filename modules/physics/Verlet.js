@@ -1,8 +1,20 @@
-VerletP = function(d, data)
+var Verlet = function()
 {
-   d.x += d.vx //+ (0.5*Math.pow(t,2)*ax);
-   d.y += d.vy //+ (0.5*Math.pow(t,2)*ay);
-   d.z += d.vz //+ (0.5*Math.pow(t,2)*az);
+   var potentials=[]; // contains functions for
+   var data=[]; // total force on each datapoint
+   var dt = 1;
+
+   var calculateForces = function(){
+     data.forEach((d) => {
+       potentials.forEach((dU) => {
+         var potential = dU(d,data);
+         var totalForce =
+       });
+
+     });
+
+   }
+
 }
 
-Physics.VerletP = VerletP;
+Physics.Verlet = VerletP;
