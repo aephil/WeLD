@@ -1,8 +1,28 @@
 var UserInterface = function()
 {
   var data=[]; //data associated with the simulation
+  var nodes=[];
+  var highlighted=false;
 
-  this.setData = function(n){data=n}
+  this.setData = function(d){data=d}
+  this.setNodes = function(n){nodes=n}
+
+  this.highlight = function(evt, i)
+  {
+    var datapoint = data[parseInt(i)];
+    debugger;
+    if(datapoint.stroke=="red")
+    {
+      datapoint.stroke="black";
+      highlighted=false;
+    } else {
+        datapoint.stroke = "red";
+        if(highlighted!==false){
+          data[highlighted].stroke = "black";
+        }
+        highlighted=parseInt(i);
+      }
+  }
 
   this.showTooltip = function(evt, i) {
     let tooltip = document.getElementById("tooltip");
@@ -18,7 +38,6 @@ var UserInterface = function()
       neighbours.forEach((neighbour) => {
           tooltip.innerHTML += "#"+ neighbour[0] + " ";
       });
-
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
@@ -107,6 +126,18 @@ var UserInterface = function()
 
       this.colouredText = function(msg, colour){
         return colouredText(msg, colour);
+      }
+
+      this.logWarning = function(msg, newline=true){
+        buffer += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
+        document.getElementById("vterm").innerHTML = buffer;
+        updateScroll()
+      }
+
+      this.logError = function(msg, newline=true){
+        buffer += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
+        document.getElementById("vterm").innerHTML = buffer;
+        updateScroll()
       }
 
       this.log = function (msg, newline=true) {  //public fn

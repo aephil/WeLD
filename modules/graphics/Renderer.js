@@ -15,6 +15,7 @@ var Renderer = function () {
     var updates;
     var redraw;
     var lattice;
+    var sim;
 
     this.setRho = function(angle){rho=angle;}
     this.setTheta = function(angle){theta=angle;}
@@ -27,8 +28,6 @@ var Renderer = function () {
     var cameraView = function(d){
       return rotY(rotX(d,theta),rho)
     }
-
-
 
     this.setSpeed = function(n, terminalObj=null){
       freq = n;
@@ -45,16 +44,17 @@ var Renderer = function () {
 
     this.fps = function(){return fps;}
 
-    this.addAnimation = function(u,r,l){
+    this.addAnimation = function(u,r,l,s){
 
       lattice = l;
 
       if(l.data().length !== l.nodes().length){
-        terminalObj.log(terminalObj.colouredText("ERR:", "red") +" data and nodes must be same length.");
+        terminalObj.logError("data and nodes must be same length.");
         return;
       }
       updates = u
       drawCall = r
+      sim = s
     }
 
     var update = function()
@@ -72,7 +72,7 @@ var Renderer = function () {
         infoBox.style.position = "fixed";
         infoBox.style.padding = "2.5px";
         infoBox.style.backgroundColor = "rgba(0,0,0,0.5)";
-        infoBox.style.width = "5%";
+        infoBox.style.width = "15%";
         infoBox.style.color = "rgb(173,172,173)";
         infoBox.style.height = "7%";
         infoBox.style.top = lattice.nodes()[0].parentNode.style.top;
@@ -105,7 +105,7 @@ var Renderer = function () {
 
        if(lattice.showEdges())
        {
-         datapoint.valencePairs.forEach((vp, i) => {
+         datapoint.valencePairs.forEach((vp) => {
            var nodeLine1 = vp[3];
            var nodeLine2 = vp[4];
 
@@ -128,23 +128,34 @@ var Renderer = function () {
            nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
          });
        }
-          node.style.zIndex = -parseInt(imagePos.z); // user z direction is flipped
+
           node.setAttribute("cx", centreToScreenX(imagePos.x) );
           node.setAttribute("cy", centreToScreenY(imagePos.y) );
+          node.setAttribute("cz", centreToScreenY(imagePos.z) );
           node.setAttribute("fill", datapoint.col );
-          node.setAttribute("stroke", "black" );
+          node.setAttribute("stroke", datapoint.stroke );
           node.setAttribute("r", datapoint.r);
      }
 
-    var redraw = function()
-    {
-      lattice.nodes().forEach((node, i) => {
-        if(drawCall){
-          drawCall(node, lattice.data()[i]);
-        } else {
-          defaultDrawCall(node, lattice.data()[i]);
-        }
+      var redraw = function()
+      {
+        lattice.nodes().forEach((node) => {
+          if(drawCall){
+            drawCall(node, lattice.data()[parseInt(node.getAttribute("idx"))]);
+          } else {
+            defaultDrawCall(node, lattice.data()[parseInt(node.getAttribute("idx"))]);
+          }
+        });
+
+      // need to reorder the nodes in the HTML by z value (z-index not supported by svg)
+
+      lattice.nodes().sort(function(a, b) {
+        return parseFloat(b.getAttribute("cz")).toFixed(3) - parseFloat(a.getAttribute("cz")).toFixed(3);
       });
+
+      for (let item of lattice.nodes()) {
+        sim.appendChild(item);
+      }
     }
 
     this.render = function() // public fn
@@ -157,10 +168,8 @@ var Renderer = function () {
       elapsed = (end - start)/1000;
       if(elapsed > frames * (1/fps)){ redraw(); if (showInfo) drawInfo(); frames += 1;}
     }, freq);
-
       return timer;
     }
-
   return this;
 };
 

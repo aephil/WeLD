@@ -14,7 +14,7 @@ var Lattice = function()
 
     this.setShowEdges = function(bool){
       if(bool && terminalObj){
-        terminalObj.log(terminalObj.colouredText("warning: ", "red")+"enabling edges may cause a significant hit to the frame rate.")
+        terminalObj.logWarning("enabling edges may cause a significant hit to the frame rate.")
       }
       showEdges = bool;
     }
@@ -65,7 +65,6 @@ var Lattice = function()
           } else {
             node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle]);
           }
-
         }
       }
     };
@@ -74,7 +73,6 @@ var Lattice = function()
     {
       if(predicate)
       {
-
         // form neighbours
         for(k = 0; k < data.length; k++)
         {
@@ -144,12 +142,12 @@ var Lattice = function()
                     x:(a * i) + (0.5 * a), // position x
                     y:(a * j), // position y
                     z:(a * h) + (0.5 * a), // position z
-
                     r:5,  // radius
                     m:1,  // mass
                     name:"basic node",
                     neighbours:[], // index of other atoms
                     valencePairs:[],
+                    stroke:"black",
                     col:"rgb(173,172,173)", // colour
                   }
                 )
@@ -159,12 +157,12 @@ var Lattice = function()
                     x: (a * i), // position x
                     y: (a * j) + (0.5 * a), // position y
                     z: (a * h) + (0.5 * a), // position z
-
                     r:5,  // radius
                     m:1,  // mass
                     name:"basic node",
                     neighbours:[],
                     valencePairs:[],
+                    stroke:"black",
                     col:"rgb(173,172,173)", // colour
                   })
 
@@ -178,6 +176,7 @@ var Lattice = function()
                     name:"basic node",
                     neighbours:[],
                     valencePairs:[],
+                    stroke:"black",
                     col:"rgb(173,172,173)", // colour
                   }
                 )
@@ -186,7 +185,6 @@ var Lattice = function()
           }
 
           makeBonds(data);
-
 
           if(terminalObj)
           {
@@ -212,79 +210,6 @@ var Lattice = function()
 
     }
 
-
-    this.makeFCC2D = function(cellsX, cellsY, a, sim)
-    {
-      data = []
-      nodes = []
-
-      for(i = 0; i < cellsX; i++)
-      {
-        for(j = 0; j < cellsY; j++)
-        {
-
-          var cornerX = a * i
-          var cornerY = a * j
-
-          data.push(
-            {
-              x:cornerX, // position x
-              y:cornerY, // position y
-              z:1, // position z
-
-              r:5,  // radius
-              m:1,  // mass
-
-              neighbours:[], // index of other atoms
-              valencePairs:[],
-              col:"rgb(173,172,173)", // colour
-            }
-          )
-
-          data.push(
-            {
-              x:cornerX + (a*0.5) , // position x
-              y:cornerY + (a*0.5), // position y
-              z:1, // position z
-
-              r:5,  // radius
-              m:1,  // mass
-
-              neighbours:[],
-              valencePairs:[],
-              col:"rgb(173,172,173)", // colour
-            }
-          )
-        }
-      }
-
-      // create bonds based on a given predicate
-
-      makeBonds(data);
-
-      if(terminalObj)
-      {
-        terminalObj.log("total of "+data.length+" nodes were formed.");
-      }
-
-      for(let i = 0; i < data.length; i++)
-      {
-        var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-
-        newNode.addEventListener("mouseover", function( event ) {
-            UserInterface.showTooltip(event,data[i].name);
-          }, false);
-
-        newNode.addEventListener("mouseout", function( event ) {
-            UserInterface.hideTooltip();
-          }, false);
-
-        sim.appendChild(newNode);
-        nodes.push(newNode);
-      }
-
-    }
-
     this.makePrimitive3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
       data = []
@@ -294,18 +219,17 @@ var Lattice = function()
         {
           for(j = 0; j < cellsY; j++)
           {
-
             data.push(
               {
                 x:a * i, // position x
                 y:a * j, // position y
                 z:a * h, // position z
-
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
                 name:"basic node",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"rgb(173,172,173)"), // colour
               }
             )
@@ -319,7 +243,7 @@ var Lattice = function()
 
       if(terminalObj)
       {
-        terminalObj.log("loaded" + terminalObj.colouredText(" Primitive Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
+        terminalObj.log("loaded"+terminalObj.colouredText(" Primitive Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
         terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
       }
 
@@ -335,6 +259,11 @@ var Lattice = function()
             Graphics.UserInterface.hideTooltip();
           }, false);
 
+        newNode.addEventListener("mousedown", function( event ) {
+          Graphics.UserInterface.highlight(event,i);
+          }, false);
+
+        newNode.setAttribute("idx",i);
         sim.appendChild(newNode);
         nodes.push(newNode);
       }
@@ -368,6 +297,7 @@ var Lattice = function()
                 name:"A Cation",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"blue"), // colour
               }
             )
@@ -389,6 +319,7 @@ var Lattice = function()
                 name:"B Cation",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"orange"), // colour
               }
             )
@@ -410,6 +341,7 @@ var Lattice = function()
                 name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"red"), // colour
               }
             )
@@ -429,6 +361,7 @@ var Lattice = function()
                 name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"red"), // colour
               }
             )
@@ -448,10 +381,10 @@ var Lattice = function()
                 name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"red"), // colour
               }
             )
-
           }
         }
       }

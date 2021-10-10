@@ -100,8 +100,9 @@
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange"
     });
 
-  lattice.makePrimitive3D(2,2,2, edgeLen, sim);
-  ui.setData(lattice.data())
+  lattice.makePrimitive3D(5,5,5, edgeLen, sim);
+  ui.setData(lattice.data());
+  ui.setNodes(lattice.nodes());
   var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 
   // setup graphics resources ///////////////////////////////////////////////
@@ -116,14 +117,14 @@
 
   renderer = Graphics.Renderer;
   renderer.setTerminal(terminalObj);
-  renderer.setFPS(30);
+  renderer.setFPS(60);
 
- function makeDraggable(evt) {
-   var svg = evt.target;
-   svg.addEventListener('mousedown', startDrag);
-   svg.addEventListener('mousemove', drag);
-   svg.addEventListener('mouseup', endDrag);
-   svg.addEventListener('mouseleave', endDrag);
+   function makeDraggable(evt) {
+     var svg = evt.target;
+     svg.addEventListener('mousedown', startDrag);
+     svg.addEventListener('mousemove', drag);
+     svg.addEventListener('mouseup', endDrag);
+     svg.addEventListener('mouseleave', endDrag);
    function startDrag(evt) {
      if (evt.target.classList.contains('sim'))
      {
@@ -143,9 +144,10 @@
    function endDrag(evt) {
      selectedElement = null;
    }
+
  }
 
- renderer.addAnimation(physics, false, lattice )
+ renderer.addAnimation(physics, false, lattice, sim)
  animation = renderer.render(lattice)
 
  // non-essential WeLD banner //////////////////////////////////////////////
