@@ -7,6 +7,15 @@ var Renderer = function () {
     var terminalObj = false;
     var showInfo = true;
 
+    var fps = 30; //private var
+    var frames = 0;
+    var freq = 1; //milliseconds
+    var elapsed = 0;
+
+    var updates;
+    var redraw;
+    var lattice;
+
     this.setRho = function(angle){rho=angle;}
     this.setTheta = function(angle){theta=angle;}
     this.setTerminal = function(termObj)
@@ -19,14 +28,7 @@ var Renderer = function () {
       return rotY(rotX(d,theta),rho)
     }
 
-    var fps = 30; //private var
-    var frames = 0;
-    var freq = 1;
-    var elapsed = 0;
 
-    var updates;
-    var redraw;
-    var lattice;
 
     this.setSpeed = function(n, terminalObj=null){
       freq = n;
@@ -38,7 +40,7 @@ var Renderer = function () {
     this.setFPS = function(n){
       fps = n;
       if(terminalObj){
-        terminalObj.log("fps set to "+(n>=60?terminalObj.colouredText(n,"red"):terminalObj.colouredText(n,"green")))}};
+        terminalObj.log("fps set to "+terminalObj.colouredText(n,"blue"))}};
 
     this.fps = function(){return fps;}
 
@@ -147,11 +149,11 @@ var Renderer = function () {
     this.render = function() // public fn
     {
       if (showInfo) initInfo();
-      var start = performance.now();
       var timer = window.setInterval(function(){
-        /// call your function here
       update();
-      elapsed = (performance.now() - start) / 1000;
+      elapsed += (freq/1000);
+      console.log(elapsed);
+
       if(elapsed > frames * (1/fps)){ redraw(); if (showInfo) drawInfo(); frames += 1;}
     }, freq);
 
