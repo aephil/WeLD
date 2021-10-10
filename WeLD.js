@@ -103,6 +103,7 @@
   lattice.makePrimitive3D(5,5,5, edgeLen, sim);
   ui.setData(lattice.data());
   ui.setNodes(lattice.nodes());
+  ui.setTerminal(terminalObj);
   var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 
   // setup graphics resources ///////////////////////////////////////////////

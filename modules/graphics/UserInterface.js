@@ -3,9 +3,11 @@ var UserInterface = function()
   var data=[]; //data associated with the simulation
   var nodes=[];
   var highlighted=false;
+  var terminalObj=false;
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
+  this.setTerminal = function(t){terminalObj=t}
 
   this.highlight = function(evt, i)
   {
@@ -21,6 +23,7 @@ var UserInterface = function()
           data[highlighted].stroke = "black";
         }
         highlighted=parseInt(i);
+        if(terminalObj){terminalObj.log("selected node "+terminalObj.colouredText("#"+i,"green"))}
       }
   }
 
