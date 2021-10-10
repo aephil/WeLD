@@ -1,5 +1,19 @@
 var UserInterface = {} // namespace
 
+UserInterface.showTooltip = function(evt, text) {
+  let tooltip = document.getElementById("tooltip");
+  tooltip.innerHTML = text;
+  tooltip.style.display = "block";
+  tooltip.style.left = evt.pageX + 10 + 'px';
+  tooltip.style.top = evt.pageY + 10 + 'px';
+}
+
+UserInterface.hideTooltip = function() {
+  var tooltip = document.getElementById("tooltip");
+  tooltip.style.display = "none";
+}
+
+
 var VTerm = function () {
 
     var buffer = ""; //private var

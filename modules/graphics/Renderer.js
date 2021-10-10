@@ -37,6 +37,7 @@ var Renderer = function () {
         terminalObj.log("frequency set to "+n +"/ms")
       }
     };
+
     this.setFPS = function(n){
       fps = n;
       if(terminalObj){
@@ -148,12 +149,12 @@ var Renderer = function () {
 
     this.render = function() // public fn
     {
+      var start = performance.now();
       if (showInfo) initInfo();
       var timer = window.setInterval(function(){
+      var end = performance.now();
       update();
-      elapsed += (freq/1000);
-      console.log(elapsed);
-
+      elapsed = (end - start)/1000;
       if(elapsed > frames * (1/fps)){ redraw(); if (showInfo) drawInfo(); frames += 1;}
     }, freq);
 

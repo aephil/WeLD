@@ -100,7 +100,7 @@
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && i.col == j.col && i.col!=="orange"
     });
 
-  lattice.makePrimitive3D(5,5,5, edgeLen, sim);
+  lattice.makePerovskite3D(5,5,5, edgeLen, sim);
   var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 
   // setup graphics resources ///////////////////////////////////////////////

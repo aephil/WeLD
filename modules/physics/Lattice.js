@@ -14,7 +14,7 @@ var Lattice = function()
 
     this.setShowEdges = function(bool){
       if(bool && terminalObj){
-        terminalObj.log(terminalObj.colouredText("warning: ", "red")+"enabling edges causes a significant hit to the frame rate.")
+        terminalObj.log(terminalObj.colouredText("warning: ", "red")+"enabling edges may cause a significant hit to the frame rate.")
       }
       showEdges = bool;
     }
@@ -171,6 +171,15 @@ var Lattice = function()
         for(let i = 0; i < data.length; i++)
         {
           var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+          newNode.addEventListener("mouseover", function( event ) {
+              UserInterface.showTooltip(event,data[i].name);
+            }, false);
+
+          newNode.addEventListener("mouseout", function( event ) {
+              UserInterface.hideTooltip();
+            }, false);
+
           sim.appendChild(newNode);
           nodes.push(newNode);
         }
@@ -233,6 +242,15 @@ var Lattice = function()
       for(let i = 0; i < data.length; i++)
       {
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+        newNode.addEventListener("mouseover", function( event ) {
+            UserInterface.showTooltip(event,data[i].name);
+          }, false);
+
+        newNode.addEventListener("mouseout", function( event ) {
+            UserInterface.hideTooltip();
+          }, false);
+
         sim.appendChild(newNode);
         nodes.push(newNode);
       }
@@ -260,7 +278,7 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"basic node",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 col:(nodeCol?nodeCol():"rgb(173,172,173)"), // colour
@@ -283,6 +301,15 @@ var Lattice = function()
       for(let i = 0; i < data.length; i++)
       {
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+        newNode.addEventListener("mouseover", function( event ) {
+            UserInterface.showTooltip(event,data[i].name);
+          }, false);
+
+        newNode.addEventListener("mouseout", function( event ) {
+            UserInterface.hideTooltip();
+          }, false);
+
         sim.appendChild(newNode);
         nodes.push(newNode);
       }
@@ -313,7 +340,7 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():3),  // radius
                 m:1,  // mass
-
+                name:"A Cation",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 col:(nodeCol?nodeCol():"blue"), // colour
@@ -334,7 +361,7 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"B Cation",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 col:(nodeCol?nodeCol():"orange"), // colour
@@ -355,7 +382,7 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 col:(nodeCol?nodeCol():"red"), // colour
@@ -374,7 +401,7 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 col:(nodeCol?nodeCol():"red"), // colour
@@ -393,7 +420,7 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 col:(nodeCol?nodeCol():"red"), // colour
@@ -416,6 +443,15 @@ var Lattice = function()
       for(let i = 0; i < data.length; i++)
       {
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+        newNode.addEventListener("mouseover", function( event ) {
+            UserInterface.showTooltip(event,data[i].name);
+          }, false);
+
+        newNode.addEventListener("mouseout", function( event ) {
+            UserInterface.hideTooltip();
+          }, false);
+
         sim.appendChild(newNode);
         nodes.push(newNode);
       }

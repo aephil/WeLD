@@ -33,3 +33,11 @@ text.orange {
 text.blue {
   color: blue;
 }
+
+#tooltip {
+  background: cornsilk;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 5px;
+  z-index: 200;
+}
