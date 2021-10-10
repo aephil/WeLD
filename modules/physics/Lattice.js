@@ -130,60 +130,88 @@ var Lattice = function()
       return hasNeighbour(i,j);
     }
 
-    this.makePrimitive2D = function(cellsX, cellsY, a, sim)
+    this.makeFCC3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
-        data = []
-        nodes = []
-        for(i = 0; i < cellsX; i++)
-        {
-          for(j = 0; j < cellsY; j++)
-          {
-            var cornerX = a * i
-            var cornerY = a * j
-
-            data.push(
+      for(let h = 0; h < cellsZ; h++)
+      {
+        for(let i = 0; i < cellsX; i++)
+            {
+              for(let j = 0; j < cellsY; j++)
               {
-                x:cornerX, // position x
-                y:cornerY, // position y
-                z:1, // position z
 
-                r:(nodeCol?nodeR():5),  // radius
-                m:5,  // mass
+                data.push(
+                  {
+                    x:(a * i) + (0.5 * a), // position x
+                    y:(a * j), // position y
+                    z:(a * h) + (0.5 * a), // position z
 
-                neighbours:[], // index of other atoms
-                valencePairs:[],
-                col:"rgb(173,172,173)", // colour
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[], // index of other atoms
+                    valencePairs:[],
+                    col:"rgb(173,172,173)", // colour
+                  }
+                )
+
+                data.push(
+                  {
+                    x: (a * i), // position x
+                    y: (a * j) + (0.5 * a), // position y
+                    z: (a * h) + (0.5 * a), // position z
+
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[],
+                    valencePairs:[],
+                    col:"rgb(173,172,173)", // colour
+                  })
+
+                data.push(
+                  {
+                    x:(a * i) + (0.5 * a), // position x
+                    y:(a * j) + (0.5 * a), // position y
+                    z:(a * h), // position z
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[],
+                    valencePairs:[],
+                    col:"rgb(173,172,173)", // colour
+                  }
+                )
               }
-            )
+            }
           }
-        }
 
-        // create bonds based on a given predicate
+          makeBonds(data);
 
-        makeBonds(data);
 
-        if(terminalObj)
-        {
-          terminalObj.log("loaded" + terminalObj.colouredText(" Face-Centered Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-          terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
-        }
+          if(terminalObj)
+          {
+            terminalObj.log("loaded" + terminalObj.colouredText(" Face-Centered Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
+            terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
+          }
 
-        for(let i = 0; i < data.length; i++)
-        {
-          var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          for(let i = 0; i < data.length; i++)
+          {
+            var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
 
-          newNode.addEventListener("mouseover", function( event ) {
-              UserInterface.showTooltip(event,data[i].name);
-            }, false);
+            newNode.addEventListener("mouseover", function( event ) {
+                Graphics.UserInterface.showTooltip(event,i);
+              }, false);
 
-          newNode.addEventListener("mouseout", function( event ) {
-              UserInterface.hideTooltip();
-            }, false);
+            newNode.addEventListener("mouseout", function( event ) {
+                Graphics.UserInterface.hideTooltip();
+              }, false);
 
-          sim.appendChild(newNode);
-          nodes.push(newNode);
-        }
-      }
+            sim.appendChild(newNode);
+            nodes.push(newNode);
+          }
+
+    }
+
 
     this.makeFCC2D = function(cellsX, cellsY, a, sim)
     {
@@ -266,15 +294,12 @@ var Lattice = function()
         {
           for(j = 0; j < cellsY; j++)
           {
-            var cornerX = a * i
-            var cornerY = a * j
-            var cornerZ = a * h
 
             data.push(
               {
-                x:cornerX, // position x
-                y:cornerY, // position y
-                z:cornerZ, // position z
+                x:a * i, // position x
+                y:a * j, // position y
+                z:a * h, // position z
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
@@ -303,11 +328,11 @@ var Lattice = function()
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
 
         newNode.addEventListener("mouseover", function( event ) {
-            UserInterface.showTooltip(event,data[i].name);
+            Graphics.UserInterface.showTooltip(event,i);
           }, false);
 
         newNode.addEventListener("mouseout", function( event ) {
-            UserInterface.hideTooltip();
+            Graphics.UserInterface.hideTooltip();
           }, false);
 
         sim.appendChild(newNode);
@@ -445,11 +470,11 @@ var Lattice = function()
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
 
         newNode.addEventListener("mouseover", function( event ) {
-            UserInterface.showTooltip(event,data[i].name);
+            Graphics.UserInterface.showTooltip(event,i);
           }, false);
 
         newNode.addEventListener("mouseout", function( event ) {
-            UserInterface.hideTooltip();
+            Graphics.UserInterface.hideTooltip();
           }, false);
 
         sim.appendChild(newNode);

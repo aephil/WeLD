@@ -1,7 +1,7 @@
 /**
  * WeLD.js
  *
- * Coyright (C) 06-09-2021, Author Takudzwa Makoni
+ * Copyright (C) 06-09-2021, Author Takudzwa Makoni
  * <https://github.com/aephil/WeLD>
  *
  * This Program is free software: you can redistribute
@@ -14,7 +14,7 @@
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a coy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with This Program. If not, see <http://www.gnu.org/licenses/>.
  *
  * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
@@ -23,13 +23,13 @@
  // setup simulation canvas and terminal ///////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
- ui = UserInterface.loadBasic();
- sim = ui[0];
- vterm = ui[1];
+ ui = Graphics.UserInterface;
+ canvas = ui.loadBasic()
+ sim = canvas[0];
+ vterm = canvas[1];
 
- terminalObj = UserInterface.VTerm;
+ terminalObj = Graphics.UserInterface.VTerm;
  terminalObj.parent = vterm;
- terminalObj.log("User Interface is setup.");
 
 
  // load physics controls  /////////////////////////////////////////////////
@@ -38,7 +38,7 @@
  // temperature
  tempController = Physics.Temperature;
     // ui controls for temperature
-    tempSlider = UserInterface.slider(0,1,0.001)
+    tempSlider = ui.slider(0,1,0.001)
 
     tempSliderContainer = tempSlider[0];
     tempSliderInput = tempSlider[1];
@@ -57,7 +57,7 @@
     harmonicController = Physics.Harmonic;
 
       // ui controls for spring constant
-      springConstSlider = UserInterface.slider(0,1,0.01)
+      springConstSlider = ui.slider(0,1,0.01)
       springConstSliderContainer = springConstSlider[0];
       springConstSliderContainer.style.top = "30%";
 
@@ -72,7 +72,7 @@
       }
 
       // ui controls for valence angle constant
-      valenceConstSlider = UserInterface.slider(0,1, 0.01)
+      valenceConstSlider = ui.slider(0,1, 0.01)
       valenceConstSliderContainer = valenceConstSlider[0];
       valenceConstSliderContainer.style.top = "38%";
 
@@ -89,7 +89,7 @@
   // setup physics resources ////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-  var edgeLen = 50;
+  var edgeLen = 40;
 
   lattice = Physics.Lattice;
   lattice.setTerminal(terminalObj);
@@ -97,10 +97,11 @@
 
   lattice.setPredicate(
     function(i,j){
-      return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j && i.col == j.col && i.col!=="orange"
+      return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange"
     });
 
-  lattice.makePerovskite3D(5,5,5, edgeLen, sim);
+  lattice.makePrimitive3D(2,2,2, edgeLen, sim);
+  ui.setData(lattice.data())
   var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 
   // setup graphics resources ///////////////////////////////////////////////
@@ -115,7 +116,7 @@
 
   renderer = Graphics.Renderer;
   renderer.setTerminal(terminalObj);
-  renderer.setFPS(60);
+  renderer.setFPS(30);
 
  function makeDraggable(evt) {
    var svg = evt.target;

@@ -79,7 +79,6 @@ var Renderer = function () {
         infoBox.style.left = lattice.nodes()[0].parentNode.style.left;
         infoBox.style.zIndex = lattice.nodes()[0].parentNode.style.zIndex + 1;
         document.body.appendChild(infoBox);
-
     }
 
   var drawInfo = function(){
@@ -129,11 +128,12 @@ var Renderer = function () {
            nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
          });
        }
-          node.style.zIndex = datapoint.z;
+          node.style.zIndex = -parseInt(imagePos.z); // user z direction is flipped
           node.setAttribute("cx", centreToScreenX(imagePos.x) );
           node.setAttribute("cy", centreToScreenY(imagePos.y) );
           node.setAttribute("fill", datapoint.col );
-          node.setAttribute("r", datapoint.r );
+          node.setAttribute("stroke", "black" );
+          node.setAttribute("r", datapoint.r);
      }
 
     var redraw = function()
