@@ -68,8 +68,8 @@ var Renderer = function () {
         infoBox.setAttribute("id", "infoBox");
         infoBox.style.position = "fixed";
         infoBox.style.padding = "2.5px";
-        infoBox.style.backgroundColor = "black";
-        infoBox.style.width = "25%";
+        infoBox.style.backgroundColor = "rgba(0,0,0,0.5)";
+        infoBox.style.width = "15%";
         infoBox.style.color = "rgb(173,172,173)";
         infoBox.style.height = "10%";
         infoBox.style.top = lattice.nodes()[0].parentNode.style.top;
