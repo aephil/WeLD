@@ -4,7 +4,8 @@ var Renderer = function () {
     // camera
     var rho = 0;
     var theta = 0;
-    var terminalObj = false;
+
+    var ui = false;
     var showInfo = true;
 
     var fps = 30; //private var
@@ -15,46 +16,48 @@ var Renderer = function () {
     var updates;
     var redraw;
     var lattice;
-    var sim;
+    var ui = false;
 
+    this.rho = function(){return rho;}
+    this.theta = function(){return theta;}
     this.setRho = function(angle){rho=angle;}
     this.setTheta = function(angle){theta=angle;}
-    this.setTerminal = function(termObj)
+    this.setUI = function(i)
     {
       // typescript to check type maybe?
-      terminalObj = termObj;
+      ui = i;
     }
 
     var cameraView = function(d){
-      return rotY(rotX(d,theta),rho)
+      return rotY(rotX(d,theta),rho);
     }
 
-    this.setSpeed = function(n, terminalObj=null){
+    this.setSpeed = function(n, ui=null){
       freq = n;
-      if(terminalObj!==null)
+      if(ui)
       {
-        terminalObj.log("frequency set to "+n +"/ms")
+        ui.log("frequency set to "+n +"/ms")
       }
     };
 
     this.setFPS = function(n){
       fps = n;
-      if(terminalObj){
-        terminalObj.log("fps set to "+terminalObj.colouredText(n,"blue"))}};
+      if(ui){
+        ui.log("fps set to "+ui.colouredText(n,"blue"))}};
 
     this.fps = function(){return fps;}
 
-    this.addAnimation = function(u,r,l,s){
+    this.addAnimation = function(u,r,l,i=false){
 
       lattice = l;
 
       if(l.data().length !== l.nodes().length){
-        terminalObj.logError("data and nodes must be same length.");
+        ui.logError("data and nodes must be same length.");
         return;
       }
       updates = u
       drawCall = r
-      sim = s
+      ui = i
     }
 
     var update = function()
@@ -154,7 +157,7 @@ var Renderer = function () {
       });
 
       for (let item of lattice.nodes()) {
-        sim.appendChild(item);
+        ui.sim().appendChild(item);
       }
     }
 
@@ -170,6 +173,7 @@ var Renderer = function () {
     }, freq);
       return timer;
     }
+
   return this;
 };
 

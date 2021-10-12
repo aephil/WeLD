@@ -1,18 +1,108 @@
+
 var UserInterface = function()
 {
   var data=[]; //data associated with the simulation
   var nodes=[];
   var highlighted=false;
-  var terminalObj=false;
+
+  var output = "";
+  var input = "";
+
+  var sim = false;
+  this.sim = function(){return sim;}
+  var control = false;
+
+  var updateScroll = function(){
+    termNode.scrollTop = termNode.scrollHeight;
+  }
+  var colouredText = function(msg, colour) {
+    return "<text class='"+colour+"'>"+msg+"</text>";
+  }
+  var initTerminal = function(termNode){
+
+    termNode = document.getElementById("terminal");
+
+      termNode.focus();
+      termNode.addEventListener("keydown", function( event ) {
+
+        var key = event.keyCode;
+        var char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
+
+        // If the user has pressed enter
+
+        switch (key) {
+          case 32 /*space*/:
+          {
+            input+=(input.slice(-1)===" "?"":" ");
+            termNode.innerHTML = output + "User: " + input + "<";;
+            break;
+          }
+          case 13 /*enter*/:
+          {
+            input="";
+            termNode.innerHTML = output;
+            break;
+          }
+          case 8/*backspace*/:
+          {
+            if(input.length>0)
+            {
+              input = input.slice(0, -1);
+              termNode.innerHTML = output + "User: " +input + "<";
+            }
+            break;
+          }
+          case 37/*left*/:
+          {
+
+            break;
+          }
+          case 39/*right*/:
+          {
+
+            break;
+          }
+            case 38/*up*/:
+          {
+
+            break;
+          }
+            case 40/*down*/:
+
+              break;
+          default:
+          {
+            input += char;
+            termNode.innerHTML = output + "User: " + input + "<";
+          }
+          console.log(input);
+
+        }
+      }, false);
+    }
+  this.colouredText = function(msg, colour){
+    return colouredText(msg, colour);
+  }
+  this.logWarning = function(msg, newline=true){
+      output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
+      document.getElementById("terminal").innerHTML = output;
+      updateScroll()
+    }
+  this.logError = function(msg, newline=true){
+      output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
+      document.getElementById("termNode").innerHTML = output;
+      updateScroll()
+    }
+  this.log = function (msg, newline=true) {
+      output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"");
+      document.getElementById("terminal").innerHTML = output;
+      updateScroll()
+    };
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
-  this.setTerminal = function(t){terminalObj=t}
-
-  this.highlight = function(evt, i)
-  {
+  this.highlight = function(evt, i){
     var datapoint = data[parseInt(i)];
-    debugger;
     if(datapoint.stroke=="red")
     {
       datapoint.stroke="black";
@@ -23,10 +113,9 @@ var UserInterface = function()
           data[highlighted].stroke = "black";
         }
         highlighted=parseInt(i);
-        if(terminalObj){terminalObj.log("selected node "+terminalObj.colouredText("#"+i,"green"))}
+        if(terminal){terminal.log("selected node "+terminal.colouredText("#"+i,"green"))}
       }
   }
-
   this.showTooltip = function(evt, i) {
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
@@ -47,16 +136,13 @@ var UserInterface = function()
     tooltip.style.left = evt.pageX + 10 + 'px';
     tooltip.style.top = evt.pageY + 10 + 'px';
   }
-
   this.hideTooltip = function() {
     var tooltip = document.getElementById("tooltip");
     tooltip.style.display = "none";
   }
+  this.loadBasic = function(){
 
-  this.loadBasic = function()
-  {
-
-    var sim = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    sim = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     document.body.appendChild(sim);
     sim.setAttribute("id","sim");
     sim.setAttribute("class","sim"); // todo pick ONE
@@ -67,35 +153,54 @@ var UserInterface = function()
     sim.style.height = "95%";
     sim.style.backgroundColor = "rgb(33,33,37)";
 
-    var vterm = document.createElement("div");
-    document.body.appendChild(vterm);
-    vterm.setAttribute("id","vterm");
-    vterm.style.position = "fixed";
-    vterm.style.top = "2.5%";
-    vterm.style.right = "2%";
-    vterm.style.width = "25%";
-    vterm.style.height = "20%";
-    vterm.style.color = "rgb(173,172,173)";
-    vterm.style.padding = "2.5px";
-    vterm.style.fontFamily = "monospace";
-    vterm.style.backgroundColor = "white";
-    vterm.style.overflowX = "scroll";
-    vterm.style.overflowY = "scroll";
+    termNode = document.createElement("div");
+    document.body.appendChild(termNode);
+    termNode.setAttribute("tabindex","0");
+    termNode.setAttribute("id","terminal");
+    termNode.style.position = "fixed";
+    termNode.style.top = "2.5%";
+    termNode.style.right = "2%";
+    termNode.style.width = "25%";
+    termNode.style.height = "25%";
+    termNode.style.color = "rgb(173,172,173)";
+    termNode.style.padding = "2.5px";
+    termNode.style.fontFamily = "monospace";
+    termNode.style.overflowX = "scroll";
+    termNode.style.overflowY = "scroll";
+    termNode.addEventListener("focus",function(event){
+        termNode.style.color = "black";
+    })
+    termNode.addEventListener("focusout",function(event){
+        termNode.style.backgroundColor = "white";
+        termNode.style.color = "rgb(173,172,173)";
+    });
+    initTerminal(termNode);
 
-    return [sim, vterm]
+    control = document.createElement("div");
+    document.body.appendChild(control);
+    control.setAttribute("id","control");
+    control.style.position = "fixed";
+    control.style.top = "28.0%";
+    control.style.right = "1.5%";
+    control.style.width = "25%";
+    control.style.height = "68.5%";
+    control.style.color = "rgb(173,172,173)";
+    control.style.padding = "2.5px";
+    control.style.fontFamily = "monospace";
+    control.style.overflowX = "scroll";
+    control.style.overflowY = "scroll";
+
   }
-
-  this.slider = function(min=0, max=100, step=1)
-  {
+  this.slider = function(min=0, max=100, step=1){
 
     // TODO remove d3 here too
     var container = document.createElement("div");
-    document.body.appendChild(container);
-    container.style.position = "fixed";
-    container.style.width = "25%";
-    container.style.height = "20%";
-    container.style.top = "22.5%";
+    container.style.position = "relative";
+    container.style.width = "40%";
+    container.style.height = "10%";
+    container.style.top = "0%";
     container.style.right = "1%";
+    container.style.padding = "5px";
 
     var slider = document.createElement("input");
     container.appendChild(slider);
@@ -112,47 +217,7 @@ var UserInterface = function()
       return [container, slider, label];
   }
 
-  var VTerm = function () {
-
-      var buffer = ""; //private var
-      this.parent = null; // public var
-
-      var updateScroll = function() // private fn
-      {
-        var element = document.getElementById("vterm");
-        element.scrollTop = element.scrollHeight;
-      }
-
-      var colouredText = function(msg, colour) {
-        return "<text class='"+colour+"'>"+msg+"</text>";
-      }
-
-      this.colouredText = function(msg, colour){
-        return colouredText(msg, colour);
-      }
-
-      this.logWarning = function(msg, newline=true){
-        buffer += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
-        document.getElementById("vterm").innerHTML = buffer;
-        updateScroll()
-      }
-
-      this.logError = function(msg, newline=true){
-        buffer += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
-        document.getElementById("vterm").innerHTML = buffer;
-        updateScroll()
-      }
-
-      this.log = function (msg, newline=true) {  //public fn
-        buffer += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"");
-        document.getElementById("vterm").innerHTML = buffer;
-        updateScroll()
-      };
-      return this;
-  };
-
-  this.VTerm = new VTerm();
-
+  return this;
 }
 
 Graphics.UserInterface = new UserInterface();

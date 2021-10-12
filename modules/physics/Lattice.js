@@ -3,7 +3,7 @@ var Lattice = function()
 
     var nodeR = false;
     var nodeCol = false;
-    var terminalObj = false;
+    var ui = false;
     var predicate = false;
     var showEdges = false;
     var data = [];
@@ -13,18 +13,18 @@ var Lattice = function()
     this.nodes = function(){return nodes};
 
     this.setShowEdges = function(bool){
-      if(bool && terminalObj){
-        terminalObj.logWarning("enabling edges may cause a significant hit to the frame rate.")
+      if(bool && ui){
+        ui.logWarning("enabling edges may cause a significant hit to the frame rate.")
       }
       showEdges = bool;
     }
 
     this.showEdges = function(){return showEdges;}
 
-    this.setTerminal = function(termObj)
+    this.setUI = function(x)
     {
       // typescript to check type maybe?
-      terminalObj = termObj;
+      ui = x;
     }
 
     // returns true if node i considers node j a neighbour.
@@ -186,10 +186,11 @@ var Lattice = function()
 
           makeBonds(data);
 
-          if(terminalObj)
+          if(ui)
           {
-            terminalObj.log("loaded" + terminalObj.colouredText(" Face-Centered Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-            terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
+            debugger;
+            ui.log("loaded" + ui.colouredText(" Face-Centered Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
+            ui.log("total of "+ui.colouredText(data.length,"blue")+" nodes were formed.");
           }
 
           for(let i = 0; i < data.length; i++)
@@ -241,10 +242,10 @@ var Lattice = function()
 
       makeBonds(data);
 
-      if(terminalObj)
+      if(ui)
       {
-        terminalObj.log("loaded"+terminalObj.colouredText(" Primitive Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-        terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
+        ui.log("loaded"+ui.colouredText(" Primitive Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
+        ui.log("total of "+ui.colouredText(data.length,"blue")+" nodes were formed.");
       }
 
       for(let i = 0; i < data.length; i++)
@@ -392,10 +393,10 @@ var Lattice = function()
       // create bonds based on a given predicate
       makeBonds(data);
 
-      if(terminalObj)
+      if(ui)
       {
-        terminalObj.log("loaded" + terminalObj.colouredText(" Perovskite ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-        terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
+        ui.log("loaded" + ui.colouredText(" Perovskite ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
+        ui.log("total of "+ui.colouredText(data.length,"blue")+" nodes were formed.");
       }
 
       for(let i = 0; i < data.length; i++)
@@ -410,13 +411,17 @@ var Lattice = function()
             Graphics.UserInterface.hideTooltip();
           }, false);
 
+        newNode.addEventListener("mousedown", function( event ) {
+          Graphics.UserInterface.highlight(event,i);
+          }, false);
+
+        newNode.setAttribute("idx",i);
         sim.appendChild(newNode);
         nodes.push(newNode);
       }
     }
 
    this.setPredicate = function(p){predicate = p}
-
 // default draw call for renderer, (can use a custom one)
   }
 
