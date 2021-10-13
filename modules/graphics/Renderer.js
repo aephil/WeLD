@@ -4,7 +4,8 @@ var Renderer = function () {
     // camera
     var rho = 0;
     var theta = 0;
-    var terminalObj = false;
+
+    var ui = false;
     var showInfo = true;
 
     var fps = 30; //private var
@@ -15,45 +16,48 @@ var Renderer = function () {
     var updates;
     var redraw;
     var lattice;
+    var ui = false;
 
+    this.rho = function(){return rho;}
+    this.theta = function(){return theta;}
     this.setRho = function(angle){rho=angle;}
     this.setTheta = function(angle){theta=angle;}
-    this.setTerminal = function(termObj)
+    this.setUI = function(i)
     {
       // typescript to check type maybe?
-      terminalObj = termObj;
+      ui = i;
     }
 
     var cameraView = function(d){
-      return rotY(rotX(d,theta),rho)
+      return rotY(rotX(d,theta),rho);
     }
 
-
-
-    this.setSpeed = function(n, terminalObj=null){
+    this.setSpeed = function(n, ui=null){
       freq = n;
-      if(terminalObj!==null)
+      if(ui)
       {
-        terminalObj.log("frequency set to "+n +"/ms")
+        ui.log("frequency set to "+n +"/ms")
       }
     };
+
     this.setFPS = function(n){
       fps = n;
-      if(terminalObj){
-        terminalObj.log("fps set to "+terminalObj.colouredText(n,"blue"))}};
+      if(ui){
+        ui.log("fps set to "+ui.colouredText(n,"blue"))}};
 
     this.fps = function(){return fps;}
 
-    this.addAnimation = function(u,r,l){
+    this.addAnimation = function(u,r,l,i=false){
 
       lattice = l;
 
       if(l.data().length !== l.nodes().length){
-        terminalObj.log(terminalObj.colouredText("ERR:", "red") +" data and nodes must be same length.");
+        ui.logError("data and nodes must be same length.");
         return;
       }
       updates = u
       drawCall = r
+      ui = i
     }
 
     var update = function()
@@ -70,15 +74,14 @@ var Renderer = function () {
         infoBox.setAttribute("id", "infoBox");
         infoBox.style.position = "fixed";
         infoBox.style.padding = "2.5px";
-        infoBox.style.backgroundColor = "black";
-        infoBox.style.width = "25%";
+        infoBox.style.backgroundColor = "rgba(0,0,0,0.5)";
+        infoBox.style.width = "15%";
         infoBox.style.color = "rgb(173,172,173)";
-        infoBox.style.height = "10%";
+        infoBox.style.height = "7%";
         infoBox.style.top = lattice.nodes()[0].parentNode.style.top;
         infoBox.style.left = lattice.nodes()[0].parentNode.style.left;
         infoBox.style.zIndex = lattice.nodes()[0].parentNode.style.zIndex + 1;
         document.body.appendChild(infoBox);
-
     }
 
   var drawInfo = function(){
@@ -105,7 +108,7 @@ var Renderer = function () {
 
        if(lattice.showEdges())
        {
-         datapoint.valencePairs.forEach((vp, i) => {
+         datapoint.valencePairs.forEach((vp) => {
            var nodeLine1 = vp[3];
            var nodeLine2 = vp[4];
 
@@ -128,35 +131,46 @@ var Renderer = function () {
            nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
          });
        }
-          node.style.zIndex = datapoint.z;
+
           node.setAttribute("cx", centreToScreenX(imagePos.x) );
           node.setAttribute("cy", centreToScreenY(imagePos.y) );
+          node.setAttribute("cz", centreToScreenY(imagePos.z) );
           node.setAttribute("fill", datapoint.col );
-          node.setAttribute("r", datapoint.r );
+          node.setAttribute("stroke", datapoint.stroke );
+          node.setAttribute("r", datapoint.r);
      }
 
-    var redraw = function()
-    {
-      lattice.nodes().forEach((node, i) => {
-        if(drawCall){
-          drawCall(node, lattice.data()[i]);
-        } else {
-          defaultDrawCall(node, lattice.data()[i]);
-        }
+      var redraw = function()
+      {
+        lattice.nodes().forEach((node) => {
+          if(drawCall){
+            drawCall(node, lattice.data()[parseInt(node.getAttribute("idx"))]);
+          } else {
+            defaultDrawCall(node, lattice.data()[parseInt(node.getAttribute("idx"))]);
+          }
+        });
+
+      // need to reorder the nodes in the HTML by z value (z-index not supported by svg)
+
+      lattice.nodes().sort(function(a, b) {
+        return parseFloat(b.getAttribute("cz")).toFixed(3) - parseFloat(a.getAttribute("cz")).toFixed(3);
       });
+
+      for (let item of lattice.nodes()) {
+        ui.sim().appendChild(item);
+      }
     }
 
     this.render = function() // public fn
     {
+      var start = performance.now();
       if (showInfo) initInfo();
       var timer = window.setInterval(function(){
+      var end = performance.now();
       update();
-      elapsed += (freq/1000);
-      console.log(elapsed);
-
+      elapsed = (end - start)/1000;
       if(elapsed > frames * (1/fps)){ redraw(); if (showInfo) drawInfo(); frames += 1;}
     }, freq);
-
       return timer;
     }
 

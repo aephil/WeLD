@@ -3,7 +3,7 @@ var Lattice = function()
 
     var nodeR = false;
     var nodeCol = false;
-    var terminalObj = false;
+    var ui = false;
     var predicate = false;
     var showEdges = false;
     var data = [];
@@ -13,18 +13,18 @@ var Lattice = function()
     this.nodes = function(){return nodes};
 
     this.setShowEdges = function(bool){
-      if(bool && terminalObj){
-        terminalObj.log(terminalObj.colouredText("warning: ", "red")+"enabling edges causes a significant hit to the frame rate.")
+      if(bool && ui){
+        ui.logWarning("enabling edges may cause a significant hit to the frame rate.")
       }
       showEdges = bool;
     }
 
     this.showEdges = function(){return showEdges;}
 
-    this.setTerminal = function(termObj)
+    this.setUI = function(x)
     {
       // typescript to check type maybe?
-      terminalObj = termObj;
+      ui = x;
     }
 
     // returns true if node i considers node j a neighbour.
@@ -65,7 +65,6 @@ var Lattice = function()
           } else {
             node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle]);
           }
-
         }
       }
     };
@@ -74,7 +73,6 @@ var Lattice = function()
     {
       if(predicate)
       {
-
         // form neighbours
         for(k = 0; k < data.length; k++)
         {
@@ -130,112 +128,86 @@ var Lattice = function()
       return hasNeighbour(i,j);
     }
 
-    this.makePrimitive2D = function(cellsX, cellsY, a, sim)
+    this.makeFCC3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
-        data = []
-        nodes = []
-        for(i = 0; i < cellsX; i++)
-        {
-          for(j = 0; j < cellsY; j++)
-          {
-            var cornerX = a * i
-            var cornerY = a * j
-
-            data.push(
+      for(let h = 0; h < cellsZ; h++)
+      {
+        for(let i = 0; i < cellsX; i++)
+            {
+              for(let j = 0; j < cellsY; j++)
               {
-                x:cornerX, // position x
-                y:cornerY, // position y
-                z:1, // position z
 
-                r:(nodeCol?nodeR():5),  // radius
-                m:5,  // mass
+                data.push(
+                  {
+                    x:(a * i) + (0.5 * a), // position x
+                    y:(a * j), // position y
+                    z:(a * h) + (0.5 * a), // position z
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[], // index of other atoms
+                    valencePairs:[],
+                    stroke:"black",
+                    col:"rgb(173,172,173)", // colour
+                  }
+                )
 
-                neighbours:[], // index of other atoms
-                valencePairs:[],
-                col:"rgb(173,172,173)", // colour
+                data.push(
+                  {
+                    x: (a * i), // position x
+                    y: (a * j) + (0.5 * a), // position y
+                    z: (a * h) + (0.5 * a), // position z
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[],
+                    valencePairs:[],
+                    stroke:"black",
+                    col:"rgb(173,172,173)", // colour
+                  })
+
+                data.push(
+                  {
+                    x:(a * i) + (0.5 * a), // position x
+                    y:(a * j) + (0.5 * a), // position y
+                    z:(a * h), // position z
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[],
+                    valencePairs:[],
+                    stroke:"black",
+                    col:"rgb(173,172,173)", // colour
+                  }
+                )
               }
-            )
+            }
           }
-        }
 
-        // create bonds based on a given predicate
+          makeBonds(data);
 
-        makeBonds(data);
+          if(ui)
+          {
+            debugger;
+            ui.log("loaded" + ui.colouredText(" Face-Centered Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
+            ui.log("total of "+ui.colouredText(data.length,"blue")+" nodes were formed.");
+          }
 
-        if(terminalObj)
-        {
-          terminalObj.log("loaded" + terminalObj.colouredText(" Face-Centered Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-          terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
-        }
+          for(let i = 0; i < data.length; i++)
+          {
+            var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
 
-        for(let i = 0; i < data.length; i++)
-        {
-          var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          sim.appendChild(newNode);
-          nodes.push(newNode);
-        }
-      }
+            newNode.addEventListener("mouseover", function( event ) {
+                Graphics.UserInterface.showTooltip(event,i);
+              }, false);
 
-    this.makeFCC2D = function(cellsX, cellsY, a, sim)
-    {
-      data = []
-      nodes = []
+            newNode.addEventListener("mouseout", function( event ) {
+                Graphics.UserInterface.hideTooltip();
+              }, false);
 
-      for(i = 0; i < cellsX; i++)
-      {
-        for(j = 0; j < cellsY; j++)
-        {
-
-          var cornerX = a * i
-          var cornerY = a * j
-
-          data.push(
-            {
-              x:cornerX, // position x
-              y:cornerY, // position y
-              z:1, // position z
-
-              r:5,  // radius
-              m:1,  // mass
-
-              neighbours:[], // index of other atoms
-              valencePairs:[],
-              col:"rgb(173,172,173)", // colour
-            }
-          )
-
-          data.push(
-            {
-              x:cornerX + (a*0.5) , // position x
-              y:cornerY + (a*0.5), // position y
-              z:1, // position z
-
-              r:5,  // radius
-              m:1,  // mass
-
-              neighbours:[],
-              valencePairs:[],
-              col:"rgb(173,172,173)", // colour
-            }
-          )
-        }
-      }
-
-      // create bonds based on a given predicate
-
-      makeBonds(data);
-
-      if(terminalObj)
-      {
-        terminalObj.log("total of "+data.length+" nodes were formed.");
-      }
-
-      for(let i = 0; i < data.length; i++)
-      {
-        var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        sim.appendChild(newNode);
-        nodes.push(newNode);
-      }
+            sim.appendChild(newNode);
+            nodes.push(newNode);
+          }
 
     }
 
@@ -248,21 +220,17 @@ var Lattice = function()
         {
           for(j = 0; j < cellsY; j++)
           {
-            var cornerX = a * i
-            var cornerY = a * j
-            var cornerZ = a * h
-
             data.push(
               {
-                x:cornerX, // position x
-                y:cornerY, // position y
-                z:cornerZ, // position z
-
+                x:a * i, // position x
+                y:a * j, // position y
+                z:a * h, // position z
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"basic node",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"rgb(173,172,173)"), // colour
               }
             )
@@ -274,15 +242,29 @@ var Lattice = function()
 
       makeBonds(data);
 
-      if(terminalObj)
+      if(ui)
       {
-        terminalObj.log("loaded" + terminalObj.colouredText(" Primitive Cubic ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-        terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
+        ui.log("loaded"+ui.colouredText(" Primitive Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
+        ui.log("total of "+ui.colouredText(data.length,"blue")+" nodes were formed.");
       }
 
       for(let i = 0; i < data.length; i++)
       {
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+        newNode.addEventListener("mouseover", function( event ) {
+            Graphics.UserInterface.showTooltip(event,i);
+          }, false);
+
+        newNode.addEventListener("mouseout", function( event ) {
+            Graphics.UserInterface.hideTooltip();
+          }, false);
+
+        newNode.addEventListener("mousedown", function( event ) {
+          Graphics.UserInterface.highlight(event,i);
+          }, false);
+
+        newNode.setAttribute("idx",i);
         sim.appendChild(newNode);
         nodes.push(newNode);
       }
@@ -313,9 +295,10 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():3),  // radius
                 m:1,  // mass
-
+                name:"A Cation",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"blue"), // colour
               }
             )
@@ -334,9 +317,10 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"B Cation",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"orange"), // colour
               }
             )
@@ -355,9 +339,10 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"red"), // colour
               }
             )
@@ -374,9 +359,10 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"red"), // colour
               }
             )
@@ -393,13 +379,13 @@ var Lattice = function()
 
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
-
+                name:"O Anion",
                 neighbours:[], // index of other atoms
                 valencePairs:[],
+                stroke:"black",
                 col:(nodeCol?nodeCol():"red"), // colour
               }
             )
-
           }
         }
       }
@@ -407,22 +393,35 @@ var Lattice = function()
       // create bonds based on a given predicate
       makeBonds(data);
 
-      if(terminalObj)
+      if(ui)
       {
-        terminalObj.log("loaded" + terminalObj.colouredText(" Perovskite ","blue") +"lattice data with "+terminalObj.colouredText(cellsX,"blue")+" x " +terminalObj.colouredText(cellsY,"blue")+" x " +terminalObj.colouredText(cellsZ,"blue")+" unit cells.");
-        terminalObj.log("total of "+terminalObj.colouredText(data.length,"blue")+" nodes were formed.");
+        ui.log("loaded" + ui.colouredText(" Perovskite ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
+        ui.log("total of "+ui.colouredText(data.length,"blue")+" nodes were formed.");
       }
 
       for(let i = 0; i < data.length; i++)
       {
         var newNode = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+
+        newNode.addEventListener("mouseover", function( event ) {
+            Graphics.UserInterface.showTooltip(event,i);
+          }, false);
+
+        newNode.addEventListener("mouseout", function( event ) {
+            Graphics.UserInterface.hideTooltip();
+          }, false);
+
+        newNode.addEventListener("mousedown", function( event ) {
+          Graphics.UserInterface.highlight(event,i);
+          }, false);
+
+        newNode.setAttribute("idx",i);
         sim.appendChild(newNode);
         nodes.push(newNode);
       }
     }
 
    this.setPredicate = function(p){predicate = p}
-
 // default draw call for renderer, (can use a custom one)
   }
 

@@ -98,24 +98,26 @@ var Harmonic = function(){
 
       var faFactor = (-1)*kValence*(abc - eqAngle)/(Physics.Vector.norm(ba))
       faFactor = (isNaN(faFactor)? 0 : faFactor);
+
       var fa = Physics.Vector.scale(faFactor, pa);
 
       var fcFactor = (-1)*kValence*(abc - eqAngle)/(Physics.Vector.norm(bc))
       fcFactor = (isNaN(fcFactor)? 0 : fcFactor);
+
       var fc = Physics.Vector.scale(fcFactor, pc)
       var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
 
-      data[node1Idx].x += (fa.x/data[node1Idx].m);
-      data[node1Idx].y += (fa.y/data[node1Idx].m);
-      data[node1Idx].z += (fa.z/data[node1Idx].m);
+      data[node1Idx].x += 0.5*(fa.x/data[node1Idx].m);
+      data[node1Idx].y += 0.5*(fa.y/data[node1Idx].m);
+      data[node1Idx].z += 0.5*(fa.z/data[node1Idx].m);
 
-      d.x += (fb.x/d.m);
-      d.y += (fb.y/d.m);
-      d.z += (fb.z/d.m);
+      d.x += 0.5*(fb.x/d.m);
+      d.y += 0.5*(fb.y/d.m);
+      d.z += 0.5*(fb.z/d.m);
 
-      data[node2Idx].x += (fc.x/data[node2Idx].m)
-      data[node2Idx].y += (fc.y/data[node2Idx].m)
-      data[node2Idx].z += (fc.z/data[node2Idx].m)
+      data[node2Idx].x += 0.5*(fc.x/data[node2Idx].m)
+      data[node2Idx].y += 0.5*(fc.y/data[node2Idx].m)
+      data[node2Idx].z += 0.5*(fc.z/data[node2Idx].m)
     }
   }
     return this;
