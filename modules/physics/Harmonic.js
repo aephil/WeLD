@@ -42,40 +42,26 @@ var Harmonic = function(){
 
         // begin debug here
 
-        extY = extVec.y
+        extY = extVec.y // x_i
         extX = extVec.x
         extZ = extVec.z
 
+        fx = -(kSpring * extX)
+        fy = -(kSpring * extY)
+        fz = -(kSpring * extZ)
+
+        // do velocity verlet algorithm here to find new extension
+        // for now let timestep be 1, later will make modifying this more accesible
+
         // step 1
 
+        // step 2
 
-        //console.log(extX)
-        //console.log(extY)
-        //console.log(extZ)
+        // step 3
 
-        ax = (kSpring * extX / d.m )
-        ay = (kSpring * extY / d.m )
-        az = (kSpring * extZ / d.m )
+        // step 4
 
-        var x = (0.5*ax)
-        var xN = x * (-1)
-
-        var y = (0.5*ay)
-        var yN = y * (-1)
-
-        var z = (0.5*az)
-        var zN = z * (-1)
-
-        d.x += x
-        data[nIndex].x += xN
-
-        d.y += y
-        data[nIndex].y += yN
-
-        d.z += z
-        data[nIndex].z += zN
-
-    }
+        // use calculated x_f to reposition datapoint x, y , z
   }
 
   this.valence = function(d, data)
