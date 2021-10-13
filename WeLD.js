@@ -27,8 +27,6 @@
  ui = Graphics.UserInterface;
  ui.loadBasic(); // loads divs for simulation, control and terminal, and initialises the terminal
 
- ui.log("test")
-
  // load physics controls  /////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
@@ -102,7 +100,7 @@
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange"
     });
 
-  lattice.makePrimitive3D(4,4,4, edgeLen, ui.sim());
+  lattice.makePrimitive3D(5,5,5, edgeLen, ui.sim());
 
   ui.setData(lattice.data());
   ui.setNodes(lattice.nodes());

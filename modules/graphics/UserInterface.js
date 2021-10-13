@@ -1,6 +1,34 @@
 
 var UserInterface = function()
 {
+  var focus = function(args){
+    var selection = parseInt(args[0]); // todo: check user input
+
+    nodes.forEach((node) => {
+      var index = parseInt(node.getAttribute("idx"))
+      var neighbours = data[selection].neighbours;
+      var isNeighbour = false;
+      for(let i = 0; i < neighbours.length; i++)
+      {
+        if(index === neighbours[i][0])
+        {
+          isNeighbour = true
+        }
+      }
+
+      if( index !== selection && !isNeighbour)
+      {
+        node.setAttribute("visibility", "hidden");
+      }
+    });
+  }
+
+  var commandMap = new Map(
+    [
+      ["focus", focus],
+    ]
+  )
+
   var data=[]; //data associated with the simulation
   var nodes=[];
   var highlighted=false;
@@ -34,13 +62,17 @@ var UserInterface = function()
           case 32 /*space*/:
           {
             input+=(input.slice(-1)===" "?"":" ");
-            termNode.innerHTML = output + "User: " + input + "<";;
+            termNode.innerHTML = output + "UserIn: " + input + "<";;
             break;
           }
           case 13 /*enter*/:
           {
-            input="";
-            termNode.innerHTML = output;
+            var args = input.split(" ");
+            var command = args[0]
+            var fn = commandMap.get(command);
+            fn(args.slice(1));
+            input = "";
+            termNode.innerHTML = output + "UserIn: " +input + "<";
             break;
           }
           case 8/*backspace*/:
@@ -48,7 +80,7 @@ var UserInterface = function()
             if(input.length>0)
             {
               input = input.slice(0, -1);
-              termNode.innerHTML = output + "User: " +input + "<";
+              termNode.innerHTML = output + "UserIn: " +input + "<";
             }
             break;
           }
@@ -73,7 +105,7 @@ var UserInterface = function()
           default:
           {
             input += char;
-            termNode.innerHTML = output + "User: " + input + "<";
+            termNode.innerHTML = output + "UserIn: " + input + "<";
           }
           console.log(input);
 
@@ -83,21 +115,26 @@ var UserInterface = function()
   this.colouredText = function(msg, colour){
     return colouredText(msg, colour);
   }
-  this.logWarning = function(msg, newline=true){
+  var logWarning = function(msg, newline=true){
       output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
-      document.getElementById("terminal").innerHTML = output;
+      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
     }
-  this.logError = function(msg, newline=true){
+  this.logWarning = function(msg,newline=true){logWarning(msg,newline)}
+
+  var logError = function(msg, newline=true){
       output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
-      document.getElementById("termNode").innerHTML = output;
+      document.getElementById("termNode").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
     }
-  this.log = function (msg, newline=true) {
-      output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"");
-      document.getElementById("terminal").innerHTML = output;
+  this.logError = function(msg,newline=true){logError(msg,newline)}
+
+  var log = function (msg, newline=true) {
+      output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"") ;
+      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
     };
+  this.log = function(msg,newline=true){log(msg,newline)}
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
@@ -113,7 +150,7 @@ var UserInterface = function()
           data[highlighted].stroke = "black";
         }
         highlighted=parseInt(i);
-        if(terminal){terminal.log("selected node "+terminal.colouredText("#"+i,"green"))}
+        log("selected node "+colouredText("#"+i,"green"))
       }
   }
   this.showTooltip = function(evt, i) {
@@ -157,6 +194,7 @@ var UserInterface = function()
     document.body.appendChild(termNode);
     termNode.setAttribute("tabindex","0");
     termNode.setAttribute("id","terminal");
+    termNode.innerHTML = output + "User: " + input + "<";
     termNode.style.position = "fixed";
     termNode.style.top = "2.5%";
     termNode.style.right = "2%";
@@ -169,6 +207,7 @@ var UserInterface = function()
     termNode.style.overflowY = "scroll";
     termNode.addEventListener("focus",function(event){
         termNode.style.color = "black";
+        termNode.innerHTML = output + "UserIn: " + input + "<";
     })
     termNode.addEventListener("focusout",function(event){
         termNode.style.backgroundColor = "white";
@@ -189,6 +228,8 @@ var UserInterface = function()
     control.style.fontFamily = "monospace";
     control.style.overflowX = "scroll";
     control.style.overflowY = "scroll";
+
+    sim.focus();
 
   }
   this.slider = function(min=0, max=100, step=1){
