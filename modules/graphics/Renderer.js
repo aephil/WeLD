@@ -108,6 +108,7 @@ var Renderer = function () {
 
        if(lattice.showEdges())
        {
+
          datapoint.valencePairs.forEach((vp) => {
            var nodeLine1 = vp[3];
            var nodeLine2 = vp[4];
@@ -115,20 +116,31 @@ var Renderer = function () {
            var imagePos1 = cameraView(data[vp[0]])
            var imagePos2 = cameraView(data[vp[1]])
 
-           nodeLine1.setAttribute("stroke", datapoint.col);
-           nodeLine2.setAttribute("stroke", datapoint.col);
-           nodeLine1.setAttribute("stroke-width", 2);
-           nodeLine2.setAttribute("stroke-width", 2);
 
-           nodeLine1.setAttribute("x1",centreToScreenX(imagePos.x))
-           nodeLine1.setAttribute("y1",centreToScreenY(imagePos.y))
-           nodeLine1.setAttribute("x2",centreToScreenX(imagePos1.x))
-           nodeLine1.setAttribute("y2",centreToScreenY(imagePos1.y))
+           if(datapoint.showEdges)
+           {
+             nodeLine1.setAttribute("stroke", datapoint.col);
+             nodeLine1.setAttribute("stroke-width", 2);
+             nodeLine2.setAttribute("stroke", datapoint.col);
+             nodeLine2.setAttribute("stroke-width", 2);
 
-           nodeLine2.setAttribute("x1",centreToScreenX(imagePos.x))
-           nodeLine2.setAttribute("y1",centreToScreenY(imagePos.y))
-           nodeLine2.setAttribute("x2",centreToScreenX(imagePos2.x))
-           nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
+             nodeLine1.setAttribute("x1",centreToScreenX(imagePos.x))
+             nodeLine1.setAttribute("y1",centreToScreenY(imagePos.y))
+             nodeLine1.setAttribute("x2",centreToScreenX(imagePos1.x))
+             nodeLine1.setAttribute("y2",centreToScreenY(imagePos1.y))
+             nodeLine1.setAttribute("visibility", "visible");
+
+             nodeLine2.setAttribute("x1",centreToScreenX(imagePos.x))
+             nodeLine2.setAttribute("y1",centreToScreenY(imagePos.y))
+             nodeLine2.setAttribute("x2",centreToScreenX(imagePos2.x))
+             nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
+             nodeLine2.setAttribute("visibility", "visible");
+           } else {
+             nodeLine1.setAttribute("visibility","hidden")
+             nodeLine2.setAttribute("visibility","hidden")
+           }
+
+
          });
        }
 

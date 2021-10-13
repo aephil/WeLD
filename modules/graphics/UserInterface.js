@@ -10,7 +10,8 @@ var UserInterface = function()
       {
         if(parseInt(selection)<=(data.length -1))
         {
-          highlighted = selection;
+          //highlighted = selection;
+          highlight(null, selection);
           log("focused node #"+selection);
         } else {
           logError("invalid range");
@@ -33,6 +34,7 @@ var UserInterface = function()
       var index = parseInt(node.getAttribute("idx"))
       var neighbours = data[highlighted].neighbours;
       var isNeighbour = false;
+
       for(let i = 0; i < neighbours.length; i++)
       {
         if(index === neighbours[i][0])
@@ -41,16 +43,33 @@ var UserInterface = function()
         }
       }
 
-      if( index !== highlighted && !isNeighbour)
+      if(index != highlighted)
       {
-        node.setAttribute("visibility", "hidden");
+        data[index].showEdges = false;
+
+        if(!isNeighbour){
+          node.setAttribute("visibility", "hidden");
+        }
       }
+
     });
+
+
+  }
+
+  var unfocus = function(){
+    nodes.forEach((node) => {
+        var index = parseInt(node.getAttribute("idx"))
+        data[index].showEdges = true;
+        node.setAttribute("visibility", "visible");
+    });
+    log("focus off")
   }
 
   var commandMap = new Map(
     [
       ["focus", focus],
+      ["unfocus", unfocus],
     ]
   )
 
@@ -163,7 +182,7 @@ var UserInterface = function()
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
-  this.highlight = function(evt, i){
+  var highlight = function(evt, i){
     var datapoint = data[parseInt(i)];
     if(datapoint.stroke=="red")
     {
@@ -177,6 +196,9 @@ var UserInterface = function()
         highlighted=parseInt(i);
         log("selected node "+colouredText("#"+i,"green"))
       }
+  }
+  this.highlight = function(evt, i){
+    highlight(evt,i);
   }
   this.showTooltip = function(evt, i) {
     let tooltip = document.getElementById("tooltip");

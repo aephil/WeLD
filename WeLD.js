@@ -97,10 +97,10 @@
 
   lattice.setPredicate(
     function(i,j){
-      return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange"
+      return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange";
     });
 
-  lattice.makePrimitive3D(5,5,5, edgeLen, ui.sim());
+  lattice.makePerovskite3D(2,2,2, edgeLen, ui.sim());
 
   ui.setData(lattice.data());
   ui.setNodes(lattice.nodes());
