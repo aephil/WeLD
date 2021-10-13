@@ -2,11 +2,36 @@
 var UserInterface = function()
 {
   var focus = function(args){
-    var selection = parseInt(args[0]); // todo: check user input
+
+    if(args.length > 0){
+      // check input is int
+      var selection = args[0];
+      if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
+      {
+        if(parseInt(selection)<=(data.length -1))
+        {
+          highlighted = selection;
+          log("focused node #"+selection);
+        } else {
+          logError("invalid range");
+        }
+      } else {
+              logError("input is not an integer");
+            }
+  } else if(highlighted) {
+
+    highlighted = parseInt(args[0]); // todo: check user input
+    log("focused highlighed node.")
+
+  } else {
+    logError("no user input or highlighted node.")
+    return;
+  }
+
 
     nodes.forEach((node) => {
       var index = parseInt(node.getAttribute("idx"))
-      var neighbours = data[selection].neighbours;
+      var neighbours = data[highlighted].neighbours;
       var isNeighbour = false;
       for(let i = 0; i < neighbours.length; i++)
       {
@@ -16,7 +41,7 @@ var UserInterface = function()
         }
       }
 
-      if( index !== selection && !isNeighbour)
+      if( index !== highlighted && !isNeighbour)
       {
         node.setAttribute("visibility", "hidden");
       }
@@ -124,7 +149,7 @@ var UserInterface = function()
 
   var logError = function(msg, newline=true){
       output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
-      document.getElementById("termNode").innerHTML = output + "UserIn: " + input + "<";
+      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
     }
   this.logError = function(msg,newline=true){logError(msg,newline)}
