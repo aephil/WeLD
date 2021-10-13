@@ -38,13 +38,16 @@ var Harmonic = function(){
         uVec = Physics.Vector.unitVector(vec);
 
         equilibrium = Physics.Vector.scale(nodesLen, uVec);
-        extVec = Physics.Vector.sub(equilibrium, vec);
+        extVec = Physics.Vector.sub(vec, equilibrium);
 
         // begin debug here
 
         extY = extVec.y
         extX = extVec.x
         extZ = extVec.z
+
+        // step 1
+
 
         //console.log(extX)
         //console.log(extY)
