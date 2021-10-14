@@ -62,7 +62,8 @@
     springConstSliderInput = springConstSlider[1];
     springConstSliderLabel =  springConstSlider[2];
 
-    springConstSliderLabel.innerHTML = "k (spring): " + 0;
+    harmonicController.changeKSpring(0.5);
+    springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
 
     springConstSliderInput.oninput = function(){
       var value = springConstSliderInput.value;
@@ -93,19 +94,19 @@
 
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(false);
+  lattice.setShowEdges(true);
 
   lattice.setPredicate(
     function(i,j){
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange";
     });
 
-  lattice.makePerovskite3D(2,2,2, edgeLen, ui.sim());
+  lattice.makePrimitive3D(2,2,1, edgeLen, ui.sim());
 
   ui.setData(lattice.data());
   ui.setNodes(lattice.nodes());
 
-  var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
+  var physics = [harmonicController.spring/*, harmonicController.valence, tempController.vibrate*/];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
@@ -146,7 +147,8 @@
 }
 
   renderer = Graphics.Renderer;
-  renderer.setFPS(60);
+  //renderer.setFPS(60);
+  renderer.setSpeed(1000);
 
   renderer.addAnimation(physics, false, lattice, ui)
   animation = renderer.render(lattice);

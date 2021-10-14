@@ -6,6 +6,7 @@ var Harmonic = function(){
 
   var kSpring = 0 // Spring constant
   var kValence = 0
+  var dt = 1; // timestep
 
   this.changeKSpring = function(n){
     kSpring = n;
@@ -33,36 +34,33 @@ var Harmonic = function(){
         dy = Math.abs(d.y - data[nIndex].y);
         dz = Math.abs(d.z - data[nIndex].z);
 
-        // get unit vector of the vector (dx, dy, dz)
+        // get unit vector of the(dx, dy, dz)
         vec = {x:dx,y:dy,z:dz};
         uVec = Physics.Vector.unitVector(vec);
 
         equilibrium = Physics.Vector.scale(nodesLen, uVec);
-        extVec = Physics.Vector.sub(vec, equilibrium);
 
-        // begin debug here
 
-        extY = extVec.y // x_i
-        extX = extVec.x
-        extZ = extVec.z
 
-        fx = -(kSpring * extX)
-        fy = -(kSpring * extY)
-        fz = -(kSpring * extZ)
+        x_i = Physics.Vector.sub(vec, equilibrium);
 
-        // do velocity verlet algorithm here to find new extension
-        // for now let timestep be 1, later will make modifying this more accesible
+        f_i = Physics.Vector.v3(-kSpring*x_i.x, -kSpring*x_i.y, -kSpring*x_i.z)
+        v_i = Physics.Vector.v3(d.vx, d.vy, d.vz);
 
-        // step 1
-
-        // step 2
-
-        // step 3
-
-        // step 4
+        x_f = Physics.Vector.add(x_i, Physics.Vector.add( Physics.Vector.scale(dt,v_i) , Physics.Vector.scale(dt*dt*0.5*d.m,f_i)))
+        v_half = Physics.Vector.add(v_i, Physics.Vector.scale(dt/(2*d.m), f_i));
+        f_f = Physics.Vector.scale(-kSpring, x_f);
+        v_f = Physics.Vector.add(v_half, Physics.Vector.scale(-kSpring*dt*0.5*d.m, x_f));
 
         // use calculated x_f to reposition datapoint x, y , z
+        d.x += x_f.x;
+        d.y += x_f.y;
+        d.z += x_f.z;
+
+
+
   }
+}
 
   this.valence = function(d, data)
   {

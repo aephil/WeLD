@@ -24,9 +24,9 @@ var Vector = function()
       return Math.acos( num / (denom===0?2*Math.pi:denom));
     }
 
-  this.v3 = function()
+  this.v3 = function(a=0,b=0,c=0)
     {
-      return {x:0, y:0, z:0};
+      return {x:a, y:b, z:c};
     }
 
   this.makeV3 = function(d)
