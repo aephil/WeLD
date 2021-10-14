@@ -94,14 +94,14 @@
 
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(true);
+  lattice.setShowEdges(false);
 
   lattice.setPredicate(
     function(i,j){
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange";
     });
 
-  lattice.makePrimitive3D(2,2,1, edgeLen, ui.sim());
+  lattice.makePerovskite3D(2,2,2, edgeLen, ui.sim());
 
   ui.setData(lattice.data());
   ui.setNodes(lattice.nodes());
@@ -147,8 +147,8 @@
 }
 
   renderer = Graphics.Renderer;
-  //renderer.setFPS(60);
-  renderer.setSpeed(1000);
+  renderer.setFPS(60);
+  //renderer.setSpeed(1000);
 
   renderer.addAnimation(physics, false, lattice, ui)
   animation = renderer.render(lattice);
