@@ -62,7 +62,8 @@
     springConstSliderInput = springConstSlider[1];
     springConstSliderLabel =  springConstSlider[2];
 
-    springConstSliderLabel.innerHTML = "k (spring): " + 0;
+    harmonicController.changeKSpring(0.5);
+    springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
 
     springConstSliderInput.oninput = function(){
       var value = springConstSliderInput.value;
@@ -105,7 +106,7 @@
   ui.setData(lattice.data());
   ui.setNodes(lattice.nodes());
 
-  var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
+  var physics = [harmonicController.spring/*, harmonicController.valence, tempController.vibrate*/];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
@@ -147,6 +148,7 @@
 
   renderer = Graphics.Renderer;
   renderer.setFPS(60);
+  //renderer.setSpeed(1000);
 
   renderer.addAnimation(physics, false, lattice, ui)
   animation = renderer.render(lattice);

@@ -232,6 +232,11 @@ var Lattice = function()
                 x:a * i, // position x
                 y:a * j, // position y
                 z:a * h, // position z
+
+                vx:randomNumber(-0.01,0.01),
+                vy:randomNumber(-0.01,0.01),
+                vz:randomNumber(-0.01,0.01),
+
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
                 name:"basic node",

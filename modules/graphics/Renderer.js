@@ -135,12 +135,11 @@ var Renderer = function () {
              nodeLine2.setAttribute("x2",centreToScreenX(imagePos2.x))
              nodeLine2.setAttribute("y2",centreToScreenY(imagePos2.y))
              nodeLine2.setAttribute("visibility", "visible");
+
            } else {
              nodeLine1.setAttribute("visibility","hidden")
              nodeLine2.setAttribute("visibility","hidden")
            }
-
-
          });
        }
 
