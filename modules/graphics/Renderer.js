@@ -140,8 +140,6 @@ var Renderer = function () {
              nodeLine1.setAttribute("visibility","hidden")
              nodeLine2.setAttribute("visibility","hidden")
            }
-
-
          });
        }
 

@@ -6,7 +6,6 @@ var Harmonic = function(){
 
   var kSpring = 0 // Spring constant
   var kValence = 0
-  var dt = 1; // timestep
 
   this.changeKSpring = function(n){
     kSpring = n;
@@ -34,33 +33,47 @@ var Harmonic = function(){
         dy = Math.abs(d.y - data[nIndex].y);
         dz = Math.abs(d.z - data[nIndex].z);
 
-        // get unit vector of the(dx, dy, dz)
+        // get unit vector of the vector (dx, dy, dz)
         vec = {x:dx,y:dy,z:dz};
         uVec = Physics.Vector.unitVector(vec);
 
         equilibrium = Physics.Vector.scale(nodesLen, uVec);
+        extVec = Physics.Vector.sub(equilibrium, vec);
 
+        // begin debug here
 
+        extY = extVec.y
+        extX = extVec.x
+        extZ = extVec.z
 
-        x_i = Physics.Vector.sub(vec, equilibrium);
+        //console.log(extX)
+        //console.log(extY)
+        //console.log(extZ)
 
-        f_i = Physics.Vector.v3(-kSpring*x_i.x, -kSpring*x_i.y, -kSpring*x_i.z)
-        v_i = Physics.Vector.v3(d.vx, d.vy, d.vz);
+        ax = (kSpring * extX / d.m )
+        ay = (kSpring * extY / d.m )
+        az = (kSpring * extZ / d.m )
 
-        x_f = Physics.Vector.add(x_i, Physics.Vector.add( Physics.Vector.scale(dt,v_i) , Physics.Vector.scale(dt*dt*0.5*d.m,f_i)))
-        v_half = Physics.Vector.add(v_i, Physics.Vector.scale(dt/(2*d.m), f_i));
-        f_f = Physics.Vector.scale(-kSpring, x_f);
-        v_f = Physics.Vector.add(v_half, Physics.Vector.scale(-kSpring*dt*0.5*d.m, x_f));
+        var x = (0.5*ax)
+        var xN = x * (-1)
 
-        // use calculated x_f to reposition datapoint x, y , z
-        d.x += x_f.x;
-        d.y += x_f.y;
-        d.z += x_f.z;
+        var y = (0.5*ay)
+        var yN = y * (-1)
 
+        var z = (0.5*az)
+        var zN = z * (-1)
 
+        d.x += x
+        data[nIndex].x += xN
 
+        d.y += y
+        data[nIndex].y += yN
+
+        d.z += z
+        data[nIndex].z += zN
+
+    }
   }
-}
 
   this.valence = function(d, data)
   {
