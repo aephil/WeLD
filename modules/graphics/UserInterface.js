@@ -80,8 +80,7 @@ var UserInterface = function()
   var output = "";
   var input = "";
 
-  var sim = false;
-  this.sim = function(){return sim;}
+  this.canvas = false;
   var control = false;
 
   var updateScroll = function(){
@@ -226,16 +225,21 @@ var UserInterface = function()
   }
   this.loadBasic = function(){
 
-    sim = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    sim = document.createElement("div");
     document.body.appendChild(sim);
     sim.setAttribute("id","sim");
-    sim.setAttribute("class","sim"); // todo pick ONE
     sim.style.position = "fixed";
     sim.style.top = "2.5%";
     sim.style.left = "2.5%";
     sim.style.width = "70%";
     sim.style.height = "95%";
-    sim.style.backgroundColor = "rgb(33,33,37)";
+    sim.style.backgroundColor = "none";
+
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = sim.clientWidth
+    this.canvas.height = sim.clientHeight
+    this.canvas.id = "canvas";
+    sim.appendChild(this.canvas);
 
     termNode = document.createElement("div");
     document.body.appendChild(termNode);
