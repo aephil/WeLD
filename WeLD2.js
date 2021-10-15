@@ -101,7 +101,7 @@
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
     });
 
-  lattice.makePrimitive3D(2,2,1, edgeLen);
+  lattice.makePrimitive3D(30,10,10, edgeLen);
 
   ui.setData(lattice.data);
   //ui.setNodes(lattice.nodes());

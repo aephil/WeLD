@@ -46,9 +46,6 @@ var Harmonic = function(){
         extX = extVec.x
         extZ = extVec.z
 
-        //console.log(extX)
-        //console.log(extY)
-        //console.log(extZ)
 
         ax = (kSpring * extX / d.m )
         ay = (kSpring * extY / d.m )

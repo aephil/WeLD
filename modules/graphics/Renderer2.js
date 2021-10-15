@@ -135,7 +135,9 @@ var Renderer = function () {
        ctx.fillStyle = "rgb(33,33,37)";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
-       lattice.data.sort(
+       // need to shallow copy for sorting draw order
+       var copyForSort = [...lattice.data];
+       copyForSort.sort(
          function(a, b) {
 
            imagePos1 = rotY(rotX(a,theta),rho);
@@ -143,13 +145,14 @@ var Renderer = function () {
            return imagePos1.z - imagePos2.z;
          });
 
-       lattice.data.forEach((n) => {
+       copyForSort.forEach((n) => {
          var imagePos = cameraView(n);
          ctx.beginPath();
          ctx.arc( centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
          ctx.closePath();
          ctx.fillStyle = n.col;
-         ctx.lineWidth = 0.5;
+         ctx.lineWidth = 1;
+         ctx.strokeStyle = "black";
          ctx.fill();
          ctx.stroke();
 
