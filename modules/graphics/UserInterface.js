@@ -181,7 +181,7 @@ var UserInterface = function()
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
-  var highlight = function(evt, i){
+  var highlight = function(i){
     var datapoint = data[parseInt(i)];
     if(datapoint.stroke=="red")
     {
@@ -196,10 +196,10 @@ var UserInterface = function()
         log("selected node "+colouredText("#"+i,"green"))
       }
   }
-  this.highlight = function(evt, i){
-    highlight(evt,i);
+  this.highlight = function(i){
+    highlight(i);
   }
-  this.showTooltip = function(evt, i) {
+  this.showTooltip = function(pos, i) {
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
@@ -216,8 +216,8 @@ var UserInterface = function()
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
-    tooltip.style.left = evt.pageX + 10 + 'px';
-    tooltip.style.top = evt.pageY + 10 + 'px';
+    tooltip.style.left = centreToScreenX(pos[0]) + 10 + 'px';
+    tooltip.style.top =  centreToScreenY(pos[1]) + 10 + 'px';
   }
   this.hideTooltip = function() {
     var tooltip = document.getElementById("tooltip");
@@ -239,6 +239,7 @@ var UserInterface = function()
     this.canvas.width = sim.clientWidth
     this.canvas.height = sim.clientHeight
     this.canvas.id = "canvas";
+    this.canvas.style.cursor="crosshair";
     sim.appendChild(this.canvas);
 
     termNode = document.createElement("div");

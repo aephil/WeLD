@@ -22,9 +22,6 @@
 
 var Renderer = function () {
 
-  // public member variables
-
-
   // public member functions
   this.setSpeed = function(n){
     freq = n;
@@ -48,9 +45,9 @@ var Renderer = function () {
 
     lattice = l
   }
-  this.setCanvas = function(c){
-    ui.canvas = c
-  }
+  //this.setCanvas = function(c){
+  //  ui.canvas = c
+  //}
   this.setDrawCall = function(d){
     drawCall = d;
   }
@@ -66,9 +63,43 @@ var Renderer = function () {
   this.setUI = function(u){
 
     ui=u
+
+    ui.canvas.addEventListener(
+      "mousemove",
+      function(event) {
+        var ClientRect = this.getBoundingClientRect();
+        mouseX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
+        mouseY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+      },
+      false
+    );
+
+    ui.canvas.addEventListener("click", function(event){
+
+      var active = []
+      lattice.data.forEach(function(n) {
+        var onScreenPos = cameraView(n);
+        var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
+        if (isHit){
+          active.push(n)
+        }
+      });
+
+      active.sort(function(a, b) {
+          var onScreenPos1 = rotY(rotX(a,theta),rho);
+          var onScreenPos2 = rotY(rotX(b,theta),rho);
+          return onScreenPos1.z - onScreenPos2.z;
+        });
+
+      if(active.length!=0)
+      {
+        ui.highlight(active[0].id)
+      }
+
+    }, false)
+
   }
   this.setUpdates = function(u){
-
     updates = u
   }
 
@@ -77,9 +108,11 @@ var Renderer = function () {
     var elapsed = 0; // in milliseconds
     var start = 0; // start timestamp
     var rho = 0
-    var theta = 0.5
+    var theta = 0
     var lattice = false;
-    var xcanvas = false;
+    var mouseX = 0;
+    var mouseY = 0;
+
     var drawCall = false;
     var showInfo = true;
     var updates = [];
@@ -127,9 +160,34 @@ var Renderer = function () {
       }
       infoBox.innerHTML += "fps: " + fpsDisplay + "</br>";
     }
+    var drawToolTip = function()
+    {
+      var active = []
+      lattice.data.forEach(function(n) {
+        var onScreenPos = cameraView(n);
+        var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
+        if (isHit){
+          active.push(n)
+        }
+      });
+
+      active.sort(function(a, b) {
+          var onScreenPos1 = rotY(rotX(a,theta),rho);
+          var onScreenPos2 = rotY(rotX(b,theta),rho);
+          return onScreenPos1.z - onScreenPos2.z;
+        });
+
+      if(active.length!=0)
+      {
+        ui.showTooltip([mouseX,mouseY], active[0].id)
+      } else {
+        ui.hideTooltip()
+      }
+    }
+
     var defaultDrawCall = function(){
 
-    var ctx = ui.canvas.getContext("2d");
+      var ctx = ui.canvas.getContext("2d");
        ctx.clearRect(0,0, ui.canvas.width, ui.canvas.height);
 
        ctx.fillStyle = "rgb(33,33,37)";
@@ -139,10 +197,9 @@ var Renderer = function () {
        var copyForSort = [...lattice.data];
        copyForSort.sort(
          function(a, b) {
-
            imagePos1 = rotY(rotX(a,theta),rho);
            imagePos2 = rotY(rotX(b,theta),rho);
-           return imagePos1.z - imagePos2.z;
+           return imagePos2.z - imagePos1.z;
          });
 
        copyForSort.forEach((n) => {
@@ -152,20 +209,16 @@ var Renderer = function () {
          ctx.closePath();
          ctx.fillStyle = n.col;
          ctx.lineWidth = 1;
-         ctx.strokeStyle = "black";
+         ctx.strokeStyle = n.stroke;
          ctx.fill();
          ctx.stroke();
 
          if(lattice.showEdges())
          {
-
            n.neighbours.forEach((neighbour) => {
-
-
              if(n.showEdges)
              {
                var imagePos1 = cameraView(lattice.data[neighbour[0]])
-
                ctx.beginPath();       // Start a new path
                ctx.moveTo(centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height));
                ctx.lineTo(centreToScreenX(imagePos1.x, ui.canvas.width), centreToScreenY(imagePos1.y, ui.canvas.height));
@@ -173,11 +226,9 @@ var Renderer = function () {
              }
            });
          }
+
        })
        rho+=0.01
-
-
-
      }
     var redraw = function(){
        if(drawCall){
@@ -187,6 +238,9 @@ var Renderer = function () {
        }
    }
     var animate = function(){
+
+
+
      update();
      requestAnimationFrame(animate);
 
@@ -196,6 +250,7 @@ var Renderer = function () {
      {
        var x = showInfo;
        if (showInfo) drawInfo();
+       drawToolTip();
        redraw();
        frames++;
      }

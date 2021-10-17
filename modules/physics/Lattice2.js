@@ -222,11 +222,13 @@ var Lattice = function()
     {
       this.data = []
       nodes = []
-      for(h =0; h < cellsZ; h++){
+      var counter=0;
+      for(h = 0; h < cellsZ; h++){
         for(i = 0; i < cellsX; i++)
         {
           for(j = 0; j < cellsY; j++)
           {
+
             this.data.push(
               {
                 x:a * i, // position x
@@ -237,6 +239,7 @@ var Lattice = function()
                 vy:randomNumber(-0.01,0.01),
                 vz:randomNumber(-0.01,0.01),
 
+                id:counter,
                 r:(nodeR?nodeR():5),  // radius
                 m:1,  // mass
                 name:"basic node",
@@ -247,6 +250,7 @@ var Lattice = function()
                 col:(nodeCol?nodeCol():"rgb(173,172,173)"), // colour
               }
             )
+            counter++
           }
         }
       }

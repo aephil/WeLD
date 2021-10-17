@@ -64,6 +64,7 @@
 
     harmonicController.changeKSpring(0.5);
     springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
+    springConstSliderInput.value = 0.5
 
     springConstSliderInput.oninput = function(){
       var value = springConstSliderInput.value;
@@ -91,20 +92,17 @@
   ///////////////////////////////////////////////////////////////////////////
 
   var edgeLen = 20;
-
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(true);
-
+  lattice.setShowEdges(false);
   lattice.setPredicate(
     function(i,j){
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
     });
 
-  lattice.makePrimitive3D(30,10,10, edgeLen);
+  lattice.makePrimitive3D(10,10,10, edgeLen);
 
   ui.setData(lattice.data);
-  //ui.setNodes(lattice.nodes());
 
   var physics = [harmonicController.spring/*, harmonicController.valence, tempController.vibrate*/];
 

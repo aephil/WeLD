@@ -8,6 +8,14 @@ var centreToScreenX = function(x, worldWidth=1000){
 return  x + worldWidth/2;
 }
 
+var screenToCentreX = function(x, worldWidth = 1000){ 
+  return x - worldWidth/2;
+}
+// returns the screen y coordinate equivalent of the user defined coordinate system
+var screenToCentreY = function(y, worldHeight = 1000){
+  return (worldHeight/2) - y;
+  }
+
  var randomNumber = function(min, max) {
    return Math.random() * (max - min) + min;
  }
