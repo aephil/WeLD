@@ -67,20 +67,28 @@ var Renderer = function () {
     ui.canvas.addEventListener(
       "mousemove",
       function(event) {
+
         var ClientRect = this.getBoundingClientRect();
         mouseX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
         mouseY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+
+        if(dragOn){
+          rho = rhoLast+((mouseX - dragStartX) * 0.01);
+          theta = thetaLast+((mouseY - dragStartY) * 0.01);
+        }
       },
       false
     );
 
     ui.canvas.addEventListener("click", function(event){
 
+      event.preventDefault();
+
       var active = []
       lattice.data.forEach(function(n) {
         var onScreenPos = cameraView(n);
         var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
-        if (isHit){
+        if (isHit && n.visible){
           active.push(n)
         }
       });
@@ -98,6 +106,26 @@ var Renderer = function () {
 
     }, false)
 
+    ui.canvas.addEventListener("mousedown", function(event){
+      var ClientRect = this.getBoundingClientRect();
+      dragOn = true;
+      event.preventDefault();
+      dragStartX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
+      dragStartY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+    }, false)
+
+    ui.canvas.addEventListener("mouseout",function(event){
+      dragOn = false;
+      rhoLast = rho;
+      thetaLast = theta;
+    },false)
+
+    ui.canvas.addEventListener("mouseup", function(event){
+      dragOn = false;
+      rhoLast = rho;
+      thetaLast = theta;
+    }, false)
+
   }
   this.setUpdates = function(u){
     updates = u
@@ -109,9 +137,15 @@ var Renderer = function () {
     var start = 0; // start timestamp
     var rho = 0
     var theta = 0
+    var rhoLast = 0
+    var thetaLast = 0
+
     var lattice = false;
     var mouseX = 0;
     var mouseY = 0;
+    var dragStartX = 0;
+    var dragStartY = 0;
+    var dragOn=false;
 
     var drawCall = false;
     var showInfo = true;
@@ -164,17 +198,17 @@ var Renderer = function () {
     {
       var active = []
       lattice.data.forEach(function(n) {
-        var onScreenPos = cameraView(n);
-        var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
-        if (isHit){
+        var imagePos = cameraView(n);
+        var isHit = (Math.abs(imagePos.x - mouseX) < n.r) && (Math.abs(imagePos.y - mouseY) < n.r)
+        if (isHit && n.visible){
           active.push(n)
         }
       });
 
       active.sort(function(a, b) {
-          var onScreenPos1 = rotY(rotX(a,theta),rho);
-          var onScreenPos2 = rotY(rotX(b,theta),rho);
-          return onScreenPos1.z - onScreenPos2.z;
+          var imagePos1 = cameraView(a);
+          var imagePos2 = cameraView(b);
+          return imagePos1.z - imagePos2.z;
         });
 
       if(active.length!=0)
@@ -197,13 +231,14 @@ var Renderer = function () {
        var copyForSort = [...lattice.data];
        copyForSort.sort(
          function(a, b) {
-           imagePos1 = rotY(rotX(a,theta),rho);
-           imagePos2 = rotY(rotX(b,theta),rho);
+           var imagePos1 = cameraView(a);
+           var imagePos2 = cameraView(b);
            return imagePos2.z - imagePos1.z;
          });
 
        copyForSort.forEach((n) => {
-         var imagePos = cameraView(n);
+         if(n.visible){
+           var imagePos = cameraView(n);
          ctx.beginPath();
          ctx.arc( centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
          ctx.closePath();
@@ -222,13 +257,15 @@ var Renderer = function () {
                ctx.beginPath();       // Start a new path
                ctx.moveTo(centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height));
                ctx.lineTo(centreToScreenX(imagePos1.x, ui.canvas.width), centreToScreenY(imagePos1.y, ui.canvas.height));
+               ctx.closePath();
+               ctx.strokeStyle = n.edgeStroke;
                ctx.stroke();
              }
            });
          }
-
-       })
-       rho+=0.01
+       }
+     }
+     )
      }
     var redraw = function(){
        if(drawCall){

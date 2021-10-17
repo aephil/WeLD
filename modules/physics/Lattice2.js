@@ -7,7 +7,6 @@ var Lattice = function()
     var predicate = false;
     var showEdges = false;
     this.data = [];
-    var nodes = [];
 
     this.data = function(){return data};
     this.nodes = function(){return nodes};
@@ -40,35 +39,6 @@ var Lattice = function()
       return hasNeighbour(i,j) || hasNeighbour(j,i);
     };
 
-    function calcNeighbourAngles(node, data)
-    {
-      for(let i = 0; i < node.neighbours.length; i++)
-      {
-        for(let j = i+1; j < node.neighbours.length; j++)
-        {
-          n1 = data[node.neighbours[i][0]];
-          n2 = data[node.neighbours[j][0]];
-
-          var vec1 = {x:(n1.x-node.x),y:(n1.y-node.y),z:(n1.z-node.z)};
-          var vec2 = {x:(n2.x-node.x),y:(n2.y-node.y),z:(n2.z-node.z)};
-          var angle = Physics.Vector.angle(vec1,vec2);
-
-          if(showEdges)
-          {
-            var newLine1 = document.createElementNS('http://www.w3.org/2000/svg','line');
-            document.getElementById('sim').appendChild(newLine1);
-
-            var newLine2 = document.createElementNS('http://www.w3.org/2000/svg','line');
-            document.getElementById('sim').appendChild(newLine2);
-
-            node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle, newLine1, newLine2]);
-          } else {
-            node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle]);
-          }
-        }
-      }
-    };
-
     function makeBonds(data)
     {
       if(predicate)
@@ -80,7 +50,6 @@ var Lattice = function()
           {
             if(predicate(data[k], data[l]))
             {
-
               // check they are not already considered neighbours
               if(!(areNeighbours(data[k],data[l])))
               {
@@ -103,23 +72,10 @@ var Lattice = function()
                 var vec1 = {x:(n1.x-node.x),y:(n1.y-node.y),z:(n1.z-node.z)};
                 var vec2 = {x:(n2.x-node.x),y:(n2.y-node.y),z:(n2.z-node.z)};
                 var angle = Physics.Vector.angle(vec1,vec2);
-
-                if(showEdges)
-                {
-                  var newLine1 = document.createElementNS('http://www.w3.org/2000/svg','line');
-                  document.getElementById('sim').appendChild(newLine1);
-
-                  var newLine2 = document.createElementNS('http://www.w3.org/2000/svg','line');
-                  document.getElementById('sim').appendChild(newLine2);
-
-                  node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle, newLine1, newLine2]);
-                } else {
-                  node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle]);
-                }
+                node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle]);
             }
           }
         })
-
       }
     }
 
@@ -246,7 +202,9 @@ var Lattice = function()
                 neighbours:[], // index of other atoms
                 valencePairs:[],
                 showEdges:true,
+                visible: true,
                 stroke:"black",
+                edgeStroke:"black",
                 col:(nodeCol?nodeCol():"rgb(173,172,173)"), // colour
               }
             )
@@ -261,16 +219,12 @@ var Lattice = function()
       if(ui)
       {
         ui.log("loaded"+ui.colouredText(" Primitive Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells.");
-        ui.log("total of "+ui.colouredText(this.data.length,"blue")+" nodes were formed.");
       }
-
-
     }
 
     this.makePerovskite3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
       data = []
-      nodes = []
       for(h=0; h < cellsZ; h++){
         for(i = 0; i < cellsX; i++)
         {

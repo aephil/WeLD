@@ -94,13 +94,13 @@
   var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(false);
+  lattice.setShowEdges(true);
   lattice.setPredicate(
     function(i,j){
       return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
     });
 
-  lattice.makePrimitive3D(10,10,10, edgeLen);
+  lattice.makePrimitive3D(20,10,10, edgeLen);
 
   ui.setData(lattice.data);
 
@@ -114,7 +114,7 @@
   var svgDragStartPosX = 0;
   var svgDragStartPosY = 0;
 
-  document.getElementById("sim").addEventListener('dragstart', startDrag);
+  document.getElementById("sim").addEventListener('mousedown', startDrag);
   document.getElementById("sim").addEventListener('drag', drag);
   document.getElementById("sim").addEventListener('dragend', endDrag);
 

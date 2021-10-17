@@ -11,7 +11,7 @@ var UserInterface = function()
         if(parseInt(selection)<=(data.length -1))
         {
           //highlighted = selection;
-          highlight(null, selection);
+          highlight(selection);
           log("focused node #"+selection);
         } else {
           logError("invalid range");
@@ -19,36 +19,33 @@ var UserInterface = function()
       } else {
               logError("input is not an integer");
             }
-  } else if(highlighted) {
+  } else if(highlighted!==false) {
 
-    highlighted = parseInt(args[0]); // todo: check user input
     log("focused highlighed node.")
 
   } else {
     logError("no user input or highlighted node.")
     return;
   }
-
-
-    nodes.forEach((node) => {
-      var index = parseInt(node.getAttribute("idx"))
+    data[highlighted].edgeStroke = "red";
+    data.forEach((node) => {
       var neighbours = data[highlighted].neighbours;
       var isNeighbour = false;
 
       for(let i = 0; i < neighbours.length; i++)
       {
-        if(index === neighbours[i][0])
+        if(node.id === neighbours[i][0])
         {
           isNeighbour = true
         }
       }
 
-      if(index != highlighted)
+      if(node.id != highlighted)
       {
-        data[index].showEdges = false;
+        data[node.id].showEdges = false;
 
         if(!isNeighbour){
-          node.setAttribute("visibility", "hidden");
+          node.visible = false;
         }
       }
 
@@ -58,10 +55,10 @@ var UserInterface = function()
   }
 
   var unfocus = function(){
-    nodes.forEach((node) => {
-        var index = parseInt(node.getAttribute("idx"))
-        data[index].showEdges = true;
-        node.setAttribute("visibility", "visible");
+    data.forEach((node) => {
+        node.showEdges = true;
+        node.visible = true;
+        node.edgeStroke = "black";
     });
     log("focus off")
   }
@@ -112,11 +109,18 @@ var UserInterface = function()
           {
             var args = input.split(" ");
             var command = args[0]
-            var fn = commandMap.get(command);
-            fn(args.slice(1));
-            input = "";
-            termNode.innerHTML = output + "UserIn: " +input + "<";
-            break;
+            if(!commandMap.has(command))
+            {
+              input = "";
+              logError("no such command.")
+              break;
+            } else {
+              var fn = commandMap.get(command);
+              fn(args.slice(1));
+              input = "";
+              termNode.innerHTML = output + "UserIn: " +input + "<";
+              break;
+            }
           }
           case 8/*backspace*/:
           {
