@@ -11,7 +11,7 @@ var UserInterface = function()
         if(parseInt(selection)<=(data.length -1))
         {
           //highlighted = selection;
-          highlight(null, selection);
+          highlight(selection);
           log("focused node #"+selection);
         } else {
           logError("invalid range");
@@ -19,36 +19,33 @@ var UserInterface = function()
       } else {
               logError("input is not an integer");
             }
-  } else if(highlighted) {
+  } else if(highlighted!==false) {
 
-    highlighted = parseInt(args[0]); // todo: check user input
     log("focused highlighed node.")
 
   } else {
     logError("no user input or highlighted node.")
     return;
   }
-
-
-    nodes.forEach((node) => {
-      var index = parseInt(node.getAttribute("idx"))
+    data[highlighted].edgeStroke = "red";
+    data.forEach((node) => {
       var neighbours = data[highlighted].neighbours;
       var isNeighbour = false;
 
       for(let i = 0; i < neighbours.length; i++)
       {
-        if(index === neighbours[i][0])
+        if(node.id === neighbours[i][0])
         {
           isNeighbour = true
         }
       }
 
-      if(index != highlighted)
+      if(node.id != highlighted)
       {
-        data[index].showEdges = false;
+        data[node.id].showEdges = false;
 
         if(!isNeighbour){
-          node.setAttribute("visibility", "hidden");
+          node.visible = false;
         }
       }
 
@@ -58,10 +55,10 @@ var UserInterface = function()
   }
 
   var unfocus = function(){
-    nodes.forEach((node) => {
-        var index = parseInt(node.getAttribute("idx"))
-        data[index].showEdges = true;
-        node.setAttribute("visibility", "visible");
+    data.forEach((node) => {
+        node.showEdges = true;
+        node.visible = true;
+        node.edgeStroke = "black";
     });
     log("focus off")
   }
@@ -80,22 +77,21 @@ var UserInterface = function()
   var output = "";
   var input = "";
 
-  var sim = false;
-  this.sim = function(){return sim;}
+  this.canvas = false;
   var control = false;
 
   var updateScroll = function(){
-    termNode.scrollTop = termNode.scrollHeight;
+    terminal.scrollTop = terminal.scrollHeight;
   }
   var colouredText = function(msg, colour) {
     return "<text class='"+colour+"'>"+msg+"</text>";
   }
-  var initTerminal = function(termNode){
+  var initTerminal = function(terminal){
 
-    termNode = document.getElementById("terminal");
+    terminal = document.getElementById("terminal");
 
-      termNode.focus();
-      termNode.addEventListener("keydown", function( event ) {
+      terminal.focus();
+      terminal.addEventListener("keydown", function( event ) {
 
         var key = event.keyCode;
         var char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
@@ -106,25 +102,32 @@ var UserInterface = function()
           case 32 /*space*/:
           {
             input+=(input.slice(-1)===" "?"":" ");
-            termNode.innerHTML = output + "UserIn: " + input + "<";;
+            terminal.innerHTML = output + "UserIn: " + input + "<";;
             break;
           }
           case 13 /*enter*/:
           {
             var args = input.split(" ");
             var command = args[0]
-            var fn = commandMap.get(command);
-            fn(args.slice(1));
-            input = "";
-            termNode.innerHTML = output + "UserIn: " +input + "<";
-            break;
+            if(!commandMap.has(command))
+            {
+              input = "";
+              logError("no such command.")
+              break;
+            } else {
+              var fn = commandMap.get(command);
+              fn(args.slice(1));
+              input = "";
+              terminal.innerHTML = output + "UserIn: " +input + "<";
+              break;
+            }
           }
           case 8/*backspace*/:
           {
             if(input.length>0)
             {
               input = input.slice(0, -1);
-              termNode.innerHTML = output + "UserIn: " +input + "<";
+              terminal.innerHTML = output + "UserIn: " +input + "<";
             }
             break;
           }
@@ -149,7 +152,7 @@ var UserInterface = function()
           default:
           {
             input += char;
-            termNode.innerHTML = output + "UserIn: " + input + "<";
+            terminal.innerHTML = output + "UserIn: " + input + "<";
           }
           console.log(input);
 
@@ -182,7 +185,7 @@ var UserInterface = function()
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
-  var highlight = function(evt, i){
+  var highlight = function(i){
     var datapoint = data[parseInt(i)];
     if(datapoint.stroke=="red")
     {
@@ -197,10 +200,10 @@ var UserInterface = function()
         log("selected node "+colouredText("#"+i,"green"))
       }
   }
-  this.highlight = function(evt, i){
-    highlight(evt,i);
+  this.highlight = function(i){
+    highlight(i);
   }
-  this.showTooltip = function(evt, i) {
+  this.showTooltip = function(pos, i) {
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
@@ -217,8 +220,8 @@ var UserInterface = function()
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
-    tooltip.style.left = evt.pageX + 10 + 'px';
-    tooltip.style.top = evt.pageY + 10 + 'px';
+    tooltip.style.left = centreToScreenX(pos[0]) + 10 + 'px';
+    tooltip.style.top =  centreToScreenY(pos[1]) + 10 + 'px';
   }
   this.hideTooltip = function() {
     var tooltip = document.getElementById("tooltip");
@@ -226,41 +229,49 @@ var UserInterface = function()
   }
   this.loadBasic = function(){
 
-    sim = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    sim = document.createElement("div");
     document.body.appendChild(sim);
     sim.setAttribute("id","sim");
-    sim.setAttribute("class","sim"); // todo pick ONE
     sim.style.position = "fixed";
     sim.style.top = "2.5%";
     sim.style.left = "2.5%";
     sim.style.width = "70%";
     sim.style.height = "95%";
-    sim.style.backgroundColor = "rgb(33,33,37)";
+    sim.style.backgroundColor = "none";
 
-    termNode = document.createElement("div");
-    document.body.appendChild(termNode);
-    termNode.setAttribute("tabindex","0");
-    termNode.setAttribute("id","terminal");
-    termNode.innerHTML = output + "User: " + input + "<";
-    termNode.style.position = "fixed";
-    termNode.style.top = "2.5%";
-    termNode.style.right = "2%";
-    termNode.style.width = "25%";
-    termNode.style.height = "25%";
-    termNode.style.color = "rgb(173,172,173)";
-    termNode.style.padding = "2.5px";
-    termNode.style.fontFamily = "monospace";
-    termNode.style.overflowX = "scroll";
-    termNode.style.overflowY = "scroll";
-    termNode.addEventListener("focus",function(event){
-        termNode.style.color = "black";
-        termNode.innerHTML = output + "UserIn: " + input + "<";
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = sim.clientWidth
+    this.canvas.height = sim.clientHeight
+    this.canvas.id = "canvas";
+    this.canvas.style.cursor="crosshair";
+    this.canvas.style.borderColor = "black";
+    this.canvas.style.borderStyle = "solid";
+    sim.appendChild(this.canvas);
+
+    terminal = document.createElement("div");
+    document.body.appendChild(terminal);
+    terminal.setAttribute("tabindex","0");
+    terminal.setAttribute("id","terminal");
+    terminal.innerHTML = output + "User: " + input + "<";
+    terminal.style.position = "fixed";
+    terminal.style.top = "2.5%";
+    terminal.style.right = "1.5%";
+    terminal.style.width = "25%";
+    terminal.style.height = "25%";
+    terminal.style.color = "rgb(173,172,173)";
+    terminal.style.padding = "2.5px";
+    terminal.style.fontFamily = "monospace";
+    terminal.style.overflowX = "scroll";
+    terminal.style.overflowY = "scroll";
+    terminal.addEventListener("focus",function(event){
+        terminal.style.color = "black";
+        terminal.innerHTML = output + "UserIn: " + input + "<";
     })
-    termNode.addEventListener("focusout",function(event){
-        termNode.style.backgroundColor = "white";
-        termNode.style.color = "rgb(173,172,173)";
+    terminal.addEventListener("focusout",function(event){
+        terminal.style.backgroundColor = "white";
+        terminal.style.color = "rgb(173,172,173)";
     });
-    initTerminal(termNode);
+    initTerminal(terminal);
 
     control = document.createElement("div");
     document.body.appendChild(control);

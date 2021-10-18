@@ -64,6 +64,7 @@
 
     harmonicController.changeKSpring(0.5);
     springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
+    springConstSliderInput.value = 0.5
 
     springConstSliderInput.oninput = function(){
       var value = springConstSliderInput.value;
@@ -90,68 +91,30 @@
   // setup physics resources ////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-  var edgeLen = 50;
-
+  var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(false);
-
+  lattice.setShowEdges(true);
   lattice.setPredicate(
     function(i,j){
-      return Physics.Vector.norm(Physics.Vector.sub(i,j)) <= edgeLen && i !== j  && i.col == j.col && i.col!=="orange";
+      return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
     });
 
-  lattice.makePerovskite3D(2,2,2, edgeLen, ui.sim());
-
-  ui.setData(lattice.data());
-  ui.setNodes(lattice.nodes());
-
-  var physics = [harmonicController.spring/*, harmonicController.valence, tempController.vibrate*/];
+  lattice.makePrimitive3D(20,10,10, edgeLen);
+  ui.setData(lattice.data);
+  var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-  // set up camera controls
-  sim.setAttribute("onload","makeDraggable(evt)");
-
-  var svgDragStartPosX = 0;
-  var svgDragStartPosY = 0;
-  var selectedElement = false;
-
-  function makeDraggable(evt) {
-    var svg = evt.target;
-    svg.addEventListener('mousedown', startDrag);
-    svg.addEventListener('mousemove', drag);
-    svg.addEventListener('mouseup', endDrag);
-    svg.addEventListener('mouseleave', endDrag);
-  function startDrag(evt) {
-    if (evt.target.classList.contains('sim'))
-    {
-      selectedElement = evt.target;
-      svgDragStartPosX = evt.clientX;
-      svgDragStartPosY = evt.clientY;
-    }
-  }
-  function drag(evt) {
-    if (selectedElement)
-    {
-      evt.preventDefault();
-      renderer.setRho( ((svgDragStartPosX - evt.clientX) * 0.01) );
-      renderer.setTheta( ((svgDragStartPosY - evt.clientY) * 0.01) );
-    }
-  }
-  function endDrag(evt) {
-    selectedElement = null;
-  }
-
-}
-
   renderer = Graphics.Renderer;
+  renderer.setUI(ui);
+  renderer.setUpdates(physics);
+  renderer.setLattice(lattice);
   renderer.setFPS(60);
   //renderer.setSpeed(1000);
-
-  renderer.addAnimation(physics, false, lattice, ui)
-  animation = renderer.render(lattice);
+  renderer.ui = ui;
+  renderer.render();
 
  // non-essential WeLD banner //////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
