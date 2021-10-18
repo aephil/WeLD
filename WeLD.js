@@ -94,13 +94,13 @@
   var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(false);
-  //lattice.setPredicate(
-  //  function(i,j){
-  //    return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
-  //  });
+  lattice.setShowEdges(true);
+  lattice.setPredicate(
+    function(i,j){
+      return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
+    });
 
-  lattice.makePerovskite3D(10,10,10, edgeLen);
+  lattice.makePrimitive3D(20,10,10, edgeLen);
   ui.setData(lattice.data);
   var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
 

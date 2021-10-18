@@ -222,9 +222,9 @@ var Renderer = function () {
     var defaultDrawCall = function(){
 
       var ctx = ui.canvas.getContext("2d");
-       ctx.clearRect(0,0, ui.canvas.width, ui.canvas.height);
+      ctx.clearRect(0,0, ui.canvas.width, ui.canvas.height);
 
-       ctx.fillStyle = "rgb(33,33,37)";
+       ctx.fillStyle = "cornsilk";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
        // need to shallow copy for sorting draw order

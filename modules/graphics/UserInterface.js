@@ -81,17 +81,17 @@ var UserInterface = function()
   var control = false;
 
   var updateScroll = function(){
-    termNode.scrollTop = termNode.scrollHeight;
+    terminal.scrollTop = terminal.scrollHeight;
   }
   var colouredText = function(msg, colour) {
     return "<text class='"+colour+"'>"+msg+"</text>";
   }
-  var initTerminal = function(termNode){
+  var initTerminal = function(terminal){
 
-    termNode = document.getElementById("terminal");
+    terminal = document.getElementById("terminal");
 
-      termNode.focus();
-      termNode.addEventListener("keydown", function( event ) {
+      terminal.focus();
+      terminal.addEventListener("keydown", function( event ) {
 
         var key = event.keyCode;
         var char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
@@ -102,7 +102,7 @@ var UserInterface = function()
           case 32 /*space*/:
           {
             input+=(input.slice(-1)===" "?"":" ");
-            termNode.innerHTML = output + "UserIn: " + input + "<";;
+            terminal.innerHTML = output + "UserIn: " + input + "<";;
             break;
           }
           case 13 /*enter*/:
@@ -118,7 +118,7 @@ var UserInterface = function()
               var fn = commandMap.get(command);
               fn(args.slice(1));
               input = "";
-              termNode.innerHTML = output + "UserIn: " +input + "<";
+              terminal.innerHTML = output + "UserIn: " +input + "<";
               break;
             }
           }
@@ -127,7 +127,7 @@ var UserInterface = function()
             if(input.length>0)
             {
               input = input.slice(0, -1);
-              termNode.innerHTML = output + "UserIn: " +input + "<";
+              terminal.innerHTML = output + "UserIn: " +input + "<";
             }
             break;
           }
@@ -152,7 +152,7 @@ var UserInterface = function()
           default:
           {
             input += char;
-            termNode.innerHTML = output + "UserIn: " + input + "<";
+            terminal.innerHTML = output + "UserIn: " + input + "<";
           }
           console.log(input);
 
@@ -244,32 +244,34 @@ var UserInterface = function()
     this.canvas.height = sim.clientHeight
     this.canvas.id = "canvas";
     this.canvas.style.cursor="crosshair";
+    this.canvas.style.borderColor = "black";
+    this.canvas.style.borderStyle = "solid";
     sim.appendChild(this.canvas);
 
-    termNode = document.createElement("div");
-    document.body.appendChild(termNode);
-    termNode.setAttribute("tabindex","0");
-    termNode.setAttribute("id","terminal");
-    termNode.innerHTML = output + "User: " + input + "<";
-    termNode.style.position = "fixed";
-    termNode.style.top = "2.5%";
-    termNode.style.right = "2%";
-    termNode.style.width = "25%";
-    termNode.style.height = "25%";
-    termNode.style.color = "rgb(173,172,173)";
-    termNode.style.padding = "2.5px";
-    termNode.style.fontFamily = "monospace";
-    termNode.style.overflowX = "scroll";
-    termNode.style.overflowY = "scroll";
-    termNode.addEventListener("focus",function(event){
-        termNode.style.color = "black";
-        termNode.innerHTML = output + "UserIn: " + input + "<";
+    terminal = document.createElement("div");
+    document.body.appendChild(terminal);
+    terminal.setAttribute("tabindex","0");
+    terminal.setAttribute("id","terminal");
+    terminal.innerHTML = output + "User: " + input + "<";
+    terminal.style.position = "fixed";
+    terminal.style.top = "2.5%";
+    terminal.style.right = "1.5%";
+    terminal.style.width = "25%";
+    terminal.style.height = "25%";
+    terminal.style.color = "rgb(173,172,173)";
+    terminal.style.padding = "2.5px";
+    terminal.style.fontFamily = "monospace";
+    terminal.style.overflowX = "scroll";
+    terminal.style.overflowY = "scroll";
+    terminal.addEventListener("focus",function(event){
+        terminal.style.color = "black";
+        terminal.innerHTML = output + "UserIn: " + input + "<";
     })
-    termNode.addEventListener("focusout",function(event){
-        termNode.style.backgroundColor = "white";
-        termNode.style.color = "rgb(173,172,173)";
+    terminal.addEventListener("focusout",function(event){
+        terminal.style.backgroundColor = "white";
+        terminal.style.color = "rgb(173,172,173)";
     });
-    initTerminal(termNode);
+    initTerminal(terminal);
 
     control = document.createElement("div");
     document.body.appendChild(control);

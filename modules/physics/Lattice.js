@@ -221,7 +221,7 @@ var Lattice = function()
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"rgb(173,172,173)"), // colour
+                col:(nodeCol?nodeCol():"orange"), // colour
               }
             )
           }
