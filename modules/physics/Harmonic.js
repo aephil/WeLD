@@ -60,8 +60,14 @@ var Harmonic = function(){
         var z = (0.5*az)
         var zN = z * (-1)
 
+        d.x += x
+        data[nIndex].x += xN
 
-        return {x:, y:, z:}
+        d.y += y
+        data[nIndex].y += yN
+
+        d.z += z
+        data[nIndex].z += zN
 
     }
   }
