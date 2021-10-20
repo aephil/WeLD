@@ -49,7 +49,7 @@ var Lattice = function()
               // check l does not already consider k a neighbour
               if(!(hasNeighbour(data[l],data[k])))
               {
-                data[k].neighbours.push([l, Physics.Vector.distance(data[k],data[l])]);
+                data[k].neighbours.push([l, Physics.Vector.distance(data[k].ri,data[l].ri)]);
                 edgeCount++;
               }
             }
@@ -203,13 +203,13 @@ var Lattice = function()
 
             this.data.push(
               {
-                x:a * i,
-                y:a * j,
-                z:a * h,
+                // displacement
+                ri:{x:a * i,y:a * j,z:a * h},
+                rf:{x:0,y:0,z:0},
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                // velocity
+                vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                vf:{x:0,y:0,z:0},
 
                 id:counter++,
                 r:(nodeR?nodeR():5),  // radius

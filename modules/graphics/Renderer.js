@@ -86,7 +86,7 @@ var Renderer = function () {
 
       var active = []
       lattice.data.forEach(function(n) {
-        var onScreenPos = cameraView(n);
+        var onScreenPos = cameraView(n.ri);
         var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
@@ -94,8 +94,8 @@ var Renderer = function () {
       });
 
       active.sort(function(a, b) {
-          var onScreenPos1 = rotY(rotX(a,theta),rho);
-          var onScreenPos2 = rotY(rotX(b,theta),rho);
+          var onScreenPos1 = cameraView(a.ri);
+          var onScreenPos2 = cameraView(b.ri);
           return onScreenPos1.z - onScreenPos2.z;
         });
 
@@ -198,7 +198,7 @@ var Renderer = function () {
     {
       var active = []
       lattice.data.forEach(function(n) {
-        var imagePos = cameraView(n);
+        var imagePos = cameraView(n.ri);
         var isHit = (Math.abs(imagePos.x - mouseX) < n.r) && (Math.abs(imagePos.y - mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
@@ -206,8 +206,8 @@ var Renderer = function () {
       });
 
       active.sort(function(a, b) {
-          var imagePos1 = cameraView(a);
-          var imagePos2 = cameraView(b);
+          var imagePos1 = cameraView(a.ri);
+          var imagePos2 = cameraView(b.ri);
           return imagePos1.z - imagePos2.z;
         });
 
@@ -227,18 +227,22 @@ var Renderer = function () {
        ctx.fillStyle = "cornsilk";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
-       // need to shallow copy for sorting draw order
-       var copyForSort = [...lattice.data];
-       copyForSort.sort(
+       // need to copy and reorder ids for sorting draw order
+       var forSort = [];
+       lattice.data.forEach((node) => {
+         forSort.push(node.id);
+       });
+       forSort.sort(
          function(a, b) {
-           var imagePos1 = cameraView(a);
-           var imagePos2 = cameraView(b);
+           var imagePos1 = cameraView(lattice.data[a].ri);
+           var imagePos2 = cameraView(lattice.data[b].ri);
            return imagePos2.z - imagePos1.z;
          });
 
-       copyForSort.forEach((n) => {
+       forSort.forEach((id) => {
+         var n = lattice.data[id];
          if(n.visible){
-           var imagePos = cameraView(n);
+           var imagePos = cameraView(n.ri);
          ctx.beginPath();
          ctx.arc( centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
          ctx.closePath();
@@ -253,7 +257,7 @@ var Renderer = function () {
            n.neighbours.forEach((neighbour) => {
              if(n.showEdges)
              {
-               var imagePos1 = cameraView(lattice.data[neighbour[0]])
+               var imagePos1 = cameraView(lattice.data[neighbour[0]].ri)
                ctx.beginPath();       // Start a new path
                ctx.moveTo(centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height));
                ctx.lineTo(centreToScreenX(imagePos1.x, ui.canvas.width), centreToScreenY(imagePos1.y, ui.canvas.height));
@@ -275,8 +279,6 @@ var Renderer = function () {
        }
    }
     var animate = function(){
-
-
 
      update();
      requestAnimationFrame(animate);

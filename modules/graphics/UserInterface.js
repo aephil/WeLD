@@ -207,7 +207,7 @@ var UserInterface = function()
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
-    tooltip.innerHTML += "x: "+parseFloat(datapoint.x).toFixed(2)+", y: "+parseFloat(datapoint.y).toFixed(2)+", z: "+parseFloat(datapoint.z).toFixed(2) + "</br>";
+    tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
     var neighbours = datapoint.neighbours;

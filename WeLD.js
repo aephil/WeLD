@@ -52,7 +52,6 @@
 
     // spring constant
     harmonicController = Physics.Harmonic;
-
     // ui controls for spring constant
     springConstSlider = ui.slider(0,1,0.01)
 
@@ -97,7 +96,7 @@
   lattice.setShowEdges(true);
   lattice.setPredicate(
     function(i,j){
-      return Physics.Vector.norm(Physics.Vector.sub(i,j)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
+      return Physics.Vector.norm(Physics.Vector.sub(i.ri,j.ri)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
     });
 
   lattice.makePrimitive3D(20,10,10, edgeLen);
