@@ -250,7 +250,7 @@ var Renderer = function () {
          if(n.visible){
            var imagePos = cameraView(n.ri);
          ctx.beginPath();
-         ctx.arc( centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
+         ctx.arc( centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
          ctx.closePath();
          ctx.fillStyle = n.col;
          ctx.lineWidth = 1;
@@ -265,8 +265,8 @@ var Renderer = function () {
              {
                var imagePos1 = cameraView(lattice.data[neighbour[0]].ri)
                ctx.beginPath();       // Start a new path
-               ctx.moveTo(centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height));
-               ctx.lineTo(centreToScreenX(imagePos1.x, ui.canvas.width), centreToScreenY(imagePos1.y, ui.canvas.height));
+               ctx.moveTo(centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height));
+               ctx.lineTo(centreToScreenXPeriodic(imagePos1.x, ui.canvas.width), centreToScreenYPeriodic(imagePos1.y, ui.canvas.height));
                ctx.closePath();
                ctx.strokeStyle = n.edgeStroke;
                ctx.stroke();

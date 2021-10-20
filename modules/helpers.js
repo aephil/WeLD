@@ -8,7 +8,18 @@ var centreToScreenX = function(x, worldWidth=1000){
 return  x + worldWidth/2;
 }
 
-var screenToCentreX = function(x, worldWidth = 1000){ 
+var centreToScreenYPeriodic = function(y, worldHeight=1000){
+  var pos = (worldHeight/2) - y;
+  pos = pos > 0 ? pos : worldHeight + pos;
+  return pos % worldHeight;
+}
+var centreToScreenXPeriodic = function(x, worldWidth=1000){
+var pos =  x + (worldWidth/2);
+pos = pos > 0 ? pos : worldWidth + pos;
+return pos % worldWidth;
+}
+
+var screenToCentreX = function(x, worldWidth = 1000){
   return x - worldWidth/2;
 }
 // returns the screen y coordinate equivalent of the user defined coordinate system
