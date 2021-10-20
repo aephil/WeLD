@@ -22,6 +22,19 @@ return pos % worldWidth;
 var screenToCentreX = function(x, worldWidth = 1000){
   return x - worldWidth/2;
 }
+
+var screenToCentreXPeriodic = function(x, worldWidth = 1000){
+  var pos = x - worldWidth/2;
+  pos = pos > 0 ? pos : worldWidth + pos;
+  return pos % worldWidth;
+}
+
+var screenToCentreYPeriodic = function(y, worldHeight = 1000){
+  var pos = (worldHeight/2) - y;
+  pos = pos > 0 ? pos : worldHeight + pos;
+  return pos % worldHeight;
+  }
+
 // returns the screen y coordinate equivalent of the user defined coordinate system
 var screenToCentreY = function(y, worldHeight = 1000){
   return (worldHeight/2) - y;

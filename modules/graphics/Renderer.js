@@ -73,8 +73,8 @@ var Renderer = function () {
       function(event) {
 
         var ClientRect = this.getBoundingClientRect();
-        mouseX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
-        mouseY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+        mouseX = (event.clientX - ClientRect.left);
+        mouseY = (event.clientY - ClientRect.top);
 
         if(dragOn){
           rho = rhoLast+((mouseX - dragStartX) * 0.01);
@@ -87,11 +87,10 @@ var Renderer = function () {
     ui.canvas.addEventListener("click", function(event){
 
       event.preventDefault();
-
       var active = []
       lattice.data.forEach(function(n) {
         var onScreenPos = cameraView(n.ri);
-        var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
+        var isHit = (Math.abs(centreToScreenXPeriodic(onScreenPos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(onScreenPos.y, ui.canvas.height)- mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
         }
@@ -107,15 +106,14 @@ var Renderer = function () {
       {
         ui.highlight(active[0].id)
       }
-
     }, false)
 
     ui.canvas.addEventListener("mousedown", function(event){
       var ClientRect = this.getBoundingClientRect();
       dragOn = true;
       event.preventDefault();
-      dragStartX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
-      dragStartY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+      dragStartX = (event.clientX - ClientRect.left);
+      dragStartY = (event.clientY - ClientRect.top);
     }, false)
 
     ui.canvas.addEventListener("mouseout",function(event){
@@ -205,7 +203,7 @@ var Renderer = function () {
       var active = []
       lattice.data.forEach(function(n) {
         var imagePos = cameraView(n.ri);
-        var isHit = (Math.abs(imagePos.x - mouseX) < n.r) && (Math.abs(imagePos.y - mouseY) < n.r)
+        var isHit = (Math.abs(centreToScreenXPeriodic(imagePos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(imagePos.y, ui.canvas.height) - mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
         }
