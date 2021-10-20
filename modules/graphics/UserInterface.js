@@ -220,8 +220,8 @@ var UserInterface = function()
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
-    tooltip.style.left = centreToScreenX(pos[0]) + 10 + 'px';
-    tooltip.style.top =  centreToScreenY(pos[1]) + 10 + 'px';
+    tooltip.style.left = (pos[0]) + 40 + 'px';
+    tooltip.style.top =  (pos[1]) + 40 + 'px';
   }
   this.hideTooltip = function() {
     var tooltip = document.getElementById("tooltip");
