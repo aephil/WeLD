@@ -93,15 +93,11 @@
   var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(true);
-  lattice.setPredicate(
-    function(i,j){
-      return Physics.Vector.norm(Physics.Vector.sub(i.ri,j.ri)) === edgeLen && i !== j /* && i.col == j.col && i.col!=="orange"*/;
-    });
-
-  lattice.makePrimitive3D(20,10,10, edgeLen);
+  lattice.setShowEdges(false);
+  lattice.makePrimitive3D(10,10,10, edgeLen);
   ui.setData(lattice.data);
-  var physics = [harmonicController.spring, harmonicController.valence, tempController.vibrate];
+  verletController = Physics.Verlet;
+  var physics = [verletController.velocityVerlet, verletController.updateState];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
@@ -110,8 +106,8 @@
   renderer.setUI(ui);
   renderer.setUpdates(physics);
   renderer.setLattice(lattice);
-  renderer.setFPS(60);
-  //renderer.setSpeed(1000);
+  renderer.setFPS(30);
+  renderer.setSpeed(10000);
   renderer.ui = ui;
   renderer.render();
 

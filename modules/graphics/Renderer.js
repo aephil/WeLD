@@ -27,7 +27,7 @@ var Renderer = function () {
     freq = n;
     if(ui)
     {
-      ui.log("frequency set to "+n +"/ms")
+      ui.log("frequency set to "+n +" updates/s")
     }
   };
   this.setFPS = function(n){
@@ -59,6 +59,10 @@ var Renderer = function () {
   }
   this.setTheta = function(angle){
     theta = angle
+  }
+  this.setUpdates = function(u)
+  {
+    updates = u;
   }
   this.setUI = function(u){
 
@@ -127,20 +131,22 @@ var Renderer = function () {
     }, false)
 
   }
-  this.setUpdates = function(u){
-    updates = u
-  }
 
     // private member variables
     var frames = 0;
-    var elapsed = 0; // in milliseconds
+    var elapsed = 0; // in seconds
     var start = 0; // start timestamp
     var rho = 0
     var theta = 0
     var rhoLast = 0
     var thetaLast = 0
+    var fps = 30
+    var freq = 1 // in seconds^-1
+    var updateCounter = 0;
+
 
     var lattice = false;
+    var updates;
     var mouseX = 0;
     var mouseY = 0;
     var dragStartX = 0;
@@ -279,12 +285,14 @@ var Renderer = function () {
        }
    }
     var animate = function(){
+      var end = performance.now();
+      elapsed = (end - start)/1000;
 
-     update();
-     requestAnimationFrame(animate);
-
-     var end = performance.now();
-     elapsed = (end - start)/1000;
+      if(elapsed > (1/freq* updateCounter)){
+        update();
+        updateCounter++;
+      }
+      requestAnimationFrame(animate);
      if (elapsed > frames * (1/fps))
      {
        var x = showInfo;

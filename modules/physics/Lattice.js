@@ -108,13 +108,12 @@ var Lattice = function()
 
                 this.data.push(
                   {
-                    x:(a * i) + (0.5 * a), // position x
-                    y:(a * j), // position y
-                    z:(a * h) + (0.5 * a), // position z
+                    ri:{x:(a * i) + (0.5 * a),y:(a * j),z:(a * h) + (0.5 * a)},
+                    rf:{x:0,y:0,z:0},
 
-                    vx:randomNumber(-0.01,0.01),
-                    vy:randomNumber(-0.01,0.01),
-                    vz:randomNumber(-0.01,0.01),
+                    // velocity
+                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                    vf:{x:0,y:0,z:0},
 
                     id:counter++,
                     r:5,  // radius
@@ -134,13 +133,12 @@ var Lattice = function()
 
                 this.data.push(
                   {
-                    x: (a * i), // position x
-                    y: (a * j) + (0.5 * a), // position y
-                    z: (a * h) + (0.5 * a), // position z
+                    ri:{x:(a * i),y:(a * j) + (0.5 * a),z:(a * h) + (0.5 * a)},
+                    rf:{x:0,y:0,z:0},
 
-                    vx:randomNumber(-0.01,0.01),
-                    vy:randomNumber(-0.01,0.01),
-                    vz:randomNumber(-0.01,0.01),
+                    // velocity
+                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                    vf:{x:0,y:0,z:0},
 
                     id:counter++,
                     r:5,  // radius
@@ -158,13 +156,15 @@ var Lattice = function()
 
                 this.data.push(
                   {
-                    x:(a * i) + (0.5 * a), // position x
-                    y:(a * j) + (0.5 * a), // position y
-                    z:(a * h), // position z
 
-                    vx:randomNumber(-0.01,0.01),
-                    vy:randomNumber(-0.01,0.01),
-                    vz:randomNumber(-0.01,0.01),
+                    // displacement
+                    ri:{x:(a * i) + (0.5 * a),y:(a * j) + (0.5 * a),z:(a * h)},
+                    rf:{x:0,y:0,z:0},
+
+                    // velocity
+                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                    vf:{x:0,y:0,z:0},
+
 
                     id:counter++,
                     r:5,  // radius
@@ -208,7 +208,7 @@ var Lattice = function()
                 rf:{x:0,y:0,z:0},
 
                 // velocity
-                vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                vi:{x:randomNumber(-0.1,0.1), y:randomNumber(-0.1,0.1), z:randomNumber(-0.1,0.1)},
                 vf:{x:0,y:0,z:0},
 
                 id:counter++,
