@@ -128,57 +128,6 @@ var Lattice = function()
                     col:"rgb(173,172,173)", // colour
                   }
                 )
-
-
-
-                this.data.push(
-                  {
-                    ri:{x:(a * i),y:(a * j) + (0.5 * a),z:(a * h) + (0.5 * a)},
-                    rf:{x:0,y:0,z:0},
-
-                    // velocity
-                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
-                    vf:{x:0,y:0,z:0},
-
-                    id:counter++,
-                    r:5,  // radius
-                    m:1,  // mass
-                    name:"basic node",
-                    neighbours:[],
-                    valencePairs:[],
-                    showEdges:true,
-                    visible: true,
-                    stroke:"black",
-                    edgeStroke:"black",
-                    col:"rgb(173,172,173)", // colour
-                  })
-
-
-                this.data.push(
-                  {
-
-                    // displacement
-                    ri:{x:(a * i) + (0.5 * a),y:(a * j) + (0.5 * a),z:(a * h)},
-                    rf:{x:0,y:0,z:0},
-
-                    // velocity
-                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
-                    vf:{x:0,y:0,z:0},
-
-
-                    id:counter++,
-                    r:5,  // radius
-                    m:1,  // mass
-                    name:"basic node",
-                    neighbours:[],
-                    valencePairs:[],
-                    showEdges:true,
-                    visible: true,
-                    stroke:"black",
-                    edgeStroke:"black",
-                    col:"rgb(173,172,173)", // colour
-                  }
-                )
               }
             }
           }
