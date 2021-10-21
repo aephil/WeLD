@@ -267,17 +267,19 @@ var Renderer = function () {
 
          if(lattice.showEdges())
          {
-           n.neighbours.forEach((neighbour) => {
-             if(n.showEdges)
-             {
-               var imagePos1 = cameraView(lattice.data[neighbour[0]].ri)
-               ctx.beginPath();       // Start a new path
-               ctx.moveTo(centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height));
-               ctx.lineTo(centreToScreenXPeriodic(imagePos1.x, ui.canvas.width), centreToScreenYPeriodic(imagePos1.y, ui.canvas.height));
-               ctx.closePath();
-               ctx.strokeStyle = n.edgeStroke;
-               ctx.stroke();
-             }
+           n.forces.forEach((force) => {
+             if(force.name=="spring"){
+               if(n.showEdges)
+               {
+                 var imagePos1 = cameraView(lattice.data[force.params[2]].ri)
+                 ctx.beginPath();       // Start a new path
+                 ctx.moveTo(centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height));
+                 ctx.lineTo(centreToScreenXPeriodic(imagePos1.x, ui.canvas.width), centreToScreenYPeriodic(imagePos1.y, ui.canvas.height));
+                 ctx.closePath();
+                 ctx.strokeStyle = n.edgeStroke;
+                 ctx.stroke();
+                }
+           }
            });
          }
        }

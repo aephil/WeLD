@@ -36,12 +36,16 @@ var Lattice = function()
 
                 this.data.push(
                   {
-                    ri:{x:(a * i) + (0.5 * a),y:(a * j),z:(a * h) + (0.5 * a)},
+                    ri:{
+                      x:(a * i) + (0.5 * a),
+                      y:(a * j),
+                      z:(a * h) + (0.5 * a)},
                     rf:{x:0,y:0,z:0},
 
                     // velocity
                     vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
                     vf:{x:0,y:0,z:0},
+                    forces: [],
 
                     id:counter++,
                     r:5,  // radius
@@ -56,15 +60,71 @@ var Lattice = function()
                     col:"rgb(173,172,173)", // colour
                   }
                 )
+
+
+
+                this.data.push(
+                  {
+                    ri:{
+                      x:(a * i),
+                      y:(a * j) + (0.5 * a),
+                      z:(a * h) + (0.5 * a)},
+                    rf:{x:0,y:0,z:0},
+
+                    // velocity
+                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                    vf:{x:0,y:0,z:0},
+                    forces: [],
+
+                    id:counter++,
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    neighbours:[],
+                    valencePairs:[],
+                    showEdges:true,
+                    visible: true,
+                    stroke:"black",
+                    edgeStroke:"black",
+                    col:"rgb(173,172,173)", // colour
+                  })
+
+
+                this.data.push(
+                  {
+
+                    // displacement
+                    ri:{
+                      x:(a * i) + (0.5 * a),
+                      y:(a * j) + (0.5 * a),
+                      z:(a * h)},
+                    rf:{x:0,y:0,z:0},
+
+                    // velocity
+                    vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
+                    vf:{x:0,y:0,z:0},
+
+                    forces: [],
+                    id:counter++,
+                    r:5,  // radius
+                    m:1,  // mass
+                    name:"basic node",
+                    showEdges:true,
+                    visible: true,
+                    stroke:"black",
+                    edgeStroke:"black",
+                    col:"rgb(173,172,173)", // colour
+                  }
+                )
               }
             }
           }
+
 
           if(ui)
           {
             ui.log("loaded"+ui.colouredText(" Face-Centred Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells. Total of "+ui.colouredText(this.data.length,"blue")+" nodes.");
           }
-          makeBonds(this.data);
     }
 
     // creates a free-particle lattice
@@ -97,8 +157,6 @@ var Lattice = function()
                 r:5,  // radius
                 m:1,  // mass
                 name:"basic node",
-                neighbours:[], // index of other atoms
-                valencePairs:[],
                 showEdges:true,
                 visible: true,
                 stroke:"black",

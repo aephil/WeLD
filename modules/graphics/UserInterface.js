@@ -230,12 +230,12 @@ var UserInterface = function()
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
-    var neighbours = datapoint.neighbours;
-    if(Array.isArray(neighbours) && neighbours.length)
+    var forces = datapoint.forces;
+    if(Array.isArray(forces) && forces.length)
     {
-      tooltip.innerHTML += "neighbour(s): "
-      neighbours.forEach((neighbour) => {
-          tooltip.innerHTML += "#"+ neighbour[0] + " ";
+      tooltip.innerHTML += "force(s): "
+      forces.forEach((force) => {
+          tooltip.innerHTML += force.name + "</br>"
       });
     }
     tooltip.innerHTML += ""

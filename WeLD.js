@@ -93,7 +93,7 @@
   var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(false);
+  lattice.setShowEdges(true);
 
 // Make neighbours
   const springPredicate = (d1, d2) => {
@@ -110,7 +110,7 @@
 
 
   // This sets lattice.data
-  lattice.makePrimitive3D(2,1,1, 40);
+  lattice.makePrimitive3D(2,1,1,40);
 
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
