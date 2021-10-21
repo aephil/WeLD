@@ -94,7 +94,10 @@
   lattice = Physics.Lattice;
   lattice.setUI(ui);
   lattice.setShowEdges(false);
+
+  // This sets lattice.data
   lattice.makePrimitive3D(10,10,10, edgeLen);
+
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
   var physics = [verletController.velocityVerlet, verletController.updateState];
