@@ -135,12 +135,14 @@ var Renderer = function () {
     var elapsed = 0; // in seconds
     var start = 0; // start timestamp
     var rho = 0
+    var translate={x:0,y:0,z:0};
     var theta = 0
     var rhoLast = 0
     var thetaLast = 0
     var fps = 30
     var freq = 1 // in seconds^-1
     var updateCounter = 0;
+    var highlighted = false;
 
 
     var lattice = false;
@@ -173,6 +175,13 @@ var Renderer = function () {
         document.body.appendChild(infoBox);
     }
     var cameraView = function(d){
+
+      if(ui.highlighted()!==false)
+      {
+        var origin = lattice.data[ui.highlighted()];
+        var translated = translateVec(d, {x:(-origin.ri.x),y:(-origin.ri.y),z:(-origin.ri.z)})
+        return rotY(rotX(translated,theta),rho)
+      }
       return rotY(rotX(d,theta),rho);
     }
     var update = function(){

@@ -96,7 +96,7 @@
   lattice.setShowEdges(false);
 
 // Make neighbours
-  const neighborPredicate = (d1, d2) => {
+  const springPredicate = (d1, d2) => {
     if (d1.id === d2.id) return false;
 
     const dx2 = (d2.ri.x - d1.ri.x) ** 2;
@@ -108,23 +108,24 @@
     //return distanceSquared <= 20;
   }
 
-  lattice.setPredicate(neighborPredicate);
 
   // This sets lattice.data
-  lattice.makePrimitive3D(10,10,10, edgeLen);
+  lattice.makePrimitive3D(2,1,1, edgeLen);
 
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
 
-  // lattice.setForces([{name: "Test Force", params: [], color: "red"}])
-  // setting forces
-  lattice.setForces([
-    {
-      name: "Harmonic",
-      params: [1e-3],
-      color: "red"
-    }
-  ]);
+  lattice.setForces({name: "Test Force", params: [], color: "red"})
+
+
+  // lattice.setInterAtomicForces(
+  //  {
+  //    name: "spring",
+  //    params: [1e-3,edgeLen],
+  //    color: "red"
+  //  },
+  //  springPredicate
+  //);
 
   var physics = [verletController.velocityVerlet, verletController.updateState];
 

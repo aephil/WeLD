@@ -203,6 +203,9 @@ var UserInterface = function()
   this.highlight = function(i){
     highlight(i);
   }
+  this.highlighted = function(){
+    return highlighted;
+  }
   this.showTooltip = function(pos, i) {
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];

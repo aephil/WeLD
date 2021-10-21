@@ -12,45 +12,39 @@ should simply calculate the force and return it.
 const ForceMap = function () {
     this.testForce = function(d, data, params) {
         // just for testing purposes
-        return {fx: 1, fy: 1, fz: 1};
+        return {x: 1, y: 1, z: 1};
     }
 
-    this.harmonic = function(d, data, params) {
+    this.spring = function(d, data, params) {
         // Copied with minor changes from physics/Harmonic.js
-        [k] = params;
-        let [fx, fy, fz] = [0, 0, 0];
 
-        for (let i = 0; i < d.neighbours.length; i++) {
-               const neighbour = d.neighbours[i];
-               const neighbourIndex = neighbour[0];
-               const d2 = data[neighbourIndex];
-               
-               const nodesLen = neighbour[1]; 
+         const [k, nodesLen, neighbourIndex] = params
+         const d2 = data[neighbourIndex];
 
-               const dx = Math.abs(d.ri.x - d2.ri.x);
-               const dy = Math.abs(d.ri.y - d2.ri.y);
-               const dz = Math.abs(d.ri.z - d2.ri.z);
+         const dx = Math.abs(d.ri.x - d2.ri.x);
+         const dy = Math.abs(d.ri.y - d2.ri.y);
+         const dz = Math.abs(d.ri.z - d2.ri.z);
 
-               const separation = {x: dx, y: dy, z: dz};
-               const unitSeparation = Physics.Vector.unitVector(separation);
+         const separation = {x: dx, y: dy, z: dz};
+         const unitSeparation = Physics.Vector.unitVector(separation);
 
-               const equilibrium = Physics.Vector.scale(nodesLen, unitSeparation);
-               const extension = Physics.Vector.sub(equilibrium, separation);
+         const equilibrium = Physics.Vector.scale(nodesLen, unitSeparation);
+         const extension = Physics.Vector.sub(equilibrium, separation);
 
-               // begin debug here
+         // begin debug here
 
-               fx -= k * extension.x;
-               fy -= k * extension.y;
-               fz -= k * extension.z;
 
-            }
+         fx = -k * extension.x;
+         fy = -k * extension.y;
+         fz = -k * extension.z;
 
-        return {fx: fx, fy: fy, fz: fz};
+
+        return {x: fx, y: fy, z: fz};
         }
-    
+
     this.forceMap = {
     "Test Force": this.testForce,
-    "Harmonic": this.harmonic
+    "spring": this.spring
     }
 
     return this.forceMap;

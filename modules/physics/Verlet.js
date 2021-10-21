@@ -10,12 +10,13 @@ const Verlet = function(d, data)
 
     d.forces.forEach(({name, params, color}) => {
       force = Physics.Forcemap[name];
-      const {fx, fy, fz} = force(d, data, params);
-      fi.x += fx;
-      fi.y += fy;
-      fi.z += fz;
+      const {x, y, z} = force(d, data, params);
+      fi.x += x;
+      fi.y += y;
+      fi.z += z;
     })
-  
+
+
     // leapfrog step
     const v_half = Physics.Vector.add(d.vi, Physics.Vector.scale(0.5*(1/d.m)*dt, fi));
     const rf = Physics.Vector.add(d.ri, Physics.Vector.scale(dt, v_half));
