@@ -90,6 +90,7 @@ var Lattice = function()
       }
     }
 
+
     // returns true if node i considers node j a neighbour.
      this.hasNeighbour = function(i,j){
       return hasNeighbour(i,j);
@@ -141,6 +142,7 @@ var Lattice = function()
 
     this.makePrimitive3D = function(cellsX, cellsY, cellsZ, a)
     {
+      this.a = a;
       this.data = []
       nodes = []
       var counter=0;
@@ -159,6 +161,9 @@ var Lattice = function()
                 // velocity
                 vi:{x:randomNumber(-0.1,0.1), y:randomNumber(-0.1,0.1), z:randomNumber(-0.1,0.1)},
                 vf:{x:0,y:0,z:0},
+
+                // forces
+                forces: [],
 
                 id:counter++,
                 r:(nodeR?nodeR():5),  // radius
@@ -336,6 +341,15 @@ var Lattice = function()
 
    this.setPredicate = function(p){predicate = p}
 // default draw call for renderer, (can use a custom one)
+
+    // Set forces for all nodes. Note this sets the forces to be the exact same
+    // for all the nodes
+    this.setForces = function(forces) {
+      this.data.forEach(d => {
+        d.forces = forces;
+      });
+    }
+
   }
 
 Physics.Lattice = new Lattice();

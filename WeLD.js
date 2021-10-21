@@ -95,11 +95,37 @@
   lattice.setUI(ui);
   lattice.setShowEdges(false);
 
+// Make neighbours
+  const neighborPredicate = (d1, d2) => {
+    if (d1.id === d2.id) return false;
+
+    const dx2 = (d2.ri.x - d1.ri.x) ** 2;
+    const dy2 = (d2.ri.y - d1.ri.y) ** 2;
+    const dz2 = (d2.ri.z - d1.ri.z) ** 2;
+    const distanceSquared = dx2 + dy2 + dz2;
+
+    return distanceSquared <= edgeLen ** 2;
+    //return distanceSquared <= 20;
+  }
+
+  lattice.setPredicate(neighborPredicate);
+
   // This sets lattice.data
   lattice.makePrimitive3D(10,10,10, edgeLen);
 
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
+
+  // lattice.setForces([{name: "Test Force", params: [], color: "red"}])
+  // setting forces
+  lattice.setForces([
+    {
+      name: "Harmonic",
+      params: [1e-3],
+      color: "red"
+    }
+  ]);
+
   var physics = [verletController.velocityVerlet, verletController.updateState];
 
   // setup graphics resources ///////////////////////////////////////////////
