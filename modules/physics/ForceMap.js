@@ -29,15 +29,12 @@ const ForceMap = function () {
          const unitSeparation = Physics.Vector.unitVector(separation);
 
          const equilibrium = Physics.Vector.scale(nodesLen, unitSeparation);
-         const extension = Physics.Vector.sub(equilibrium, separation);
+         const extension = Physics.Vector.sub(separation, equilibrium);
 
          // begin debug here
-
-
          fx = -k * extension.x;
          fy = -k * extension.y;
          fz = -k * extension.z;
-
 
         return {x: fx, y: fy, z: fz};
         }

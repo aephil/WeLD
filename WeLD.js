@@ -110,22 +110,19 @@
 
 
   // This sets lattice.data
-  lattice.makePrimitive3D(2,1,1, edgeLen);
+  lattice.makePrimitive3D(2,1,1, 40);
 
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
 
-  lattice.setForces({name: "Test Force", params: [], color: "red"})
-
-
-  // lattice.setInterAtomicForces(
-  //  {
-  //    name: "spring",
-  //    params: [1e-3,edgeLen],
-  //    color: "red"
-  //  },
-  //  springPredicate
-  //);
+  //lattice.setForces({name: "Test Force", params: [], color: "red"})
+   lattice.setInterAtomicForces(
+    {
+      name: "spring",
+      params: [1e-3,edgeLen],
+      color: "red"
+    }
+  );
 
   var physics = [verletController.velocityVerlet, verletController.updateState];
 

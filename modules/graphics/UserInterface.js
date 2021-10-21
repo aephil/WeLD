@@ -63,10 +63,28 @@ var UserInterface = function()
     log("focus off")
   }
 
+  var highlightCommand = function(args){
+    var selection = args[0];
+    if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
+    {
+      if(parseInt(selection)<=(data.length -1))
+      {
+        //highlighted = selection;
+        highlight(selection);
+        log("centred node #"+selection);
+      } else {
+        logError("invalid range");
+      }
+    } else {
+            logError("input is not an integer");
+          }
+  }
+
   var commandMap = new Map(
     [
       ["focus", focus],
       ["unfocus", unfocus],
+      ["centre", highlightCommand],
     ]
   )
 
@@ -154,7 +172,6 @@ var UserInterface = function()
             input += char;
             terminal.innerHTML = output + "UserIn: " + input + "<";
           }
-          console.log(input);
 
         }
       }, false);

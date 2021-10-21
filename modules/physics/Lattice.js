@@ -278,22 +278,32 @@ var Lattice = function()
     }
 
     // Set forces for all node pairs which satisfy a given a predicate.
-    this.setInterAtomicForces = function(force, predicate) {
+    this.setInterAtomicForces = function(force, predicate=false) {
       for(let i = 0; i < this.data.length; i++)
       {
         var d1 = this.data[i];
         for(let j = 0; j < this.data.length; j++)
         {
           var d2 = this.data[j];
-          if(predicate(d1, d2) && i!==j)
+          if(predicate)
           {
-            // last parameter for interatomic force is always
-            // the index of the neightbouring node.
+            if(predicate(d1, d2) && i!==j)
+            {
+              // last parameter for interatomic force is always
+              // the index of the neightbouring node.
 
-            let forceCopy = JSON.parse(JSON.stringify(force));
-            forceCopy.params.push(d2.id);
-            d1.forces.push(forceCopy);
+              let forceCopy = JSON.parse(JSON.stringify(force));
+              forceCopy.params.push(d2.id);
+              d1.forces.push(forceCopy);
+            }
           }
+          // will interact with all other particles with this force
+          if(d1.id!==d2.id)
+          {
+          let forceCopy = JSON.parse(JSON.stringify(force));
+          forceCopy.params.push(d2.id);
+          d1.forces.push(forceCopy);
+        }
         }
       }
     }
