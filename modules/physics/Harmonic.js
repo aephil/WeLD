@@ -29,9 +29,9 @@ var Harmonic = function(){
         nodesLen = neighbour[1]; // node length between neighbour and particle
         nIndex = neighbour[0]; // index of neighbour in data
 
-        dx = Math.abs(d.x - data[nIndex].x);
-        dy = Math.abs(d.y - data[nIndex].y);
-        dz = Math.abs(d.z - data[nIndex].z);
+        dx = Math.abs(d.ri.x - data[nIndex].ri.x);
+        dy = Math.abs(d.ri.y - data[nIndex].ri.y);
+        dz = Math.abs(d.ri.z - data[nIndex].ri.z);
 
         // get unit vector of the vector (dx, dy, dz)
         vec = {x:dx,y:dy,z:dz};
@@ -46,7 +46,6 @@ var Harmonic = function(){
         extX = extVec.x
         extZ = extVec.z
 
-
         ax = (kSpring * extX / d.m )
         ay = (kSpring * extY / d.m )
         az = (kSpring * extZ / d.m )
@@ -60,14 +59,14 @@ var Harmonic = function(){
         var z = (0.5*az)
         var zN = z * (-1)
 
-        d.x += x
-        data[nIndex].x += xN
+        d.ri.x += x
+        data[nIndex].ri.x += xN
 
-        d.y += y
-        data[nIndex].y += yN
+        d.ri.y += y
+        data[nIndex].ri.y += yN
 
-        d.z += z
-        data[nIndex].z += zN
+        d.ri.z += z
+        data[nIndex].ri.z += zN
 
     }
   }
@@ -81,9 +80,9 @@ var Harmonic = function(){
       var node2Idx = d.valencePairs[i][1];
       var eqAngle = d.valencePairs[i][2];
 
-      var a = Physics.Vector.makeV3(data[node1Idx]);
-      var b = Physics.Vector.makeV3(d);//central node
-      var c = Physics.Vector.makeV3(data[node2Idx]);
+      var a = data[node1Idx].ri;
+      var b = d.ri;//central node
+      var c = data[node2Idx].ri;
 
       var ba = Physics.Vector.sub(b,a);
       var bc = Physics.Vector.sub(b,c);
@@ -104,17 +103,17 @@ var Harmonic = function(){
       var fc = Physics.Vector.scale(fcFactor, pc)
       var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc))
 
-      data[node1Idx].x += 0.5*(fa.x/data[node1Idx].m);
-      data[node1Idx].y += 0.5*(fa.y/data[node1Idx].m);
-      data[node1Idx].z += 0.5*(fa.z/data[node1Idx].m);
+      data[node1Idx].ri.x += 0.5*(fa.x/data[node1Idx].m);
+      data[node1Idx].ri.y += 0.5*(fa.y/data[node1Idx].m);
+      data[node1Idx].ri.z += 0.5*(fa.z/data[node1Idx].m);
 
-      d.x += 0.5*(fb.x/d.m);
-      d.y += 0.5*(fb.y/d.m);
-      d.z += 0.5*(fb.z/d.m);
+      d.ri.x += 0.5*(fb.x/d.m);
+      d.ri.y += 0.5*(fb.y/d.m);
+      d.ri.z += 0.5*(fb.z/d.m);
 
-      data[node2Idx].x += 0.5*(fc.x/data[node2Idx].m)
-      data[node2Idx].y += 0.5*(fc.y/data[node2Idx].m)
-      data[node2Idx].z += 0.5*(fc.z/data[node2Idx].m)
+      data[node2Idx].ri.x += 0.5*(fc.x/data[node2Idx].m)
+      data[node2Idx].ri.y += 0.5*(fc.y/data[node2Idx].m)
+      data[node2Idx].ri.z += 0.5*(fc.z/data[node2Idx].m)
     }
   }
     return this;

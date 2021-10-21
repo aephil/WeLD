@@ -40,6 +40,13 @@ text.blue {
   border-radius: 5px;
   padding: 5px;
   z-index: 200;
+
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+
+  -ms-user-select: none;
+  user-select: none;
 }
 
 #terminal {

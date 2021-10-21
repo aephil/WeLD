@@ -27,7 +27,7 @@ var Renderer = function () {
     freq = n;
     if(ui)
     {
-      ui.log("frequency set to "+n +"/ms")
+      ui.log("frequency set to "+n +" updates/s")
     }
   };
   this.setFPS = function(n){
@@ -60,6 +60,10 @@ var Renderer = function () {
   this.setTheta = function(angle){
     theta = angle
   }
+  this.setUpdates = function(u)
+  {
+    updates = u;
+  }
   this.setUI = function(u){
 
     ui=u
@@ -69,8 +73,8 @@ var Renderer = function () {
       function(event) {
 
         var ClientRect = this.getBoundingClientRect();
-        mouseX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
-        mouseY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+        mouseX = (event.clientX - ClientRect.left);
+        mouseY = (event.clientY - ClientRect.top);
 
         if(dragOn){
           rho = rhoLast+((mouseX - dragStartX) * 0.01);
@@ -83,19 +87,18 @@ var Renderer = function () {
     ui.canvas.addEventListener("click", function(event){
 
       event.preventDefault();
-
       var active = []
       lattice.data.forEach(function(n) {
-        var onScreenPos = cameraView(n);
-        var isHit = (Math.abs(onScreenPos.x - mouseX) < n.r) && (Math.abs(onScreenPos.y - mouseY) < n.r)
+        var onScreenPos = cameraView(n.ri);
+        var isHit = (Math.abs(centreToScreenXPeriodic(onScreenPos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(onScreenPos.y, ui.canvas.height)- mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
         }
       });
 
       active.sort(function(a, b) {
-          var onScreenPos1 = rotY(rotX(a,theta),rho);
-          var onScreenPos2 = rotY(rotX(b,theta),rho);
+          var onScreenPos1 = cameraView(a.ri);
+          var onScreenPos2 = cameraView(b.ri);
           return onScreenPos1.z - onScreenPos2.z;
         });
 
@@ -103,15 +106,14 @@ var Renderer = function () {
       {
         ui.highlight(active[0].id)
       }
-
     }, false)
 
     ui.canvas.addEventListener("mousedown", function(event){
       var ClientRect = this.getBoundingClientRect();
       dragOn = true;
       event.preventDefault();
-      dragStartX = screenToCentreX(event.clientX - ClientRect.left,ui.canvas.width);
-      dragStartY = screenToCentreY(event.clientY - ClientRect.top,ui.canvas.height);
+      dragStartX = (event.clientX - ClientRect.left);
+      dragStartY = (event.clientY - ClientRect.top);
     }, false)
 
     ui.canvas.addEventListener("mouseout",function(event){
@@ -127,20 +129,22 @@ var Renderer = function () {
     }, false)
 
   }
-  this.setUpdates = function(u){
-    updates = u
-  }
 
     // private member variables
     var frames = 0;
-    var elapsed = 0; // in milliseconds
+    var elapsed = 0; // in seconds
     var start = 0; // start timestamp
     var rho = 0
     var theta = 0
     var rhoLast = 0
     var thetaLast = 0
+    var fps = 30
+    var freq = 1 // in seconds^-1
+    var updateCounter = 0;
+
 
     var lattice = false;
+    var updates;
     var mouseX = 0;
     var mouseY = 0;
     var dragStartX = 0;
@@ -198,16 +202,16 @@ var Renderer = function () {
     {
       var active = []
       lattice.data.forEach(function(n) {
-        var imagePos = cameraView(n);
-        var isHit = (Math.abs(imagePos.x - mouseX) < n.r) && (Math.abs(imagePos.y - mouseY) < n.r)
+        var imagePos = cameraView(n.ri);
+        var isHit = (Math.abs(centreToScreenXPeriodic(imagePos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(imagePos.y, ui.canvas.height) - mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
         }
       });
 
       active.sort(function(a, b) {
-          var imagePos1 = cameraView(a);
-          var imagePos2 = cameraView(b);
+          var imagePos1 = cameraView(a.ri);
+          var imagePos2 = cameraView(b.ri);
           return imagePos1.z - imagePos2.z;
         });
 
@@ -227,20 +231,24 @@ var Renderer = function () {
        ctx.fillStyle = "cornsilk";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
-       // need to shallow copy for sorting draw order
-       var copyForSort = [...lattice.data];
-       copyForSort.sort(
+       // need to copy and reorder ids for sorting draw order
+       var forSort = [];
+       lattice.data.forEach((node) => {
+         forSort.push(node.id);
+       });
+       forSort.sort(
          function(a, b) {
-           var imagePos1 = cameraView(a);
-           var imagePos2 = cameraView(b);
+           var imagePos1 = cameraView(lattice.data[a].ri);
+           var imagePos2 = cameraView(lattice.data[b].ri);
            return imagePos2.z - imagePos1.z;
          });
 
-       copyForSort.forEach((n) => {
+       forSort.forEach((id) => {
+         var n = lattice.data[id];
          if(n.visible){
-           var imagePos = cameraView(n);
+           var imagePos = cameraView(n.ri);
          ctx.beginPath();
-         ctx.arc( centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
+         ctx.arc( centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
          ctx.closePath();
          ctx.fillStyle = n.col;
          ctx.lineWidth = 1;
@@ -253,10 +261,10 @@ var Renderer = function () {
            n.neighbours.forEach((neighbour) => {
              if(n.showEdges)
              {
-               var imagePos1 = cameraView(lattice.data[neighbour[0]])
+               var imagePos1 = cameraView(lattice.data[neighbour[0]].ri)
                ctx.beginPath();       // Start a new path
-               ctx.moveTo(centreToScreenX(imagePos.x, ui.canvas.width), centreToScreenY(imagePos.y, ui.canvas.height));
-               ctx.lineTo(centreToScreenX(imagePos1.x, ui.canvas.width), centreToScreenY(imagePos1.y, ui.canvas.height));
+               ctx.moveTo(centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height));
+               ctx.lineTo(centreToScreenXPeriodic(imagePos1.x, ui.canvas.width), centreToScreenYPeriodic(imagePos1.y, ui.canvas.height));
                ctx.closePath();
                ctx.strokeStyle = n.edgeStroke;
                ctx.stroke();
@@ -275,14 +283,14 @@ var Renderer = function () {
        }
    }
     var animate = function(){
+      var end = performance.now();
+      elapsed = (end - start)/1000;
 
-
-
-     update();
-     requestAnimationFrame(animate);
-
-     var end = performance.now();
-     elapsed = (end - start)/1000;
+      if(elapsed > (1/freq* updateCounter)){
+        update();
+        updateCounter++;
+      }
+      requestAnimationFrame(animate);
      if (elapsed > frames * (1/fps))
      {
        var x = showInfo;
