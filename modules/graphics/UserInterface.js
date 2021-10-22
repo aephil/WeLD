@@ -80,11 +80,36 @@ var UserInterface = function()
           }
   }
 
+  // move a node to the specified location
+  // for debugging purposes
+  const moveCommand = function(args) {
+    let [nodeID, x, y, z] = args;
+    console.log(args);
+    if (nodeID && x && y && z) {
+      nodeID = parseInt(nodeID)
+      x = parseFloat(x);
+      y = parseFloat(y);
+      z = parseFloat(z);
+    
+      const node = data[nodeID];
+
+      node.ri.x = x;
+      node.ri.y = y;
+      node.ri.z = z;
+    } else {
+      logError("Usage: move [ID] [x] [y] [z], e.g. move 0 -13 45 -279");
+    }
+    
+
+
+    }
+
   var commandMap = new Map(
     [
       ["focus", focus],
       ["unfocus", unfocus],
       ["centre", highlightCommand],
+      ["move", moveCommand]
     ]
   )
 
