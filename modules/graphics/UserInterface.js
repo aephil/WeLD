@@ -84,6 +84,12 @@ var UserInterface = function()
   // for debugging purposes
   const moveCommand = function(args) {
     let [nodeID, x, y, z] = args;
+    let relative = false;
+
+    if (args.length >= 5 && args[4] == "r") {
+      relative = true;
+    }
+
     console.log(args);
     if (nodeID && x && y && z) {
       nodeID = parseInt(nodeID)
@@ -93,11 +99,19 @@ var UserInterface = function()
     
       const node = data[nodeID];
 
-      node.ri.x = x;
-      node.ri.y = y;
-      node.ri.z = z;
+      if (relative) {
+        node.ri.x += x;
+        node.ri.y += y;
+        node.ri.z += z;
+      }
+      else {
+        node.ri.x = x;
+        node.ri.y = y;
+        node.ri.z = z;
+      }
+
     } else {
-      logError("Usage: move [ID] [x] [y] [z], e.g. move 0 -13 45 -279");
+      logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
     }
     
 
