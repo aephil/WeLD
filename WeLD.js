@@ -119,7 +119,7 @@
    lattice.setInterAtomicForces(
     {
       name: "spring",
-      params: [1e-3,edgeLen],
+      params: [1e-1,edgeLen],
       color: "red"
     }
   );
