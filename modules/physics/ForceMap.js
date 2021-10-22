@@ -21,9 +21,9 @@ const ForceMap = function () {
          const [k, nodesLen, neighbourIndex] = params
          const d2 = data[neighbourIndex];
 
-         const dx = Math.abs(d.ri.x - d2.ri.x);
-         const dy = Math.abs(d.ri.y - d2.ri.y);
-         const dz = Math.abs(d.ri.z - d2.ri.z);
+         const dx = d.ri.x - d2.ri.x;
+         const dy = d.ri.y - d2.ri.y;
+         const dz = d.ri.z - d2.ri.z;
 
          const separation = {x: dx, y: dy, z: dz};
          const unitSeparation = Physics.Vector.unitVector(separation);
