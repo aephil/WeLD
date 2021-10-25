@@ -33,7 +33,7 @@
  // temperature
   tempController = Physics.Temperature;
   // ui controls for temperature
-  tempSlider = ui.slider(0,1,0.001)
+  tempSlider = ui.slider(1e-10,1e-1,1e-10)
 
   tempSliderContainer = tempSlider[0];
   control.appendChild(tempSliderContainer);
@@ -104,13 +104,12 @@
     const dz2 = (d2.ri.z - d1.ri.z) ** 2;
     const distanceSquared = dx2 + dy2 + dz2;
 
-    return distanceSquared <= edgeLen ** 2;
-    //return distanceSquared <= 20;
+    return distanceSquared == edgeLen ** 2;
   }
 
-
   // This sets lattice.data
-  lattice.makePrimitive3D(2,1,1,40);
+  lattice.makePrimitive3D(2,1,1,edgeLen);
+  tempController.changeDOF(3*lattice.data.length);
 
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
@@ -121,10 +120,42 @@
       name: "spring",
       params: [1e-1,edgeLen],
       color: "red"
-    }
+    },
+    springPredicate
   );
 
-  var physics = [verletController.velocityVerlet, verletController.updateState];
+  lattice.data.forEach((d1) => {
+    d1.forces.forEach((f1) => {
+      if(f1.name=="spring")
+      {
+        let index1 = f1.params[2]
+        let d2 = lattice.data[index1];
+        d1.forces.forEach((f2) => {
+          let index2 = f2.params[2]
+          if(f2.name=="spring" && index2!=index1)
+          {
+            let d3 = lattice.data[index2];
+            // calculate their equilibrium angles
+            let vec1 = Physics.Vector.sub(d3.ri, d1.ri);
+            let vec2 = Physics.Vector.sub(d2.ri, d1.ri);
+            let eqAngle = Physics.Vector.angle(vec1,vec2)
+            d1.forces.push(
+              {
+                name:"valenceAngle",
+                params:[1, eqAngle, index1,index2]
+              }
+            )
+          }
+        });
+
+
+      }
+    });
+
+  });
+
+
+  var physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////

@@ -9,11 +9,14 @@ const Verlet = function(d, data)
     let fi = {x:0, y:0, z:0};
 
     d.forces.forEach(({name, params, color}) => {
-      force = Physics.Forcemap[name];
-      const {x, y, z} = force(d, data, params);
-      fi.x += x;
-      fi.y += y;
-      fi.z += z;
+    //  if(Physics.ForceMap.has(name))
+      {
+        force = Physics.ForceMap[name];
+        const {x, y, z} = force(d, data, params);
+        fi.x += x;
+        fi.y += y;
+        fi.z += z;
+      }
     })
 
     // leapfrog step

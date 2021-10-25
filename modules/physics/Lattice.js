@@ -21,8 +21,6 @@ var Lattice = function()
       ui = x;
     }
 
-
-
     this.makeFCC3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
       this.data = []
@@ -146,16 +144,16 @@ var Lattice = function()
                 ri:{x:a * i,y:a * j,z:a * h},
                 rf:{x:0,y:0,z:0},
 
-                // velocity
-                vi:{x:0,y:0,z:0},
+                // velocity in angstrom / seconds
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
                 vf:{x:0,y:0,z:0},
 
                 // forces
                 forces: [],
 
                 id:counter++,
-                r:5,  // radius
-                m:1,  // mass
+                r:5,  // radius in angstrom
+                m:1,  // 1 carbon mass
                 name:"basic node",
                 showEdges:true,
                 visible: true,
@@ -192,9 +190,9 @@ var Lattice = function()
                 y:a * j, // position y
                 z:a * h, // position z
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                vx:randomNumber(-1,1),
+                vy:randomNumber(-1,1),
+                vz:randomNumber(-1,1),
 
                 id:counter++,
                 r:(nodeR?nodeR():3),  // radius
@@ -354,14 +352,16 @@ var Lattice = function()
               forceCopy.params.push(d2.id);
               d1.forces.push(forceCopy);
             }
+          } else {
+            // will interact with all other particles with this force
+            if(d1.id!==d2.id)
+            {
+            let forceCopy = JSON.parse(JSON.stringify(force));
+            forceCopy.params.push(d2.id);
+            d1.forces.push(forceCopy);
+            }
           }
-          // will interact with all other particles with this force
-          if(d1.id!==d2.id)
-          {
-          let forceCopy = JSON.parse(JSON.stringify(force));
-          forceCopy.params.push(d2.id);
-          d1.forces.push(forceCopy);
-        }
+
         }
       }
     }

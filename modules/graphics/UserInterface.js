@@ -96,7 +96,7 @@ var UserInterface = function()
       x = parseFloat(x);
       y = parseFloat(y);
       z = parseFloat(z);
-    
+
       const node = data[nodeID];
 
       if (relative) {
@@ -114,8 +114,6 @@ var UserInterface = function()
       logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
     }
     
-
-
     }
 
   var commandMap = new Map(
