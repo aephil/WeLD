@@ -115,14 +115,14 @@
   verletController = Physics.Verlet;
 
   //lattice.setForces({name: "Test Force", params: [], color: "red"})
-   lattice.setInterAtomicForces(
-    {
-      name: "spring",
-      params: [1e-1,edgeLen],
-      color: "red"
-    },
-    springPredicate
-  );
+  // lattice.setInterAtomicForces(
+  //  {
+  //    name: "spring",
+  //    params: [1e-1,edgeLen],
+  //    color: "red"
+  //  },
+  //  springPredicate
+  //);
 
   // Setup valence angles
   Physics.initValence(lattice, 1);
