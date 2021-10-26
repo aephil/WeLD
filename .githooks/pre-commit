@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+echo "hello"
+
 STAGED_FILES=$(git diff --name-only --diff-filter=ACM | grep ".ts\{0,1\}$")
 ESLINT="$(git rev-parse --show-toplevel)/node_modules/.bin/eslint"
 
