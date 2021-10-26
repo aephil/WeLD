@@ -1,0 +1,27 @@
+{
+  "name": "weld",
+  "version": "0.0.1",
+  "description": "Molecular dynamics in the browser",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aephil/WeLD.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/aephil/WeLD/issues"
+  },
+  "homepage": "https://github.com/aephil/WeLD#readme",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.25.2",
+    "typescript": "^4.4.4"
+  }
+}
