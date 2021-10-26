@@ -63,10 +63,65 @@ var UserInterface = function()
     log("focus off")
   }
 
+  var highlightCommand = function(args){
+    var selection = args[0];
+    if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
+    {
+      if(parseInt(selection)<=(data.length -1))
+      {
+        //highlighted = selection;
+        highlight(selection);
+        log("centred node #"+selection);
+      } else {
+        logError("invalid range");
+      }
+    } else {
+            logError("input is not an integer");
+          }
+  }
+
+  // move a node to the specified location
+  // for debugging purposes
+  const moveCommand = function(args) {
+    let [nodeID, x, y, z] = args;
+    let relative = false;
+
+    if (args.length >= 5 && args[4] == "r") {
+      relative = true;
+    }
+
+    console.log(args);
+    if (nodeID && x && y && z) {
+      nodeID = parseInt(nodeID)
+      x = parseFloat(x);
+      y = parseFloat(y);
+      z = parseFloat(z);
+
+      const node = data[nodeID];
+
+      if (relative) {
+        node.ri.x += x;
+        node.ri.y += y;
+        node.ri.z += z;
+      }
+      else {
+        node.ri.x = x;
+        node.ri.y = y;
+        node.ri.z = z;
+      }
+
+    } else {
+      logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
+    }
+    
+    }
+
   var commandMap = new Map(
     [
       ["focus", focus],
       ["unfocus", unfocus],
+      ["centre", highlightCommand],
+      ["move", moveCommand]
     ]
   )
 
@@ -154,7 +209,6 @@ var UserInterface = function()
             input += char;
             terminal.innerHTML = output + "UserIn: " + input + "<";
           }
-          console.log(input);
 
         }
       }, false);
@@ -203,6 +257,9 @@ var UserInterface = function()
   this.highlight = function(i){
     highlight(i);
   }
+  this.highlighted = function(){
+    return highlighted;
+  }
   this.showTooltip = function(pos, i) {
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
@@ -210,12 +267,12 @@ var UserInterface = function()
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
-    var neighbours = datapoint.neighbours;
-    if(Array.isArray(neighbours) && neighbours.length)
+    var forces = datapoint.forces;
+    if(Array.isArray(forces) && forces.length)
     {
-      tooltip.innerHTML += "neighbour(s): "
-      neighbours.forEach((neighbour) => {
-          tooltip.innerHTML += "#"+ neighbour[0] + " ";
+      tooltip.innerHTML += "force(s): "
+      forces.forEach((force) => {
+          tooltip.innerHTML += force.name + "</br>"
       });
     }
     tooltip.innerHTML += ""

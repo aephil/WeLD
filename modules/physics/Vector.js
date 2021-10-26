@@ -29,11 +29,6 @@ var Vector = function()
       return {x:a, y:b, z:c};
     }
 
-  this.makeV3 = function(d)
-    {
-      return {x:d.x, y:d.y, z:d.z}
-    }
-
   this.dot = function(v1, v2)
     {
       return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;

@@ -33,7 +33,7 @@
  // temperature
   tempController = Physics.Temperature;
   // ui controls for temperature
-  tempSlider = ui.slider(0,1,0.001)
+  tempSlider = ui.slider(1e-10,1e-1,1e-10)
 
   tempSliderContainer = tempSlider[0];
   control.appendChild(tempSliderContainer);
@@ -93,11 +93,42 @@
   var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
-  lattice.setShowEdges(false);
-  lattice.makePrimitive3D(10,10,10, edgeLen);
+  lattice.setShowEdges(true);
+
+// Make neighbours
+  const springPredicate = (d1, d2) => {
+    if (d1.id === d2.id) return false;
+
+    const dx2 = (d2.ri.x - d1.ri.x) ** 2;
+    const dy2 = (d2.ri.y - d1.ri.y) ** 2;
+    const dz2 = (d2.ri.z - d1.ri.z) ** 2;
+    const distanceSquared = dx2 + dy2 + dz2;
+
+    return distanceSquared == edgeLen ** 2;
+  }
+
+  // This sets lattice.data
+  lattice.makePrimitive3D(2,1,1,edgeLen);
+  tempController.changeDOF(3*lattice.data.length);
+
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
-  var physics = [verletController.velocityVerlet, verletController.updateState];
+
+  //lattice.setForces({name: "Test Force", params: [], color: "red"})
+  // lattice.setInterAtomicForces(
+  //  {
+  //    name: "spring",
+  //    params: [1e-1,edgeLen],
+  //    color: "red"
+  //  },
+  //  springPredicate
+  //);
+
+  // Setup valence angles
+  Physics.initValence(lattice, 1);
+
+  // Each function here is called by the renderer every frame
+  var physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////

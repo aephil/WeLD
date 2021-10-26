@@ -1,11 +1,11 @@
 var Lattice = function()
   {
-    var nodeR = false;
-    var nodeCol = false;
     var ui = false;
     var predicate = false;
     var showEdges = false;
     this.data = [];
+    this.a = 20; // default
+
     this.setShowEdges = function(bool){
       if(bool && ui){
         ui.logWarning("enabling edges may cause a significant hit to the frame rate.")
@@ -21,80 +21,6 @@ var Lattice = function()
       ui = x;
     }
 
-    // returns true if node i considers node j a neighbour.
-     function hasNeighbour(i,j){
-      i.neighbours.forEach(function(el){
-        if(j[0]==el[0]){return true};
-      })
-      return false;
-    }
-
-    function areNeighbours(i,j)
-    {
-      return hasNeighbour(i,j) || hasNeighbour(j,i);
-    };
-
-    function makeBonds(data)
-    {
-      if(predicate)
-      {
-        var edgeCount = 0
-        var angleCount = 0;
-        for(k = 0; k < data.length; k++)
-        {
-          for(l = 0; l < data.length; l++)
-          {
-            if(predicate(data[k], data[l]))
-            {
-              // check l does not already consider k a neighbour
-              if(!(hasNeighbour(data[l],data[k])))
-              {
-                data[k].neighbours.push([l, Physics.Vector.distance(data[k].ri,data[l].ri)]);
-                edgeCount++;
-              }
-            }
-          }
-        }
-
-        //calculate angles between neighbours
-        data.forEach(
-          function(node){
-            for(let i = 0; i < node.neighbours.length; i++)
-            {
-              for(let j = i+1; j < node.neighbours.length; j++)
-              {
-                n1 = data[node.neighbours[i][0]];
-                n2 = data[node.neighbours[j][0]];
-
-                var vec1 = {x:(n1.x-node.x),y:(n1.y-node.y),z:(n1.z-node.z)};
-                var vec2 = {x:(n2.x-node.x),y:(n2.y-node.y),z:(n2.z-node.z)};
-                var angle = Physics.Vector.angle(vec1,vec2);
-                node.valencePairs.push([node.neighbours[i][0], node.neighbours[j][0], angle]);
-                angleCount++
-            }
-          }
-
-        })
-
-        if(ui)
-        {
-          ui.log("total of "+ui.colouredText(edgeCount,"blue")+" unique bonds (edges) were formed.");
-          ui.log("total of "+ui.colouredText(angleCount,"blue")+" valence angle pairs were formed.");
-        }
-
-      } else {
-        if(ui)
-        {
-          ui.log("No predicate for bonding was set; nodes are free.");
-        }
-      }
-    }
-
-    // returns true if node i considers node j a neighbour.
-     this.hasNeighbour = function(i,j){
-      return hasNeighbour(i,j);
-    }
-
     this.makeFCC3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
       this.data = []
@@ -108,12 +34,16 @@ var Lattice = function()
 
                 this.data.push(
                   {
-                    ri:{x:(a * i) + (0.5 * a),y:(a * j),z:(a * h) + (0.5 * a)},
+                    ri:{
+                      x:(a * i) + (0.5 * a),
+                      y:(a * j),
+                      z:(a * h) + (0.5 * a)},
                     rf:{x:0,y:0,z:0},
 
                     // velocity
                     vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
                     vf:{x:0,y:0,z:0},
+                    forces: [],
 
                     id:counter++,
                     r:5,  // radius
@@ -133,12 +63,16 @@ var Lattice = function()
 
                 this.data.push(
                   {
-                    ri:{x:(a * i),y:(a * j) + (0.5 * a),z:(a * h) + (0.5 * a)},
+                    ri:{
+                      x:(a * i),
+                      y:(a * j) + (0.5 * a),
+                      z:(a * h) + (0.5 * a)},
                     rf:{x:0,y:0,z:0},
 
                     // velocity
                     vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
                     vf:{x:0,y:0,z:0},
+                    forces: [],
 
                     id:counter++,
                     r:5,  // radius
@@ -158,20 +92,21 @@ var Lattice = function()
                   {
 
                     // displacement
-                    ri:{x:(a * i) + (0.5 * a),y:(a * j) + (0.5 * a),z:(a * h)},
+                    ri:{
+                      x:(a * i) + (0.5 * a),
+                      y:(a * j) + (0.5 * a),
+                      z:(a * h)},
                     rf:{x:0,y:0,z:0},
 
                     // velocity
                     vi:{x:randomNumber(-0.01,0.01), y:randomNumber(-0.01,0.01), z:randomNumber(-0.01,0.01)},
                     vf:{x:0,y:0,z:0},
 
-
+                    forces: [],
                     id:counter++,
                     r:5,  // radius
                     m:1,  // mass
                     name:"basic node",
-                    neighbours:[],
-                    valencePairs:[],
                     showEdges:true,
                     visible: true,
                     stroke:"black",
@@ -183,15 +118,17 @@ var Lattice = function()
             }
           }
 
+
           if(ui)
           {
             ui.log("loaded"+ui.colouredText(" Face-Centred Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells. Total of "+ui.colouredText(this.data.length,"blue")+" nodes.");
           }
-          makeBonds(this.data);
     }
 
+    // creates a free-particle lattice
     this.makePrimitive3D = function(cellsX, cellsY, cellsZ, a)
     {
+      this.a = a;
       this.data = []
       nodes = []
       var counter=0;
@@ -207,34 +144,32 @@ var Lattice = function()
                 ri:{x:a * i,y:a * j,z:a * h},
                 rf:{x:0,y:0,z:0},
 
-                // velocity
-                vi:{x:randomNumber(-0.1,0.1), y:randomNumber(-0.1,0.1), z:randomNumber(-0.1,0.1)},
+                // velocity in angstrom / seconds
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
                 vf:{x:0,y:0,z:0},
 
+                // forces
+                forces: [],
+
                 id:counter++,
-                r:(nodeR?nodeR():5),  // radius
-                m:1,  // mass
+                r:5,  // radius in angstrom
+                m:1,  // 1 carbon mass
                 name:"basic node",
-                neighbours:[], // index of other atoms
-                valencePairs:[],
                 showEdges:true,
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"orange"), // colour
+                col:"orange", // colour
               }
             )
           }
         }
       }
 
-      // create bonds based on a given predicate
-
       if(ui)
       {
         ui.log("loaded"+ui.colouredText(" Primitive Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells. Total of "+ui.colouredText(this.data.length,"blue")+" nodes.");
       }
-      makeBonds(this.data);
     }
 
     this.makePerovskite3D = function(cellsX, cellsY, cellsZ, a, sim)
@@ -251,16 +186,17 @@ var Lattice = function()
 
             this.data.push(
               {
-                x:a * i, // position x
-                y:a * j, // position y
-                z:a * h, // position z
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                ri:{x:a * i,y:a * j,z:a * h},
+                rf:{x:0,y:0,z:0},
 
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
+                vf:{x:0,y:0,z:0},
+
+                // forces
+                forces: [],
                 id:counter++,
-                r:(nodeR?nodeR():3),  // radius
+                r:3,  // radius
                 m:1,  // mass
                 name:"A Cation",
                 neighbours:[], // index of other atoms
@@ -269,23 +205,27 @@ var Lattice = function()
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"blue"), // colour
+                col:"blue", // colour
               }
             )
 
             // B cation
             this.data.push(
               {
-                x:(a * i) + (a * 0.5), // position x
-                y:(a * j) + (a * 0.5), // position y
-                z:(a * h) + (a * 0.5), // position z
+                ri:{
+                  x:(a * i) + (a * 0.5),
+                  y:(a * j) + (a * 0.5),
+                  z:(a * h) + (a * 0.5)},
+                rf:{x:0,y:0,z:0},
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
+                vf:{x:0,y:0,z:0},
+
+                // forces
+                forces: [],
 
                 id:counter++,
-                r:(nodeR?nodeR():5),  // radius
+                r:5,  // radius
                 m:1,  // mass
                 name:"B Cation",
                 neighbours:[], // index of other atoms
@@ -294,24 +234,28 @@ var Lattice = function()
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"orange"), // colour
+                col:"orange", // colour
               }
             )
 
-            // O anion
+            // O anion(s)
 
             this.data.push(
               {
-                x:(a * i) + (a * 0.5), // position x
-                y:(a * j) + (a * 0.5), // position y
-                z:(a * h), // position z
+                ri:{
+                  x:(a * i) + (a * 0.5),
+                  y:(a * j) + (a * 0.5),
+                  z:(a * h)},
+                rf:{x:0,y:0,z:0},
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
+                vf:{x:0,y:0,z:0},
+
+                // forces
+                forces: [],
 
                 id:counter++,
-                r:(nodeR?nodeR():5),  // radius
+                r:5,  // radius
                 m:1,  // mass
                 name:"O Anion",
                 neighbours:[], // index of other atoms
@@ -320,22 +264,27 @@ var Lattice = function()
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"red"), // colour
+                col:"red", // colour
               }
             )
 
             this.data.push(
               {
-                x:(a * i) + (a * 0.5), // position x
-                y:(a * j), // position y
-                z:(a * h) + (a * 0.5), // position z
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                ri:{
+                  x:(a * i) + (a * 0.5),
+                  y:(a * j),
+                  z:(a * h) + (a * 0.5)},
+                rf:{x:0,y:0,z:0},
+
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
+                vf:{x:0,y:0,z:0},
+
+                // forces
+                forces: [],
 
                 id:counter++,
-                r:(nodeR?nodeR():5),  // radius
+                r:5,  // radius
                 m:1,  // mass
                 name:"O Anion",
                 neighbours:[], // index of other atoms
@@ -344,22 +293,27 @@ var Lattice = function()
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"red"), // colour
+                col:"red", // colour
               }
             )
 
             this.data.push(
               {
-                x:(a * i), // position x
-                y:(a * j) + (a * 0.5), // position y
-                z:(a * h) + (a * 0.5), // position z
 
-                vx:randomNumber(-0.01,0.01),
-                vy:randomNumber(-0.01,0.01),
-                vz:randomNumber(-0.01,0.01),
+                ri:{
+                  x:(a * i),
+                  y:(a * j) + (a * 0.5),
+                  z:(a * h) + (a * 0.5)},
+                rf:{x:0,y:0,z:0},
+
+                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
+                vf:{x:0,y:0,z:0},
+
+                // forces
+                forces: [],
 
                 id:counter++,
-                r:(nodeR?nodeR():5),  // radius
+                r:5,  // radius
                 m:1,  // mass
                 name:"O Anion",
                 neighbours:[], // index of other atoms
@@ -368,7 +322,7 @@ var Lattice = function()
                 visible: true,
                 stroke:"black",
                 edgeStroke:"black",
-                col:(nodeCol?nodeCol():"red"), // colour
+                col:"red", // colour
               }
             )
           }
@@ -381,12 +335,62 @@ var Lattice = function()
       {
         ui.log("loaded"+ui.colouredText(" Perovskite Cubic ","blue") +"lattice data with "+ui.colouredText(cellsX,"blue")+" x " +ui.colouredText(cellsY,"blue")+" x " +ui.colouredText(cellsZ,"blue")+" unit cells. Total of "+ui.colouredText(this.data.length,"blue")+" nodes.");
       }
-      makeBonds(this.data);
 
     }
 
-   this.setPredicate = function(p){predicate = p}
-// default draw call for renderer, (can use a custom one)
+
+    // set forces on all nodes given a predicate. e.g. if a force should
+    // behave as though in some field
+    this.setForces = function(force, predicate=false)
+    {
+      this.data.forEach(d => {
+        if(predicate){
+          if(predicate(d)) d.forces.push(force);
+        } else{
+          d.forces.push(force);
+        }
+      });
+    }
+
+    // Set forces for all node pairs which satisfy a given a predicate.
+    this.setInterAtomicForces = function(force, predicate=false) {
+      for(let i = 0; i < this.data.length; i++)
+      {
+        var d1 = this.data[i];
+        for(let j = 0; j < this.data.length; j++)
+        {
+          var d2 = this.data[j];
+          if(predicate)
+          {
+            if(predicate(d1, d2) && i!==j)
+            {
+              // last parameter for interatomic force is always
+              // the index of the neightbouring node.
+
+              let forceCopy = JSON.parse(JSON.stringify(force));
+              forceCopy.params.push(d2.id);
+              d1.forces.push(forceCopy);
+            }
+          } else {
+            // will interact with all other particles with this force
+            if(d1.id!==d2.id)
+            {
+            let forceCopy = JSON.parse(JSON.stringify(force));
+            forceCopy.params.push(d2.id);
+            d1.forces.push(forceCopy);
+            }
+          }
+
+        }
+      }
+    }
+
+    // sets force for a user-specific node
+    this.setForce = function(index, force)
+    {
+      this.data[index].forces.push(force)
+    }
+
   }
 
 Physics.Lattice = new Lattice();
