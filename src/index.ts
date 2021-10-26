@@ -6,4 +6,6 @@ function hello(world: string = str): string {
 
 console.log('asd');
 
+
+
 export default hello;
