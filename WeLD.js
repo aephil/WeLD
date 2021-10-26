@@ -124,37 +124,10 @@
     springPredicate
   );
 
-  lattice.data.forEach((d1) => {
-    d1.forces.forEach((f1) => {
-      if(f1.name=="spring")
-      {
-        let index1 = f1.params[2]
-        let d2 = lattice.data[index1];
-        d1.forces.forEach((f2) => {
-          let index2 = f2.params[2]
-          if(f2.name=="spring" && index2!=index1)
-          {
-            let d3 = lattice.data[index2];
-            // calculate their equilibrium angles
-            let vec1 = Physics.Vector.sub(d3.ri, d1.ri);
-            let vec2 = Physics.Vector.sub(d2.ri, d1.ri);
-            let eqAngle = Physics.Vector.angle(vec1,vec2)
-            d1.forces.push(
-              {
-                name:"valenceAngle",
-                params:[1, eqAngle, index1,index2]
-              }
-            )
-          }
-        });
+  // Setup valence angles
+  Physics.initValence(lattice, 1);
 
-
-      }
-    });
-
-  });
-
-
+  // Each function here is called by the renderer every frame
   var physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
 
   // setup graphics resources ///////////////////////////////////////////////
