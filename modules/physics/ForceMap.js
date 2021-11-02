@@ -9,7 +9,7 @@ The forces should all the pure functions, i.e. they should not mutate any nodes 
 should simply calculate the force and return it.
 */
 
-class ForceMap {
+export class ForceMap {
   constructor() {
     this.testForce = function (d, data, params) {
       // just for testing purposes
@@ -77,7 +77,7 @@ class ForceMap {
   }
 }
 
-const initValence = function (lattice, k = 1) {
+export const initValence = function (lattice, k = 1) {
   /*
   Performs the necessary initial setup for the Physics.Forcemap.valenceAngle method
   */
@@ -111,5 +111,7 @@ const initValence = function (lattice, k = 1) {
 
 }
 
-Physics.ForceMap = new ForceMap();
+const forceMap = new ForceMap();
+export default forceMap;
+Physics.ForceMap = ForceMap;
 Physics.initValence = initValence;

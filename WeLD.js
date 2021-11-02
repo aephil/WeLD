@@ -24,128 +24,132 @@
  // setup simulation canvas and terminal ///////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
- ui = Graphics.UserInterface;
+ import ForceMap, {initValence} from './modules/physics/ForceMap.js';
+
+ const ui = Graphics.UserInterface;
  ui.loadBasic(); // loads divs for simulation, control and terminal, and initialises the terminal
 
  // load physics controls  /////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
+
  // temperature
-  tempController = Physics.Temperature;
-  // ui controls for temperature
-  tempSlider = ui.slider(1e-10,1e-1,1e-10)
+const tempController = Physics.Temperature;
+// ui controls for temperature
+const tempSlider = ui.slider(1e-10,1e-1,1e-10)
 
-  tempSliderContainer = tempSlider[0];
-  control.appendChild(tempSliderContainer);
+const tempSliderContainer = tempSlider[0];
+control.appendChild(tempSliderContainer);
 
-  tempSliderInput = tempSlider[1];
-  tempSliderLabel =  tempSlider[2];
+const tempSliderInput = tempSlider[1];
+const tempSliderLabel =  tempSlider[2];
 
-  tempSliderInput.value = tempController.temp();
-  tempSliderLabel.innerHTML = "Temperature: " + tempSliderInput.value;
+tempSliderInput.value = tempController.temp();
+tempSliderLabel.innerHTML = "Temperature: " + tempSliderInput.value;
 
-  tempSliderInput.oninput = function(){
-    var value = tempSliderInput.value;
+tempSliderInput.oninput = function(){
+    const value = tempSliderInput.value;
     tempController.changeTemp(value);
     tempSliderLabel.innerHTML = "Temperature: " + value;
   }
 
-    // spring constant
-    harmonicController = Physics.Harmonic;
-    // ui controls for spring constant
-    springConstSlider = ui.slider(0,1,0.01)
+// spring constant
+const harmonicController = Physics.Harmonic;
+// ui controls for spring constant
+const springConstSlider = ui.slider(0,1,0.01)
 
-    springConstSliderContainer = springConstSlider[0];
-    control.appendChild(springConstSliderContainer);
+const springConstSliderContainer = springConstSlider[0];
+control.appendChild(springConstSliderContainer);
 
-    springConstSliderInput = springConstSlider[1];
-    springConstSliderLabel =  springConstSlider[2];
+const springConstSliderInput = springConstSlider[1];
+const springConstSliderLabel =  springConstSlider[2];
 
-    harmonicController.changeKSpring(0.5);
-    springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
-    springConstSliderInput.value = 0.5
+harmonicController.changeKSpring(0.5);
+springConstSliderLabel.innerHTML = "k (spring): " + harmonicController.kSpring();
+springConstSliderInput.value = 0.5
 
-    springConstSliderInput.oninput = function(){
-      var value = springConstSliderInput.value;
-      harmonicController.changeKSpring(value);
-      springConstSliderLabel.innerHTML = "k (spring): " + value;
-    }
+springConstSliderInput.oninput = function(){
+  const value = springConstSliderInput.value;
+  harmonicController.changeKSpring(value);
+  springConstSliderLabel.innerHTML = "k (spring): " + value;
+}
 
-    // ui controls for valence angle constant
-    valenceConstSlider = ui.slider(0,1, 0.01)
-    valenceConstSliderContainer = valenceConstSlider[0];
-    control.appendChild(valenceConstSliderContainer);
+// ui controls for valence angle constant
+const valenceConstSlider = ui.slider(0,1, 0.01)
+const valenceConstSliderContainer = valenceConstSlider[0];
+control.appendChild(valenceConstSliderContainer);
 
-    valenceConstSliderInput = valenceConstSlider[1];
-    valenceConstSliderLabel = valenceConstSlider[2];
+const valenceConstSliderInput = valenceConstSlider[1];
+const valenceConstSliderLabel = valenceConstSlider[2];
 
-    valenceConstSliderLabel.innerHTML = "k (valence): " + 0;
+valenceConstSliderLabel.innerHTML = "k (valence): " + 0;
 
-    valenceConstSliderInput.oninput = function(){
-      var value = valenceConstSliderInput.value;
-      harmonicController.changeKValence(value);
-      valenceConstSliderLabel.innerHTML = "k (valence): " + value;
-    }
+valenceConstSliderInput.oninput = function(){
+  const value = valenceConstSliderInput.value;
+  harmonicController.changeKValence(value);
+  valenceConstSliderLabel.innerHTML = "k (valence): " + value;
+}
 
-  // setup physics resources ////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////
+// setup physics resources ////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
-  var edgeLen = 20;
-  lattice = Physics.Lattice;
-  lattice.setUI(ui);
-  lattice.setShowEdges(true);
+const edgeLen = 20;
+const lattice = Physics.Lattice;
+lattice.setUI(ui);
+lattice.setShowEdges(true);
 
 // Make neighbours
-  const springPredicate = (d1, d2) => {
-    if (d1.id === d2.id) return false;
+const springPredicate = (d1, d2) => {
+  if (d1.id === d2.id) return false;
 
-    const dx2 = (d2.ri.x - d1.ri.x) ** 2;
-    const dy2 = (d2.ri.y - d1.ri.y) ** 2;
-    const dz2 = (d2.ri.z - d1.ri.z) ** 2;
-    const distanceSquared = dx2 + dy2 + dz2;
+  const dx2 = (d2.ri.x - d1.ri.x) ** 2;
+  const dy2 = (d2.ri.y - d1.ri.y) ** 2;
+  const dz2 = (d2.ri.z - d1.ri.z) ** 2;
+  const distanceSquared = dx2 + dy2 + dz2;
 
-    return distanceSquared == edgeLen ** 2;
-  }
+  return distanceSquared == edgeLen ** 2;
+}
 
-  // This sets lattice.data
-  lattice.makePrimitive3D(2,1,1,edgeLen);
-  tempController.changeDOF(3*lattice.data.length);
+// This sets lattice.data
+lattice.makePrimitive3D(2,1,1,edgeLen);
+tempController.changeDOF(3*lattice.data.length);
 
-  ui.setData(lattice.data);
-  verletController = Physics.Verlet;
+ui.setData(lattice.data);
+const verletController = Physics.Verlet;
 
-  //lattice.setForces({name: "Test Force", params: [], color: "red"})
-  // lattice.setInterAtomicForces(
-  //  {
-  //    name: "spring",
-  //    params: [1e-1,edgeLen],
-  //    color: "red"
-  //  },
-  //  springPredicate
-  //);
+//lattice.setForces({name: "Test Force", params: [], color: "red"})
+// lattice.setInterAtomicForces(
+//  {
+//    name: "spring",
+//    params: [1e-1,edgeLen],
+//    color: "red"
+//  },
+//  springPredicate
+//);
 
-  // Setup valence angles
-  Physics.initValence(lattice, 1);
+// Setup valence angles
+initValence(lattice, 1);
+// Physics.initValence(lattice, 1);
 
-  // Each function here is called by the renderer every frame
-  var physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
+// Each function here is called by the renderer every frame
+const physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
 
-  // setup graphics resources ///////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////
+// setup graphics resources ///////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
-  renderer = Graphics.Renderer;
-  renderer.setUI(ui);
-  renderer.setUpdates(physics);
-  renderer.setLattice(lattice);
-  renderer.setFPS(30);
-  renderer.setSpeed(10000);
-  renderer.ui = ui;
-  renderer.render();
+const renderer = Graphics.Renderer;
+renderer.setUI(ui);
+renderer.setUpdates(physics);
+renderer.setLattice(lattice);
+renderer.setFPS(30);
+renderer.setSpeed(10000);
+renderer.ui = ui;
+renderer.render();
 
- // non-essential WeLD banner //////////////////////////////////////////////
+// non-essential WeLD banner //////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
 
-var container = document.createElement("div");
+const container = document.createElement("div");
 container.setAttribute("id","weld");
 control.appendChild(container);
 
@@ -159,7 +163,7 @@ container.style.fontFamily = "monospace";
 container.style.overflowX = "scroll";
 container.style.overflowY = "scroll";
 
-var img = document.createElement("img");
+const img = document.createElement("img");
 img.style.position = "absolute";
 img.style.padding = "2.5px"
 img.style.maxWidth = "100%";
