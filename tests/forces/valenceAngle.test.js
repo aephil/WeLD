@@ -1,4 +1,5 @@
 Physics = {};
+require('../../modules/physics/Vector');
 require('../../modules/physics/ForceMap');
 
 let data = [{ ri: { x: 1, y: 0, z: 0 } }, { ri: { x: 0, y: 1, z: 0 } }];
@@ -12,7 +13,7 @@ params = [1, Math.PI / 2, 0, 1];
 it("Object at origin should return 0 force", () => {
     const d = { ri: { x: 0, y: 0, z: 0 } };
     const force = Physics.ForceMap.valenceAngle(d, data, params);
-    expect(force).toEqual({x: 0, y: 0, z: 0});
+    expect(force).toEqual({x: -0, y: 0, z: -0});
 })
 
 // d = { ri: { x: 0.1, y: 0.1, z: 0 } };
