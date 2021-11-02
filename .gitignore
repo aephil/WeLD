@@ -1,1 +1,4 @@
 .vscode
+import
+node_modules
+require-everything.js
