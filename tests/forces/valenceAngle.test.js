@@ -25,9 +25,11 @@ it(`Force should have components x = y < 0, z = 0
     expect(force.z).toEqual(-0)
 })
 
-
-// d = { ri: { x: 0, y: 0, z: 0.1 } };
-// force should have components x = y > 0, z < 0 since the angle is less than 90º
-// test.valenceAngle(d, data, params);
-// returns Object { x: 0.009900666556273618, y: -0.009900666556273618, z: -0 }
-// again this doesn't look correct
+it(`Force should have components x = y > 0, z < 0 since
+    the angle is less than 90 degrees`, () => {
+    const d = { ri: { x: 0, y: 0, z: 0.1 } };
+    const force = Physics.ForceMap.valenceAngle(d, data, params);
+    expect(force.x).toEqual(force.y);
+    expect(force.x).toBeGreaterThan(0);
+    expect(force.z).toBeLessThan(0)
+})
