@@ -45,8 +45,8 @@ class ForceMap {
       var b = d.ri; //central node
       var c = data[index2].ri;
 
-      var ba = Physics.Vector.sub(b, a);
-      var bc = Physics.Vector.sub(b, c);
+      var ba = Physics.Vector.sub(a, b);
+      var bc = Physics.Vector.sub(c, b);
       var cb = Physics.Vector.scale(-1, bc)
 
       var abc = Physics.Vector.angle(ba, bc);
