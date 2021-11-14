@@ -2,7 +2,14 @@
 Physics.Forcemap
 This class stores all of the predefined forces that
 velocityVerlet uses. The forces should all have the same function signature:
-(d, data, params) => {forceX, forceY, forceZ), where
+(d, data, params) =>
+[
+[index1, {x: force1x, y: force1y, z: force1z}],
+[index2, {x: force2x, y: force2y, z: force2z],
+...
+]
+i.e. it should return a list of 2-tuples (arrays) containing the index
+of the node the force should act on as well as the actual force.
 d is the data for one node, data is the data for all nodes, and params is an array
 containing all the parameters necessary to compute the force, e.g. spring constants etc.
 The forces should all the pure functions, i.e. they should not mutate any nodes or have side effects. They
@@ -13,7 +20,7 @@ class ForceMap {
   constructor() {
     this.testForce = function (d, data, params) {
       // just for testing purposes
-      return { x: 1, y: 1, z: 1 };
+      return [[d.id, {x: 100, y: 100, z: 0}]]
     };
 
     this.spring = function (d, data, params) {
@@ -31,12 +38,11 @@ class ForceMap {
       const equilibrium = Physics.Vector.scale(nodesLen, unitSeparation);
       const extension = Physics.Vector.sub(separation, equilibrium);
 
-      // begin debug here
-      fx = -k * extension.x;
-      fy = -k * extension.y;
-      fz = -k * extension.z;
+      const fx = -k * extension.x;
+      const fy = -k * extension.y;
+      const fz = -k * extension.z;
 
-      return { x: fx, y: fy, z: fz };
+      return [[d.id, {x: fx, y: fy, z: fz}]]
     };
 
     this.valenceAngle = function (d, data, params) {
@@ -64,7 +70,7 @@ class ForceMap {
 
       var fc = Physics.Vector.scale(fcFactor, pc);
       var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc));
-      return fb;
+      return [[index1, fa], [d.id, fb], [index2, fc]];
     };
 
     this.forceMap = {
