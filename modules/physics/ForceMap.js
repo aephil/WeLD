@@ -45,13 +45,14 @@ class ForceMap {
       var b = d.ri; //central node
       var c = data[index2].ri;
 
-      var ba = Physics.Vector.sub(b, a);
-      var bc = Physics.Vector.sub(b, c);
+      var ba = Physics.Vector.sub(a, b);
+      var bc = Physics.Vector.sub(c, b);
+      var cb = Physics.Vector.scale(-1, bc)
 
       var abc = Physics.Vector.angle(ba, bc);
 
       var pa = Physics.Vector.normalise(Physics.Vector.cross(ba, Physics.Vector.cross(ba, bc)));
-      var pc = Physics.Vector.normalise(Physics.Vector.cross(bc, Physics.Vector.cross(ba, bc)));
+      var pc = Physics.Vector.normalise(Physics.Vector.cross(cb, Physics.Vector.cross(ba, bc)));
 
       var faFactor = (-1) * k * (abc - eqAngle) / (Physics.Vector.norm(ba));
       faFactor = (isNaN(faFactor) ? 0 : faFactor);
@@ -63,7 +64,6 @@ class ForceMap {
 
       var fc = Physics.Vector.scale(fcFactor, pc);
       var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc));
-      debugger;
       return fb;
     };
 
