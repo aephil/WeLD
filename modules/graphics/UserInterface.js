@@ -262,6 +262,7 @@ var UserInterface = function()
     return highlighted;
   }
   this.showTooltip = function(pos, i) {
+    
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
@@ -310,6 +311,7 @@ var UserInterface = function()
     tooltip.style.display = "block";
     tooltip.style.left = (pos[0]) + 40 + 'px';
     tooltip.style.top =  (pos[1]) + 40 + 'px';
+
   }
   this.hideTooltip = function() {
     var tooltip = document.getElementById("tooltip");
@@ -381,10 +383,13 @@ var UserInterface = function()
     this.infoBox.style.padding = "2.5px";
     this.infoBox.style.backgroundColor = "rgba(0,0,0,0.7)";
     this.infoBox.style.width = "15%";
+    this.infoBox.style.height = "auto";
     this.infoBox.style.color = "rgb(173,172,173)";
     this.infoBox.style.top = document.getElementById("sim").style.top;
     this.infoBox.style.left = document.getElementById("sim").style.left;
     this.infoBox.style.zIndex = document.getElementById("sim").style.zIndex + 1;
+    this.infoBox.style.overflowX = "scroll";
+    this.infoBox.style.overflowY = "scroll";
     document.body.appendChild(this.infoBox);
 
     sim.focus();

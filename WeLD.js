@@ -108,7 +108,7 @@
   }
 
   // This sets lattice.data
-  lattice.makePrimitive3D(3,1,1,edgeLen);
+  lattice.makePrimitive3D(20,10,10,edgeLen);
   tempController.changeDOF(3*lattice.data.length);
 
   ui.setData(lattice.data);
@@ -128,7 +128,7 @@
   Physics.initValence(lattice, 1);
 
   // Each function here is called by the renderer every frame
-  var physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
+  var physics = [/*tempController.thermostat, */ verletController.velocityVerlet, verletController.updateState];
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////

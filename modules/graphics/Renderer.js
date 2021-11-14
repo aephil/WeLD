@@ -175,6 +175,7 @@ var Renderer = function () {
       });
     }
     var drawInfo = function(){
+
       ui.infoBox.innerHTML = "rho: " + parseFloat(rho).toFixed(2) +"</br> "
       ui.infoBox.innerHTML += "theta: " + parseFloat(theta).toFixed(2) + "</br>";
       var realFPS = (frames / elapsed).toFixed(2);
@@ -231,6 +232,11 @@ var Renderer = function () {
         }
       }
 
+      if(ui.infoBox.getBoundingClientRect().height>document.getElementById("sim").getBoundingClientRect().height){
+        ui.infoBox.style.height = document.getElementById("sim").style.height;
+      } else {
+        ui.infoBox.style.height = "auto";
+      }
     }
     var drawToolTip = function()
     {
