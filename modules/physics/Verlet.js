@@ -1,12 +1,15 @@
 const Verlet = function(d, data) {
     const dt = 1e-1;
 
+    // add a single one time only force, and do a single velocityVerlet step;
+    var addForceByVV = function(d,force){
+
+    }
+
     // calculate total force acting on the node
     this.velocityVerlet = function(d, data) {
 
         d.forces.forEach(({ name, params, color }) => {
-            //  if(Physics.ForceMap.has(name))
-            {
                 force = Physics.ForceMap[name];
                 const actions = force(d, data, params);
                 actions.forEach(action => {
@@ -21,12 +24,11 @@ const Verlet = function(d, data) {
                     node.vf = vf
                     node.rf = rf
 
-                })
-
-            }
+                  })
         })
 
     }
+
 
     this.updateState = function(d, data) {
         d.ri = d.rf;

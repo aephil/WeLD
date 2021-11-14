@@ -90,7 +90,7 @@
   // setup physics resources ////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
 
-  var edgeLen = 100;
+  var edgeLen = 20;
   lattice = Physics.Lattice;
   lattice.setUI(ui);
   lattice.setShowEdges(true);
@@ -108,20 +108,20 @@
   }
 
   // This sets lattice.data
-  lattice.makePrimitive3D(2,1,1,edgeLen);
+  lattice.makePrimitive3D(3,1,1,edgeLen);
   tempController.changeDOF(3*lattice.data.length);
 
   ui.setData(lattice.data);
   verletController = Physics.Verlet;
 
-  lattice.setForces({name: "Test Force", params: [], color: "red"})
+  //lattice.setForces({name: "Test Force", params: [], color: "red"})
   lattice.setInterAtomicForces(
    {
      name: "spring",
-     params: [10, edgeLen],
-     color: "red"
+     params: [1 /* spring constant k */, edgeLen /* equilibrium separation*/],
+     color: "red" // currently not in use.
    },
-   springPredicate
+   springPredicate // depending on the predicate sets the neighbour in params.
   );
 
   // Setup valence angles

@@ -23,7 +23,6 @@ var Temperature = function()
     data.forEach(d => {
       avgKinEn += 0.5 * d.m * Physics.Vector.dot(d.vi, d.vi);
     });
-
     avgKinEn /= data.length;
     realTemp = (2 * avgKinEn) / (dof /* * Physics.boltzmann*/);
 

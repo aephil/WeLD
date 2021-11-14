@@ -37,7 +37,6 @@ var Renderer = function () {
     }
   };
   this.render = function(){
-    if (showInfo) initInfo();
     start = performance.now();
     animate();
   };
@@ -154,26 +153,10 @@ var Renderer = function () {
     var dragOn=false;
 
     var drawCall = false;
-    var showInfo = true;
     var updates = [];
     var lattice = false;
     var ui = false;
 
-    // private member functions
-    var initInfo = function(){
-        var infoBox = document.createElement("div");
-        infoBox.setAttribute("id", "infoBox");
-        infoBox.style.position = "fixed";
-        infoBox.style.padding = "2.5px";
-        infoBox.style.backgroundColor = "rgba(0,0,0,0.5)";
-        infoBox.style.width = "15%";
-        infoBox.style.color = "rgb(173,172,173)";
-        infoBox.style.height = "7%";
-        infoBox.style.top = document.getElementById("sim").style.top;
-        infoBox.style.left = document.getElementById("sim").style.left;
-        infoBox.style.zIndex = document.getElementById("sim").style.zIndex + 1;
-        document.body.appendChild(infoBox);
-    }
     var cameraView = function(d){
 
       if(ui.highlighted()!==false)
@@ -192,9 +175,8 @@ var Renderer = function () {
       });
     }
     var drawInfo = function(){
-      var infoBox = document.getElementById("infoBox");
-      infoBox.innerHTML = "rho: " + parseFloat(rho).toFixed(2) +"</br> "
-      infoBox.innerHTML += "theta: " + parseFloat(theta).toFixed(2) + "</br>";
+      ui.infoBox.innerHTML = "rho: " + parseFloat(rho).toFixed(2) +"</br> "
+      ui.infoBox.innerHTML += "theta: " + parseFloat(theta).toFixed(2) + "</br>";
       var realFPS = (frames / elapsed).toFixed(2);
       var fpsRatio = (realFPS/fps)
       var fpsDisplay;
@@ -205,7 +187,50 @@ var Renderer = function () {
       } else {
         fpsDisplay = "<text class='red'>"+realFPS+"</text>"
       }
-      infoBox.innerHTML += "fps: " + fpsDisplay + "</br>";
+      ui.infoBox.innerHTML += "fps: " + fpsDisplay + "</br>";
+
+      if(ui.highlighted()!==false)
+      {
+        var datapoint = lattice.data[ui.highlighted()];
+
+        ui.infoBox.innerHTML +="<text class=green>Focused node id: #"+i+"</text></br>";
+        ui.infoBox.innerHTML += "name: "+datapoint.name
+        ui.infoBox.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
+        ui.infoBox.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
+
+        var forces = datapoint.forces;
+        if(Array.isArray(forces) && forces.length)
+        {
+          ui.infoBox.innerHTML += "force(s): "
+          for(let i = 0; i<forces.length; i++)
+          {
+            force = forces[i];
+
+            if(force.name=="spring")
+            {
+              ui.infoBox.innerHTML += "</br>&emsp;" +force.name + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) - force.params[1]).toFixed(2) + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+            }
+
+            if(force.name=="valenceAngle")
+            {
+              var ba = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[2]].ri);
+              var bc = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[3]].ri);
+              var abc = Physics.Vector.angle(ba, bc);
+
+              ui.infoBox.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbours: "+ force.params[2] +", "+ force.params[3]+ "</br>";
+              ui.infoBox.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+            }
+          }
+        }
+      }
+
     }
     var drawToolTip = function()
     {
@@ -304,8 +329,7 @@ var Renderer = function () {
       requestAnimationFrame(animate);
      if (elapsed > frames * (1/fps))
      {
-       var x = showInfo;
-       if (showInfo) drawInfo();
+       drawInfo();
        drawToolTip();
        redraw();
        frames++;

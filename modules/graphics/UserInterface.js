@@ -113,7 +113,7 @@ var UserInterface = function()
     } else {
       logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
     }
-    
+
     }
 
   var commandMap = new Map(
@@ -133,6 +133,7 @@ var UserInterface = function()
   var input = "";
 
   this.canvas = false;
+  this.infoBox;
   var control = false;
 
   var updateScroll = function(){
@@ -271,9 +272,39 @@ var UserInterface = function()
     if(Array.isArray(forces) && forces.length)
     {
       tooltip.innerHTML += "force(s): "
-      forces.forEach((force) => {
-          tooltip.innerHTML += force.name + "</br>"
-      });
+      for(let i = 0; i<forces.length; i++)
+      {
+        force = forces[i];
+        if (i==4)
+        {
+            tooltip.innerHTML += "</br>&emsp;" + (forces.length - i) + " more...</br>";
+            break;
+        }
+
+        if(force.name=="spring")
+        {
+          tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+        }
+
+        if(force.name=="valenceAngle")
+        {
+
+          var ba = Physics.Vector.sub(datapoint.ri,data[force.params[2]].ri);
+          var bc = Physics.Vector.sub(datapoint.ri,data[force.params[3]].ri);
+          var abc = Physics.Vector.angle(ba, bc);
+
+          tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbours: "+ force.params[2] +", "+ force.params[3]+ "</br>";
+          tooltip.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+        }
+
+      }
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
@@ -343,6 +374,18 @@ var UserInterface = function()
     control.style.fontFamily = "monospace";
     control.style.overflowX = "scroll";
     control.style.overflowY = "scroll";
+
+    this.infoBox = document.createElement("div");
+    this.infoBox.setAttribute("id", "infoBox");
+    this.infoBox.style.position = "fixed";
+    this.infoBox.style.padding = "2.5px";
+    this.infoBox.style.backgroundColor = "rgba(0,0,0,0.7)";
+    this.infoBox.style.width = "15%";
+    this.infoBox.style.color = "rgb(173,172,173)";
+    this.infoBox.style.top = document.getElementById("sim").style.top;
+    this.infoBox.style.left = document.getElementById("sim").style.left;
+    this.infoBox.style.zIndex = document.getElementById("sim").style.zIndex + 1;
+    document.body.appendChild(this.infoBox);
 
     sim.focus();
 

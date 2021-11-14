@@ -24,7 +24,6 @@ class ForceMap {
     };
 
     this.spring = function (d, data, params) {
-      // Copied with minor changes from physics/Harmonic.js
       const [k, nodesLen, neighbourIndex] = params;
       const d2 = data[neighbourIndex];
 
@@ -108,8 +107,6 @@ const initValence = function (lattice, k = 1) {
             )
           }
         });
-
-
       }
     });
 
