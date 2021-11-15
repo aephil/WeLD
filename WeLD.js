@@ -115,20 +115,23 @@
   verletController = Physics.Verlet;
 
   //lattice.setForces({name: "Test Force", params: [], color: "red"})
-  // lattice.setInterAtomicForces(
-  //  {
-  //    name: "spring",
-  //    params: [1e-1,edgeLen],
-  //    color: "red"
-  //  },
-  //  springPredicate
-  //);
+  lattice.setInterAtomicForces(
+   {
+     name: "spring",
+     params: [1 /* spring constant k */, edgeLen /* equilibrium separation*/],
+     color: "red" // currently not in use.
+   },
+   springPredicate // depending on the predicate sets the neighbour in params.
+  );
 
   // Setup valence angles
   Physics.initValence(lattice, 1);
 
   // Each function here is called by the renderer every frame
-  var physics = [tempController.thermostat, verletController.velocityVerlet, verletController.updateState];
+  var physics = [/*tempController.thermostat, */ verletController.velocityVerlet, verletController.updateState];
+
+  // TESTING: push the first node in the x direction to simulate an initial Extension
+  lattice.data[0].ri.x += 0.5;
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////

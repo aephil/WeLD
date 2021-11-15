@@ -39,7 +39,7 @@ text.blue {
   border: 1px solid black;
   border-radius: 5px;
   padding: 5px;
-  z-index: 200;
+  z-index: 2000;
 
   -moz-user-select: -moz-none;
   -khtml-user-select: none;

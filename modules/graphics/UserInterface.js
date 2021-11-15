@@ -113,7 +113,7 @@ var UserInterface = function()
     } else {
       logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
     }
-    
+
     }
 
   var commandMap = new Map(
@@ -133,6 +133,7 @@ var UserInterface = function()
   var input = "";
 
   this.canvas = false;
+  this.infoBox;
   var control = false;
 
   var updateScroll = function(){
@@ -261,6 +262,7 @@ var UserInterface = function()
     return highlighted;
   }
   this.showTooltip = function(pos, i) {
+
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
@@ -270,15 +272,46 @@ var UserInterface = function()
     var forces = datapoint.forces;
     if(Array.isArray(forces) && forces.length)
     {
-      tooltip.innerHTML += "force(s): "
-      forces.forEach((force) => {
-          tooltip.innerHTML += force.name + "</br>"
-      });
+      tooltip.innerHTML += "force(s):"
+      for(let i = 0; i<forces.length; i++)
+      {
+        force = forces[i];
+        if (i==2)
+        {
+            tooltip.innerHTML += "</br>&emsp;" + (forces.length - i) + " more...</br>";
+            break;
+        }
+
+        if(force.name=="spring")
+        {
+          tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+data[force.params[2]].name+")"+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+        }
+
+        if(force.name=="valenceAngle")
+        {
+
+          var ba = Physics.Vector.sub(datapoint.ri,data[force.params[2]].ri);
+          var bc = Physics.Vector.sub(datapoint.ri,data[force.params[3]].ri);
+          var abc = Physics.Vector.angle(ba, bc);
+
+          tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
+          tooltip.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+        }
+
+      }
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
-    tooltip.style.left = (pos[0]) + 40 + 'px';
-    tooltip.style.top =  (pos[1]) + 40 + 'px';
+    tooltip.style.left = (pos[0]) + 50 + 'px';
+    tooltip.style.top =  (pos[1]) + 50 + 'px';
+
   }
   this.hideTooltip = function() {
     var tooltip = document.getElementById("tooltip");
@@ -343,6 +376,21 @@ var UserInterface = function()
     control.style.fontFamily = "monospace";
     control.style.overflowX = "scroll";
     control.style.overflowY = "scroll";
+
+    this.infoBox = document.createElement("div");
+    this.infoBox.setAttribute("id", "infoBox");
+    this.infoBox.style.position = "fixed";
+    this.infoBox.style.padding = "2.5px";
+    this.infoBox.style.backgroundColor = "rgba(0,0,0,0.7)";
+    this.infoBox.style.width = "15%";
+    this.infoBox.style.height = "auto";
+    this.infoBox.style.color = "rgb(173,172,173)";
+    this.infoBox.style.top = document.getElementById("sim").style.top;
+    this.infoBox.style.left = document.getElementById("sim").style.left;
+    this.infoBox.style.zIndex = document.getElementById("sim").style.zIndex + 1;
+    this.infoBox.style.overflowX = "scroll";
+    this.infoBox.style.overflowY = "scroll";
+    document.body.appendChild(this.infoBox);
 
     sim.focus();
 
