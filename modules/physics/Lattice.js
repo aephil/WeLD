@@ -145,7 +145,8 @@ var Lattice = function()
                 rf:{x:0,y:0,z:0},
 
                 // velocity in angstrom / seconds
-                vi:{x:randomNumber(-1e-10,1e-10),y:randomNumber(-1e-10,1e-10),z:randomNumber(-1e-10,1e-10)},
+                vi:{x:0,y:0,z:0},
+                //vi:{x:randomNumber(-1e-5,1e-5),y:randomNumber(-1e-5,1e-5),z:randomNumber(-1e-5,1e-5)},
                 vf:{x:0,y:0,z:0},
 
                 // forces
@@ -196,7 +197,7 @@ var Lattice = function()
                 // forces
                 forces: [],
                 id:counter++,
-                r:3,  // radius
+                r:5,  // radius
                 m:1,  // mass
                 name:"A Cation",
                 neighbours:[], // index of other atoms
@@ -225,7 +226,7 @@ var Lattice = function()
                 forces: [],
 
                 id:counter++,
-                r:5,  // radius
+                r:10,  // radius
                 m:1,  // mass
                 name:"B Cation",
                 neighbours:[], // index of other atoms
@@ -255,7 +256,7 @@ var Lattice = function()
                 forces: [],
 
                 id:counter++,
-                r:5,  // radius
+                r:10,  // radius
                 m:1,  // mass
                 name:"O Anion",
                 neighbours:[], // index of other atoms
@@ -284,7 +285,7 @@ var Lattice = function()
                 forces: [],
 
                 id:counter++,
-                r:5,  // radius
+                r:10,  // radius
                 m:1,  // mass
                 name:"O Anion",
                 neighbours:[], // index of other atoms
@@ -313,7 +314,7 @@ var Lattice = function()
                 forces: [],
 
                 id:counter++,
-                r:5,  // radius
+                r:10,  // radius
                 m:1,  // mass
                 name:"O Anion",
                 neighbours:[], // index of other atoms

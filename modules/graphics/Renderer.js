@@ -194,15 +194,15 @@ var Renderer = function () {
       {
         var datapoint = lattice.data[ui.highlighted()];
 
-        ui.infoBox.innerHTML +="<text class=green>Focused node id: #"+i+"</text></br>";
-        ui.infoBox.innerHTML += "name: "+datapoint.name
+        ui.infoBox.innerHTML +="<text class=green>Focused node id: #"+ui.highlighted()+"</text></br>";
+        ui.infoBox.innerHTML += "name: "+datapoint.name+"</br>";
         ui.infoBox.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
         ui.infoBox.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
         var forces = datapoint.forces;
         if(Array.isArray(forces) && forces.length)
         {
-          ui.infoBox.innerHTML += "force(s): "
+          ui.infoBox.innerHTML += "force(s): (<text class=green>" + forces.length + "</text>) total"
           for(let i = 0; i<forces.length; i++)
           {
             force = forces[i];
@@ -210,9 +210,9 @@ var Renderer = function () {
             if(force.name=="spring")
             {
               ui.infoBox.innerHTML += "</br>&emsp;" +force.name + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+lattice.data[force.params[2]].name+")"+"</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) - force.params[1]).toFixed(2) + "</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) ).toFixed(2)+"</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
             }
 
@@ -223,7 +223,8 @@ var Renderer = function () {
               var abc = Physics.Vector.angle(ba, bc);
 
               ui.infoBox.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbours: "+ force.params[2] +", "+ force.params[3]+ "</br>";
+              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
+              +" ("+lattice.data[force.params[2]].name+")"+", "+force.params[3]+" ("+lattice.data[force.params[3]].name+")"+"</br>";
               ui.infoBox.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"

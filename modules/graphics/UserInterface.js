@@ -262,7 +262,7 @@ var UserInterface = function()
     return highlighted;
   }
   this.showTooltip = function(pos, i) {
-    
+
     let tooltip = document.getElementById("tooltip");
     var datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
@@ -272,11 +272,11 @@ var UserInterface = function()
     var forces = datapoint.forces;
     if(Array.isArray(forces) && forces.length)
     {
-      tooltip.innerHTML += "force(s): "
+      tooltip.innerHTML += "force(s):"
       for(let i = 0; i<forces.length; i++)
       {
         force = forces[i];
-        if (i==4)
+        if (i==2)
         {
             tooltip.innerHTML += "</br>&emsp;" + (forces.length - i) + " more...</br>";
             break;
@@ -285,9 +285,9 @@ var UserInterface = function()
         if(force.name=="spring")
         {
           tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+data[force.params[2]].name+")"+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
         }
 
@@ -299,7 +299,7 @@ var UserInterface = function()
           var abc = Physics.Vector.angle(ba, bc);
 
           tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbours: "+ force.params[2] +", "+ force.params[3]+ "</br>";
+          tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
           tooltip.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
@@ -309,8 +309,8 @@ var UserInterface = function()
     }
     tooltip.innerHTML += ""
     tooltip.style.display = "block";
-    tooltip.style.left = (pos[0]) + 40 + 'px';
-    tooltip.style.top =  (pos[1]) + 40 + 'px';
+    tooltip.style.left = (pos[0]) + 50 + 'px';
+    tooltip.style.top =  (pos[1]) + 50 + 'px';
 
   }
   this.hideTooltip = function() {
