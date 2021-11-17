@@ -128,10 +128,11 @@
   Physics.initValence(lattice, 1);
 
   // Each function here is called by the renderer every frame
-  var physics = [/*tempController.thermostat, */ verletController.velocityVerlet, verletController.updateState];
+  var physics = [verletController.velocityVerlet, verletController.updateState];
 
   // TESTING: push the first node in the x direction to simulate an initial Extension
   lattice.data[0].ri.x += 0.5;
+
 
   // setup graphics resources ///////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
@@ -141,11 +142,9 @@
   renderer.setUpdates(physics);
   renderer.setLattice(lattice);
   renderer.setFPS(30);
-  renderer.setSpeed(10000);
+  renderer.setSpeed(1000);
   renderer.ui = ui;
   renderer.render();
 
  // non-essential WeLD banner //////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////
-
-
