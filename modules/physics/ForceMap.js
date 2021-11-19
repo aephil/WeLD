@@ -85,7 +85,6 @@ class ForceMap {
             const faMagnitude = 24 * epsilon / r
                 * (2 * (sigma / r) ** 12 - (sigma / r) ** 6)
             const fa = Physics.Vector.scale(faMagnitude, u);
-            console.log(faMagnitude);
             const fb = Physics.Vector.scale(-1, fa);
 
             return [[a.id, fa], [b.id, fb]];
