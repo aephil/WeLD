@@ -11,7 +11,7 @@ params = [1, Math.PI / 2, 0, 1];
 // should be zero force since the angle is already 90º
 
 it("Object at origin should return 0 force", () => {
-    const d = {id: 1 ri: { x: 0, y: 0, z: 0 } };
+    const d = {id: 1, ri: { x: 0, y: 0, z: 0 } };
     const actions = Physics.ForceMap.valenceAngle(d, data, params);
     const fa = actions[0][1]
     const fb = actions[1][1]
