@@ -42,7 +42,6 @@ class ForceMap {
             const fz = -k * extension.z;
 
             //debugging
-            console.log(console.log(JSON.parse(JSON.stringify(fx))));
 
             return [[d.id, { x: fx, y: fy, z: fz }]]
         };
