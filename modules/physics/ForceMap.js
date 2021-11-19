@@ -16,6 +16,9 @@ The forces should all the pure functions, i.e. they should not mutate any nodes 
 should simply calculate the force and return it.
 */
 
+// Reference for potentials/forces:
+// https://hal-mines-paristech.archives-ouvertes.fr/hal-00924263/document
+
 class ForceMap {
     constructor() {
         this.testForce = function(d, data, params) {
