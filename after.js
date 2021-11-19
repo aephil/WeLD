@@ -14,6 +14,7 @@ verletController = Physics.Verlet;
 // really fragile
 
 // Each function here is called by the renderer every frame
+ui.setData(lattice.data);
 var physics = [verletController.velocityVerlet, verletController.updateState];
 
 renderer = Graphics.Renderer;
