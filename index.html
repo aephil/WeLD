@@ -30,7 +30,16 @@
 
   <body>
     <div id="tooltip" display="none" style="position: absolute; display: none;"></div>
-    <script src="WeLD.js"></script>
+    <!-- Script that does some preliminary setup for the simulation -->
+    <script src="before.js"></script>
+
+    <!-- Simulation script -->
+    <script src="simulations/testLennardJones.js"></script>
+
+    <!-- Script that does setup that needs to come
+    after the simulation-specific code-->
+    <script src="after.js"></script>
+    <!-- Script that draws the weld banner -->
     <script src="makeWeldBanner.js"></script>
   </body>
 
