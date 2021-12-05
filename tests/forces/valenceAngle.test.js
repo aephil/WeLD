@@ -17,10 +17,9 @@ it("Object at origin should return 0 force", () => {
     const fb = actions[1][1]
     const fc = actions[2][1]
 
-    expect(fb).toEqual({ x: -0, y: -0, z: 0 });
-    expect(fa).toEqual({ x: 0, y: 0, z: 0 });
-    expect(fc).toEqual({ x: 0, y: 0, z: 0 });
-
+    expect(Physics.Vector.norm(fa)).toEqual(0)
+    expect(Physics.Vector.norm(fb)).toEqual(0)
+    expect(Physics.Vector.norm(fc)).toEqual(0)
 })
 
 it(`Force should have components x = y < 0, z = 0
