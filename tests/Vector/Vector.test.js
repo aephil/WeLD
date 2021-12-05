@@ -17,8 +17,12 @@ like the index.html file does. Nevertheles, as long as the functions we are test
 Physics = {};
 require('../../modules/physics/Vector');
 
-it("Converting a length 1 vector to a unit vector should return itself", () => {
-    const v = {x: 1, y: 0, z: 0};
-    const v2 = Physics.Vector.unitVector(v);
-    expect(v).toEqual(v2);
+describe("Vector module", () => {
+    it("Converting a length 1 vector to a unit vector should return itself", () => {
+        const v = {x: 1, y: 0, z: 0};
+        const v2 = Physics.Vector.unitVector(v);
+        expect(v).toEqual(v2);
+    })
 })
+
+
