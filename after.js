@@ -13,9 +13,17 @@ verletController = Physics.Verlet;
 // as a var and hope this won't break anything else, but it seems
 // really fragile
 
+
 // Each function here is called by the renderer every frame
 ui.setData(lattice.data);
-var physics = [verletController.velocityVerlet, verletController.updateState];
+
+// The debug function should be defined in the simulation
+// script
+var physics = [
+    verletController.velocityVerlet,
+    verletController.updateState,
+    debug
+];
 
 renderer = Graphics.Renderer;
 renderer.setUI(ui);
