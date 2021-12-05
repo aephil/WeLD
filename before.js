@@ -70,7 +70,7 @@ const dy2 = (d2.ri.y - d1.ri.y) ** 2;
 const dz2 = (d2.ri.z - d1.ri.z) ** 2;
 const distanceSquared = dx2 + dy2 + dz2;
 
-return distanceSquared == edgeLen ** 2;
+return distanceSquared <= edgeLen ** 2;
 }
 
 lattice = Physics.Lattice;
