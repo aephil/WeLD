@@ -151,7 +151,7 @@ var Lattice = function()
 
                 // forces
                 forces: [],
-
+                force: {x: 0, y: 0, z: 0},
                 id:counter++,
                 r:5,  // radius in angstrom
                 m:1,  // 1 carbon mass

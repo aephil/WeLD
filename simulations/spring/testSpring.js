@@ -34,10 +34,9 @@ function meanOf(arr) {
     return mean;
 }
 
-function debug() {
+function debug(data) {
     // The lattice data can be accessed via the variable
     // lattice.data
-
     i += 1
     if (i % 100 === 0) {
         const a = lattice.data[0].ri

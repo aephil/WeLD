@@ -63,6 +63,11 @@ var Renderer = function () {
   {
     updates = u;
   }
+
+  this.setNodeUpdates = function(u) {
+    nodeUpdates = u;
+  }
+
   this.setUI = function(u){
 
     ui=u
@@ -145,6 +150,7 @@ var Renderer = function () {
 
 
     var lattice = false;
+    var nodeUpdates;
     var updates;
     var mouseX = 0;
     var mouseY = 0;
@@ -167,12 +173,20 @@ var Renderer = function () {
       }
       return rotY(rotX(d,theta),rho);
     }
+
     var update = function(){
+      // node updates
       lattice.data.forEach((d) => {
-        updates.forEach((fn) => {
+        nodeUpdates.forEach((fn) => {
           fn(d,lattice.data);
         });
       });
+      // updates
+      updates.forEach((fn) => {
+        fn(lattice.data);
+      });
+
+
     }
     var drawInfo = function(){
 
