@@ -5,8 +5,9 @@
   "main": "WeLD.js",
   "scripts": {
     "start": "live-server",
-    "test": "jest",
-    "transpile": "npx babel src --out-dir transpiled"
+    "_test": "jest",
+    "transpile": "npx babel src --out-dir transpiled",
+    "test": "npm run transpile && npm run _test"
   },
   "repository": {
     "type": "git",
