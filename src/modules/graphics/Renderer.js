@@ -158,7 +158,7 @@ const Renderer = function () {
     let lattice = false;
     let nodeUpdates;
     let updates = [];
-    let debug;
+    let debug = false;
     let mouseX = 0;
     let mouseY = 0;
     let dragStartX = 0;
@@ -189,7 +189,9 @@ const Renderer = function () {
       updates.forEach((fn) => {
         fn(lattice.data);
 
-      debug(lattice.data);
+      if (debug) {
+          debug(lattice.data);
+      }
       });
 
 
