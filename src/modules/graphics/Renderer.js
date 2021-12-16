@@ -22,7 +22,7 @@
 
 import {rotX, rotY, centreToScreenXPeriodic, centreToScreenYPeriodic} from '../helpers.js'
 
-var Renderer = function () {
+const Renderer = function () {
 
   // public member functions
   this.setSpeed = function(n){
@@ -82,7 +82,7 @@ var Renderer = function () {
       "mousemove",
       function(event) {
 
-        var ClientRect = this.getBoundingClientRect();
+        const ClientRect = this.getBoundingClientRect();
         mouseX = (event.clientX - ClientRect.left);
         mouseY = (event.clientY - ClientRect.top);
 
@@ -97,18 +97,18 @@ var Renderer = function () {
     ui.canvas.addEventListener("click", function(event){
 
       event.preventDefault();
-      var active = []
+      const active = []
       lattice.data.forEach(function(n) {
-        var onScreenPos = cameraView(n.ri);
-        var isHit = (Math.abs(centreToScreenXPeriodic(onScreenPos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(onScreenPos.y, ui.canvas.height)- mouseY) < n.r)
+        const onScreenPos = cameraView(n.ri);
+        const isHit = (Math.abs(centreToScreenXPeriodic(onScreenPos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(onScreenPos.y, ui.canvas.height)- mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
         }
       });
 
       active.sort(function(a, b) {
-          var onScreenPos1 = cameraView(a.ri);
-          var onScreenPos2 = cameraView(b.ri);
+          const onScreenPos1 = cameraView(a.ri);
+          const onScreenPos2 = cameraView(b.ri);
           return onScreenPos1.z - onScreenPos2.z;
         });
 
@@ -119,7 +119,7 @@ var Renderer = function () {
     }, false)
 
     ui.canvas.addEventListener("mousedown", function(event){
-      var ClientRect = this.getBoundingClientRect();
+      const ClientRect = this.getBoundingClientRect();
       dragOn = true;
       event.preventDefault();
       dragStartX = (event.clientX - ClientRect.left);
@@ -141,47 +141,44 @@ var Renderer = function () {
   }
 
     // private member variables
-    var frames = 0;
-    var elapsed = 0; // in seconds
-    var start = 0; // start timestamp
-    var rho = 0
-    var translate={x:0,y:0,z:0};
-    var theta = 0
-    var rhoLast = 0
-    var thetaLast = 0
-    var fps = 30
-    var freq = 1 // in seconds^-1
-    var updateCounter = 0;
-    var highlighted = false;
+    let frames = 0;
+    let elapsed = 0; // in seconds
+    let start = 0; // start timestamp
+    let rho = 0
+    let translate={x:0,y:0,z:0};
+    let theta = 0
+    let rhoLast = 0
+    let thetaLast = 0
+    let fps = 30
+    let freq = 1 // in seconds^-1
+    let updateCounter = 0;
+    let highlighted = false;
 
 
-    var lattice = false;
-    var nodeUpdates;
-    var updates;
-    var debug;
-    var mouseX = 0;
-    var mouseY = 0;
-    var dragStartX = 0;
-    var dragStartY = 0;
-    var dragOn=false;
+    let lattice = false;
+    let nodeUpdates;
+    let updates = [];
+    let debug = false;
+    let mouseX = 0;
+    let mouseY = 0;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragOn=false;
+    let drawCall = false;
+    let ui = false;
 
-    var drawCall = false;
-    var updates = [];
-    var lattice = false;
-    var ui = false;
-
-    var cameraView = function(d){
+    const cameraView = function(d){
 
       if(ui.highlighted()!==false)
       {
-        var origin = lattice.data[ui.highlighted()];
-        var translated = translateVec(d, {x:(-origin.ri.x),y:(-origin.ri.y),z:(-origin.ri.z)})
+        const origin = lattice.data[ui.highlighted()];
+        const translated = translateVec(d, {x:(-origin.ri.x),y:(-origin.ri.y),z:(-origin.ri.z)})
         return rotY(rotX(translated,theta),rho)
       }
       return rotY(rotX(d,theta),rho);
     }
 
-    var update = function(){
+    const update = function(){
       // node updates
       lattice.data.forEach((d) => {
         nodeUpdates.forEach((fn) => {
@@ -192,18 +189,20 @@ var Renderer = function () {
       updates.forEach((fn) => {
         fn(lattice.data);
 
-      debug(lattice.data);
+      if (debug) {
+          debug(lattice.data);
+      }
       });
 
 
     }
-    var drawInfo = function(){
+    const drawInfo = function(){
 
       ui.infoBox.innerHTML = "rho: " + parseFloat(rho).toFixed(2) +"</br> "
       ui.infoBox.innerHTML += "theta: " + parseFloat(theta).toFixed(2) + "</br>";
-      var realFPS = (frames / elapsed).toFixed(2);
-      var fpsRatio = (realFPS/fps)
-      var fpsDisplay;
+      const realFPS = (frames / elapsed).toFixed(2);
+      const fpsRatio = (realFPS/fps)
+      let fpsDisplay;
       if(fpsRatio > 0.7){
         fpsDisplay = "<text class='green'>"+realFPS+"</text>"
       } else if(fpsRatio > 0.5){
@@ -215,7 +214,7 @@ var Renderer = function () {
 
       if(ui.highlighted()!==false)
       {
-        var datapoint = lattice.data[ui.highlighted()];
+        const datapoint = lattice.data[ui.highlighted()];
 
         ui.infoBox.innerHTML +="<text class=green>Focused node id: #"+ui.highlighted()+"</text></br>";
         ui.infoBox.innerHTML += "name: "+datapoint.name+"</br>";
@@ -223,13 +222,13 @@ var Renderer = function () {
         ui.infoBox.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
         ui.infoBox.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
-        var forces = datapoint.forces;
+        const forces = datapoint.forces;
         if(Array.isArray(forces) && forces.length)
         {
           ui.infoBox.innerHTML += "force(s): (<text class=green>" + forces.length + "</text>) total"
           for(let i = 0; i<forces.length; i++)
           {
-            force = forces[i];
+            const force = forces[i];
 
             if(force.name=="spring")
             {
@@ -242,9 +241,9 @@ var Renderer = function () {
 
             if(force.name=="valenceAngle")
             {
-              var ba = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[2]].ri);
-              var bc = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[3]].ri);
-              var abc = Physics.Vector.angle(ba, bc);
+              const ba = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[2]].ri);
+              const bc = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[3]].ri);
+              const abc = Physics.Vector.angle(ba, bc);
 
               ui.infoBox.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
@@ -263,20 +262,20 @@ var Renderer = function () {
         ui.infoBox.style.height = "auto";
       }
     }
-    var drawToolTip = function()
+    const drawToolTip = function()
     {
-      var active = []
+      const active = []
       lattice.data.forEach(function(n) {
-        var imagePos = cameraView(n.ri);
-        var isHit = (Math.abs(centreToScreenXPeriodic(imagePos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(imagePos.y, ui.canvas.height) - mouseY) < n.r)
+        const imagePos = cameraView(n.ri);
+        const isHit = (Math.abs(centreToScreenXPeriodic(imagePos.x, ui.canvas.width) - mouseX) < n.r) && (Math.abs(centreToScreenYPeriodic(imagePos.y, ui.canvas.height) - mouseY) < n.r)
         if (isHit && n.visible){
           active.push(n)
         }
       });
 
       active.sort(function(a, b) {
-          var imagePos1 = cameraView(a.ri);
-          var imagePos2 = cameraView(b.ri);
+          const imagePos1 = cameraView(a.ri);
+          const imagePos2 = cameraView(b.ri);
           return imagePos1.z - imagePos2.z;
         });
 
@@ -288,30 +287,30 @@ var Renderer = function () {
       }
     }
 
-    var defaultDrawCall = function(){
+    const defaultDrawCall = function(){
 
-      var ctx = ui.canvas.getContext("2d");
+      const ctx = ui.canvas.getContext("2d");
       ctx.clearRect(0,0, ui.canvas.width, ui.canvas.height);
 
        ctx.fillStyle = "cornsilk";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
        // need to copy and reorder ids for sorting draw order
-       var forSort = [];
+       const forSort = [];
        lattice.data.forEach((node) => {
          forSort.push(node.id);
        });
        forSort.sort(
          function(a, b) {
-           var imagePos1 = cameraView(lattice.data[a].ri);
-           var imagePos2 = cameraView(lattice.data[b].ri);
+           const imagePos1 = cameraView(lattice.data[a].ri);
+           const imagePos2 = cameraView(lattice.data[b].ri);
            return imagePos2.z - imagePos1.z;
          });
 
        forSort.forEach((id) => {
-         var n = lattice.data[id];
+         const n = lattice.data[id];
          if(n.visible){
-           var imagePos = cameraView(n.ri);
+           const imagePos = cameraView(n.ri);
          ctx.beginPath();
          ctx.arc( centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height), n.r, 0, 2 * Math.PI);
          ctx.closePath();
@@ -327,7 +326,7 @@ var Renderer = function () {
              if(force.name=="spring"){
                if(n.showEdges)
                {
-                 var imagePos1 = cameraView(lattice.data[force.params[2]].ri)
+                 const imagePos1 = cameraView(lattice.data[force.params[2]].ri)
                  ctx.beginPath();       // Start a new path
                  ctx.moveTo(centreToScreenXPeriodic(imagePos.x, ui.canvas.width), centreToScreenYPeriodic(imagePos.y, ui.canvas.height));
                  ctx.lineTo(centreToScreenXPeriodic(imagePos1.x, ui.canvas.width), centreToScreenYPeriodic(imagePos1.y, ui.canvas.height));
@@ -342,15 +341,15 @@ var Renderer = function () {
      }
      )
      }
-    var redraw = function(){
+    const redraw = function(){
        if(drawCall){
          drawCall()
        } else {
          defaultDrawCall();
        }
    }
-    var animate = function(){
-      var end = performance.now();
+    const animate = function(){
+      const end = performance.now();
       elapsed = (end - start)/1000;
 
       if(elapsed > (1/freq* updateCounter)){

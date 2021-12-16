@@ -7,5 +7,3 @@ describe("Vector module", () => {
         expect(v).toEqual(v2);
     })
 })
-
-

@@ -51,29 +51,29 @@ export const spring = function(d, data, params) {
 
 export const valenceAngle = function(d, data, params) {
             const [k, eqAngle, index1, index2] = params;
-            var a = data[index1].ri;
-            var b = d.ri; //central node
-            var c = data[index2].ri;
+            const a = data[index1].ri;
+            const b = d.ri; //central node
+            const c = data[index2].ri;
 
-            var ba = Vector.sub(a, b);
-            var bc = Vector.sub(c, b);
-            var cb = Vector.scale(-1, bc)
+            const ba = Vector.sub(a, b);
+            const bc = Vector.sub(c, b);
+            const cb = Vector.scale(-1, bc)
 
-            var abc = Vector.angle(ba, bc);
+            const abc = Vector.angle(ba, bc);
 
-            var pa = Vector.normalise(Vector.cross(ba, Vector.cross(ba, bc)));
-            var pc = Vector.normalise(Vector.cross(cb, Vector.cross(ba, bc)));
+            const pa = Vector.normalise(Vector.cross(ba, Vector.cross(ba, bc)));
+            const pc = Vector.normalise(Vector.cross(cb, Vector.cross(ba, bc)));
 
-            var faFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(ba));
+            let faFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(ba));
             faFactor = (isNaN(faFactor) ? 0 : faFactor);
 
-            var fa = Vector.scale(faFactor, pa);
+            const fa = Vector.scale(faFactor, pa);
 
-            var fcFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(bc));
+            let fcFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(bc));
             fcFactor = (isNaN(fcFactor) ? 0 : fcFactor);
 
-            var fc = Vector.scale(fcFactor, pc);
-            var fb = Vector.scale(-1, Vector.add(fa, fc));
+            const fc = Vector.scale(fcFactor, pc);
+            const fb = Vector.scale(-1, Vector.add(fa, fc));
             return [[index1, fa], [d.id, fb], [index2, fc]];
         };
 
@@ -105,16 +105,16 @@ export const initValence = function(lattice, k = 1) {
     lattice.data.forEach((d1) => {
         d1.forces.forEach((f1) => {
             if (f1.name == "spring") {
-                let index1 = f1.params[2]
-                let d2 = lattice.data[index1];
+                const index1 = f1.params[2]
+                const d2 = lattice.data[index1];
                 d1.forces.forEach((f2) => {
-                    let index2 = f2.params[2]
+                    const index2 = f2.params[2]
                     if (f2.name == "spring" && index2 != index1) {
-                        let d3 = lattice.data[index2];
+                        const d3 = lattice.data[index2];
                         // calculate their equilibrium angles
-                        let vec1 = Vector.sub(d3.ri, d1.ri);
-                        let vec2 = Vector.sub(d2.ri, d1.ri);
-                        let eqAngle = Vector.angle(vec1, vec2)
+                        const vec1 = Vector.sub(d3.ri, d1.ri);
+                        const vec2 = Vector.sub(d2.ri, d1.ri);
+                        const eqAngle = Vector.angle(vec1, vec2)
                         d1.forces.push(
                             {
                                 name: "valenceAngle",

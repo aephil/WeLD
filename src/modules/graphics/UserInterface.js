@@ -1,11 +1,11 @@
 
-var UserInterface = function()
+const UserInterface = function()
 {
-  var focus = function(args){
+  const focus = function(args){
 
     if(args.length > 0){
       // check input is int
-      var selection = args[0];
+      const selection = args[0];
       if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
       {
         if(parseInt(selection)<=(data.length -1))
@@ -29,8 +29,8 @@ var UserInterface = function()
   }
     data[highlighted].edgeStroke = "red";
     data.forEach((node) => {
-      var neighbours = data[highlighted].neighbours;
-      var isNeighbour = false;
+      const neighbours = data[highlighted].neighbours;
+      let isNeighbour = false;
 
       for(let i = 0; i < neighbours.length; i++)
       {
@@ -54,7 +54,7 @@ var UserInterface = function()
 
   }
 
-  var unfocus = function(){
+  const unfocus = function(){
     data.forEach((node) => {
         node.showEdges = true;
         node.visible = true;
@@ -63,8 +63,8 @@ var UserInterface = function()
     log("focus off")
   }
 
-  var highlightCommand = function(args){
-    var selection = args[0];
+  const highlightCommand = function(args){
+    const selection = args[0];
     if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
     {
       if(parseInt(selection)<=(data.length -1))
@@ -83,7 +83,7 @@ var UserInterface = function()
   // move a node to the specified location
   // for debugging purposes
   const moveCommand = function(args) {
-    let [nodeID, x, y, z] = args;
+    const [nodeID, x, y, z] = args;
     let relative = false;
 
     if (args.length >= 5 && args[4] == "r") {
@@ -116,7 +116,7 @@ var UserInterface = function()
 
     }
 
-  var commandMap = new Map(
+  const commandMap = new Map(
     [
       ["focus", focus],
       ["unfocus", unfocus],
@@ -125,32 +125,32 @@ var UserInterface = function()
     ]
   )
 
-  var data=[]; //data associated with the simulation
-  var nodes=[];
-  var highlighted=false;
+  let data=[]; //data associated with the simulation
+  let nodes=[];
+  let highlighted=false;
 
-  var output = "";
-  var input = "";
+  let output = "";
+  let input = "";
 
   this.canvas = false;
   this.infoBox;
-  var control = false;
+  let control = false;
 
-  var updateScroll = function(){
+  const updateScroll = function(){
     terminal.scrollTop = terminal.scrollHeight;
   }
-  var colouredText = function(msg, colour) {
+  const colouredText = function(msg, colour) {
     return "<text class='"+colour+"'>"+msg+"</text>";
   }
-  var initTerminal = function(terminal){
+  const initTerminal = function(terminal){
 
     terminal = document.getElementById("terminal");
 
       terminal.focus();
       terminal.addEventListener("keydown", function( event ) {
 
-        var key = event.keyCode;
-        var char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
+        const key = event.keyCode;
+        const char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
 
         // If the user has pressed enter
 
@@ -163,15 +163,15 @@ var UserInterface = function()
           }
           case 13 /*enter*/:
           {
-            var args = input.split(" ");
-            var command = args[0]
+            const args = input.split(" ");
+            const command = args[0]
             if(!commandMap.has(command))
             {
               input = "";
               logError("no such command.")
               break;
             } else {
-              var fn = commandMap.get(command);
+              const fn = commandMap.get(command);
               fn(args.slice(1));
               input = "";
               terminal.innerHTML = output + "UserIn: " +input + "<";
@@ -217,21 +217,21 @@ var UserInterface = function()
   this.colouredText = function(msg, colour){
     return colouredText(msg, colour);
   }
-  var logWarning = function(msg, newline=true){
+  const logWarning = function(msg, newline=true){
       output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
       document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
     }
   this.logWarning = function(msg,newline=true){logWarning(msg,newline)}
 
-  var logError = function(msg, newline=true){
+  const logError = function(msg, newline=true){
       output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
       document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
     }
   this.logError = function(msg,newline=true){logError(msg,newline)}
 
-  var log = function (msg, newline=true) {
+  const log = function (msg, newline=true) {
       output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"") ;
       document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
       updateScroll()
@@ -240,8 +240,8 @@ var UserInterface = function()
 
   this.setData = function(d){data=d}
   this.setNodes = function(n){nodes=n}
-  var highlight = function(i){
-    var datapoint = data[parseInt(i)];
+  const highlight = function(i){
+    const datapoint = data[parseInt(i)];
     if(datapoint.stroke=="red")
     {
       datapoint.stroke="black";
@@ -264,13 +264,13 @@ var UserInterface = function()
   this.showTooltip = function(pos, i) {
 
     let tooltip = document.getElementById("tooltip");
-    var datapoint = data[parseInt(i)];
+    const datapoint = data[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
-    var forces = datapoint.forces;
+    const forces = datapoint.forces;
     if(Array.isArray(forces) && forces.length)
     {
       tooltip.innerHTML += "force(s):"
@@ -295,9 +295,9 @@ var UserInterface = function()
         if(force.name=="valenceAngle")
         {
 
-          var ba = Physics.Vector.sub(datapoint.ri,data[force.params[2]].ri);
-          var bc = Physics.Vector.sub(datapoint.ri,data[force.params[3]].ri);
-          var abc = Physics.Vector.angle(ba, bc);
+          const ba = Physics.Vector.sub(datapoint.ri,data[force.params[2]].ri);
+          const bc = Physics.Vector.sub(datapoint.ri,data[force.params[3]].ri);
+          const abc = Physics.Vector.angle(ba, bc);
 
           tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
@@ -315,7 +315,7 @@ var UserInterface = function()
 
   }
   this.hideTooltip = function() {
-    var tooltip = document.getElementById("tooltip");
+    const tooltip = document.getElementById("tooltip");
     tooltip.style.display = "none";
   }
   this.loadBasic = function(){
@@ -398,8 +398,7 @@ var UserInterface = function()
   }
   this.slider = function(min=0, max=100, step=1){
 
-    // TODO remove d3 here too
-    var container = document.createElement("div");
+    const container = document.createElement("div");
     container.style.position = "relative";
     container.style.width = "40%";
     container.style.height = "10%";
@@ -407,7 +406,7 @@ var UserInterface = function()
     container.style.right = "1%";
     container.style.padding = "5px";
 
-    var slider = document.createElement("input");
+    const slider = document.createElement("input");
     container.appendChild(slider);
     slider.setAttribute("type","range");
     slider.setAttribute("min",min);
@@ -416,7 +415,7 @@ var UserInterface = function()
     slider.setAttribute("value",min);
     //slider.style.backgroundColor = "blue";
 
-    var label = document.createElement("p");
+    const label = document.createElement("p");
     container.appendChild(label);
 
       return [container, slider, label];
