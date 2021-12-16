@@ -4,6 +4,7 @@
   "description": "Molecular dynamics in the browser",
   "main": "WeLD.js",
   "scripts": {
+    "start": "live-server",
     "test": "jest"
   },
   "repository": {
@@ -17,10 +18,16 @@
   },
   "homepage": "https://github.com/aephil/WeLD#readme",
   "devDependencies": {
-    "jest": "^27.3.1"
+    "@babel/cli": "^7.16.0",
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
+    "babel-loader": "^8.2.3",
+    "jest": "^27.3.1",
+    "live-server": "^1.2.1"
   },
   "jest": {
     "verbose": true,
     "testRegex": "./tests/*"
-  }
+  },
+  "dependencies": {}
 }

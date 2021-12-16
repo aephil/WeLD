@@ -5,7 +5,9 @@ Preview of `master` branch `index.html`:
 https://htmlpreview.github.io/?https://github.com/aephil/WeLD/blob/master/index.html
 
 ## Running the code
-Simply open the `index.html` file in your browser
+First, install the required npm modules:
+`npm install --dev`
+Run the http server with the command `npm start`
 
 ## Unit tests
 Unit tests for key bits of code should be put index
