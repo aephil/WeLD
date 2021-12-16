@@ -229,7 +229,7 @@ var Renderer = function () {
           ui.infoBox.innerHTML += "force(s): (<text class=green>" + forces.length + "</text>) total"
           for(let i = 0; i<forces.length; i++)
           {
-            force = forces[i];
+            const force = forces[i];
 
             if(force.name=="spring")
             {
