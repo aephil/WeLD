@@ -1,3 +1,5 @@
+import ForceMap from './ForceMap.js';
+import Vector from './Vector.js';
 
 const Verlet = function(d, data) {
     const dt = 1e-1;
@@ -12,12 +14,12 @@ const Verlet = function(d, data) {
         zeroForces(data);
         data.forEach(d => {
             d.forces.forEach(({ name, params, color }) => {
-                actionFunction = Physics.ForceMap[name];
+                const actionFunction = ForceMap[name];
                 const actions = actionFunction(d, data, params);
                 actions.forEach((action, i) => {
                     const [index, force] = action
                     const node = data[index]
-                    node.force = Physics.Vector.add(node.force, force);
+                    node.force = Vector.add(node.force, force);
                 })
             })
         })
@@ -35,17 +37,18 @@ const Verlet = function(d, data) {
     const velocityVerlet1 = function(data) {
         // first part of velocity verlet algorithm
         data.forEach(d => {
-                d.vi = Physics.Vector.add(d.vi, Physics.Vector.scale(0.5 * dt, d.force));
-                d.ri = Physics.Vector.add(d.ri, Physics.Vector.scale(dt, d.vi));
+                d.vi = Vector.add(d.vi, Vector.scale(0.5 * dt, d.force));
+                d.ri = Vector.add(d.ri, Vector.scale(dt, d.vi));
             });
     }
 
     const velocityVerlet2 = function(data) {
         // second part of velocity verlet algorithm
         data.forEach(d => {
-            d.vi = Physics.Vector.add(d.vi, Physics.Vector.scale(0.5 * dt, d.force));
+            d.vi = Vector.add(d.vi, Vector.scale(0.5 * dt, d.force));
         })
     }
 }
 
-Physics.Verlet = new Verlet();
+export const verlet = new Verlet();
+export default verlet;

@@ -19,14 +19,14 @@ should simply calculate the force and return it.
 // Reference for potentials/forces:
 // https://hal-mines-paristech.archives-ouvertes.fr/hal-00924263/document
 
-class ForceMap {
-    constructor() {
-        this.testForce = function(d, data, params) {
+import Vector from './Vector.js';
+
+export const testForce = function(d, data, params) {
             // just for testing purposes
             return [[d.id, { x: 100, y: 100, z: 0 }]]
         };
 
-        this.spring = function(d, data, params) {
+export const spring = function(d, data, params) {
             const [k, nodesLen, neighbourIndex] = params;
             const d2 = data[neighbourIndex];
 
@@ -35,10 +35,10 @@ class ForceMap {
             const dz = d.ri.z - d2.ri.z;
 
             const separation = { x: dx, y: dy, z: dz };
-            const unitSeparation = Physics.Vector.unitVector(separation);
+            const unitSeparation = Vector.unitVector(separation);
 
-            const equilibrium = Physics.Vector.scale(nodesLen, unitSeparation);
-            const extension = Physics.Vector.sub(separation, equilibrium);
+            const equilibrium = Vector.scale(nodesLen, unitSeparation);
+            const extension = Vector.sub(separation, equilibrium);
 
             const fx = -k * extension.x;
             const fy = -k * extension.y;
@@ -49,60 +49,56 @@ class ForceMap {
             return [[d.id, { x: fx, y: fy, z: fz }]]
         };
 
-        this.valenceAngle = function(d, data, params) {
+export const valenceAngle = function(d, data, params) {
             const [k, eqAngle, index1, index2] = params;
             var a = data[index1].ri;
             var b = d.ri; //central node
             var c = data[index2].ri;
 
-            var ba = Physics.Vector.sub(a, b);
-            var bc = Physics.Vector.sub(c, b);
-            var cb = Physics.Vector.scale(-1, bc)
+            var ba = Vector.sub(a, b);
+            var bc = Vector.sub(c, b);
+            var cb = Vector.scale(-1, bc)
 
-            var abc = Physics.Vector.angle(ba, bc);
+            var abc = Vector.angle(ba, bc);
 
-            var pa = Physics.Vector.normalise(Physics.Vector.cross(ba, Physics.Vector.cross(ba, bc)));
-            var pc = Physics.Vector.normalise(Physics.Vector.cross(cb, Physics.Vector.cross(ba, bc)));
+            var pa = Vector.normalise(Vector.cross(ba, Vector.cross(ba, bc)));
+            var pc = Vector.normalise(Vector.cross(cb, Vector.cross(ba, bc)));
 
-            var faFactor = (-1) * k * (abc - eqAngle) / (Physics.Vector.norm(ba));
+            var faFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(ba));
             faFactor = (isNaN(faFactor) ? 0 : faFactor);
 
-            var fa = Physics.Vector.scale(faFactor, pa);
+            var fa = Vector.scale(faFactor, pa);
 
-            var fcFactor = (-1) * k * (abc - eqAngle) / (Physics.Vector.norm(bc));
+            var fcFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(bc));
             fcFactor = (isNaN(fcFactor) ? 0 : fcFactor);
 
-            var fc = Physics.Vector.scale(fcFactor, pc);
-            var fb = Physics.Vector.scale(-1, Physics.Vector.add(fa, fc));
+            var fc = Vector.scale(fcFactor, pc);
+            var fb = Vector.scale(-1, Vector.add(fa, fc));
             return [[index1, fa], [d.id, fb], [index2, fc]];
         };
 
-        this.lennardJones = function(d, data, params) {
+export const lennardJones = function(d, data, params) {
             const [epsilon, sigma, neighbourIndex] = params;
             const a = d;
             const b = data[neighbourIndex];
-            const ba = Physics.Vector.sub(a.ri, b.ri);
-            const r = Physics.Vector.norm(ba);
-            const u = Physics.Vector.normalise(ba);
+            const ba = Vector.sub(a.ri, b.ri);
+            const r = Vector.norm(ba);
+            const u = Vector.normalise(ba);
             const faMagnitude = 24 * epsilon / r
                 * (2 * (sigma / r) ** 12 - (sigma / r) ** 6)
-            const fa = Physics.Vector.scale(faMagnitude, u);
-            const fb = Physics.Vector.scale(-1, fa);
+            const fa = Vector.scale(faMagnitude, u);
+            const fb = Vector.scale(-1, fa);
 
             return [[a.id, fa], [b.id, fb]];
         }
-        this.forceMap = {
-            "Test Force": this.testForce,
-            "spring": this.spring,
-            "valenceAngle": this.valenceAngle,
-            "lennardJones": this.lennardJones
+export const forceMap = {
+            "testForce": testForce,
+            "spring": spring,
+            "valenceAngle": valenceAngle,
+            "lennardJones": lennardJones
         };
 
-        return this.forceMap;
-    }
-}
-
-const initValence = function(lattice, k = 1) {
+export const initValence = function(lattice, k = 1) {
     /*
     Performs the necessary initial setup for the Physics.Forcemap.valenceAngle method
     */
@@ -116,9 +112,9 @@ const initValence = function(lattice, k = 1) {
                     if (f2.name == "spring" && index2 != index1) {
                         let d3 = lattice.data[index2];
                         // calculate their equilibrium angles
-                        let vec1 = Physics.Vector.sub(d3.ri, d1.ri);
-                        let vec2 = Physics.Vector.sub(d2.ri, d1.ri);
-                        let eqAngle = Physics.Vector.angle(vec1, vec2)
+                        let vec1 = Vector.sub(d3.ri, d1.ri);
+                        let vec2 = Vector.sub(d2.ri, d1.ri);
+                        let eqAngle = Vector.angle(vec1, vec2)
                         d1.forces.push(
                             {
                                 name: "valenceAngle",
@@ -134,5 +130,4 @@ const initValence = function(lattice, k = 1) {
 
 }
 
-Physics.ForceMap = new ForceMap();
-Physics.initValence = initValence;
+export default forceMap;

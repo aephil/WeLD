@@ -1,6 +1,5 @@
 var container = document.createElement("div");
 container.setAttribute("id","weld");
-control.appendChild(container);
 
 container.style.position = "absolute";
 container.style.bottom = "0%";

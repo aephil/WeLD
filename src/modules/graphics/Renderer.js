@@ -20,6 +20,8 @@
  * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
  */
 
+import {rotX, rotY, centreToScreenXPeriodic, centreToScreenYPeriodic} from '../helpers.js'
+
 var Renderer = function () {
 
   // public member functions
@@ -62,6 +64,10 @@ var Renderer = function () {
   this.setUpdates = function(u)
   {
     updates = u;
+  }
+
+  this.setDebug = function(debugFunc) {
+    debug = debugFunc
   }
 
   this.setNodeUpdates = function(u) {
@@ -152,6 +158,7 @@ var Renderer = function () {
     var lattice = false;
     var nodeUpdates;
     var updates;
+    var debug;
     var mouseX = 0;
     var mouseY = 0;
     var dragStartX = 0;
@@ -184,6 +191,8 @@ var Renderer = function () {
       // updates
       updates.forEach((fn) => {
         fn(lattice.data);
+
+      debug(lattice.data);
       });
 
 
@@ -361,4 +370,5 @@ var Renderer = function () {
   return this;
 };
 
-Graphics.Renderer = new Renderer();
+export const renderer = new Renderer();
+export default renderer;

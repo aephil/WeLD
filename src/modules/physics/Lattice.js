@@ -1,8 +1,10 @@
-var Lattice = function()
+import {randomNumber} from '../helpers.js';
+
+const Lattice = function()
   {
-    var ui = false;
-    var predicate = false;
-    var showEdges = false;
+    let ui = false;
+    let predicate = false;
+    let showEdges = false;
     this.data = [];
     this.a = 20; // default
 
@@ -24,7 +26,7 @@ var Lattice = function()
     this.makeFCC3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
       this.data = []
-      var counter=0;
+      let counter=0;
       for(let h = 0; h < cellsZ; h++)
       {
         for(let i = 0; i < cellsX; i++)
@@ -130,12 +132,12 @@ var Lattice = function()
     {
       this.a = a;
       this.data = []
-      nodes = []
-      var counter=0;
-      for(h = 0; h < cellsZ; h++){
-        for(i = 0; i < cellsX; i++)
+      const nodes = []
+      let counter=0;
+      for(let h = 0; h < cellsZ; h++){
+        for(let i = 0; i < cellsX; i++)
         {
-          for(j = 0; j < cellsY; j++)
+          for(let j = 0; j < cellsY; j++)
           {
 
             this.data.push(
@@ -176,7 +178,7 @@ var Lattice = function()
     this.makePerovskite3D = function(cellsX, cellsY, cellsZ, a, sim)
     {
       this.data = []
-      var counter = 0;
+      let counter = 0;
       for(h=0; h < cellsZ; h++){
         for(i = 0; i < cellsX; i++)
         {
@@ -357,10 +359,10 @@ var Lattice = function()
     this.setInterAtomicForces = function(force, predicate=false) {
       for(let i = 0; i < this.data.length; i++)
       {
-        var d1 = this.data[i];
+        let d1 = this.data[i];
         for(let j = 0; j < this.data.length; j++)
         {
-          var d2 = this.data[j];
+          let d2 = this.data[j];
           if(predicate)
           {
             if(predicate(d1, d2) && i!==j)
@@ -394,4 +396,5 @@ var Lattice = function()
 
   }
 
-Physics.Lattice = new Lattice();
+export const lattice = new Lattice();
+export default lattice;

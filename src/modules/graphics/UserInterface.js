@@ -320,7 +320,7 @@ var UserInterface = function()
   }
   this.loadBasic = function(){
 
-    sim = document.createElement("div");
+    const sim = document.createElement("div");
     document.body.appendChild(sim);
     sim.setAttribute("id","sim");
     sim.style.position = "fixed";
@@ -339,7 +339,7 @@ var UserInterface = function()
     this.canvas.style.borderStyle = "solid";
     sim.appendChild(this.canvas);
 
-    terminal = document.createElement("div");
+    const terminal = document.createElement("div");
     document.body.appendChild(terminal);
     terminal.setAttribute("tabindex","0");
     terminal.setAttribute("id","terminal");
@@ -425,4 +425,5 @@ var UserInterface = function()
   return this;
 }
 
-Graphics.UserInterface = new UserInterface();
+export const userInterface = new UserInterface();
+export default userInterface;
