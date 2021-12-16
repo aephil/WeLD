@@ -32,26 +32,24 @@ export const norm = function(v1) {
 }
 
 export const add = function(v1, v2) {
-    var _x, _y, _z;
-    _x = v1.x + v2.x
-    _y = v1.y + v2.y
-    _z = v1.z + v2.z
-    return { x: _x, y: _y, z: _z }
+    const x = v1.x + v2.x
+    const y = v1.y + v2.y
+    const z = v1.z + v2.z
+    return {x, y, z};
 }
 
 export const sub = function(v1, v2) {
-    var _x, _y, _z;
-    _x = v1.x - v2.x
-    _y = v1.y - v2.y
-    _z = v1.z - v2.z
-    return { x: _x, y: _y, z: _z }
+    const x = v1.x - v2.x
+    const y = v1.y - v2.y
+    const z = v1.z - v2.z
+    return {x, y, z};
 }
 
 export const cross = function(v1, v2) {
-    const _x = (v1.y * v2.z) - (v1.z * v2.y);
-    const _y = (v1.z * v2.x) - (v1.x * v2.z);
-    const _z = (v1.x * v2.y) - (v1.y * v2.x);
-    return { x: _x, y: _y, z: _z };
+    const x = (v1.y * v2.z) - (v1.z * v2.y);
+    const y = (v1.z * v2.x) - (v1.x * v2.z);
+    const z = (v1.x * v2.y) - (v1.y * v2.x);
+    return {x, y, z};
 }
 
 export const distance = function(v1, v2) {
