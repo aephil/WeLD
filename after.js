@@ -1,33 +1,29 @@
 verletController = Physics.Verlet;
-// There is something really weird going on here
-// where if you try to change this var to a let
-// you get the error message
-// Uncaught Syntaxerror: Identifier 'physics' has already
-// been declared,
-// I'm thinking this must have something to do with var and let
-// using different scopes, but also something really weird
-// must be going on, because if i grep the entire codebase
-// for "physics =" and "physics=", the only relevant results
-// are the let right below this comment, and a line in Weld.js,
-// which is not being run. For now I think we just leave this
-// as a var and hope this won't break anything else, but it seems
-// really fragile
-
 
 // Each function here is called by the renderer every frame
 ui.setData(lattice.data);
 
 // The debug function should be defined in the simulation
 // script
-var physics = [
-    verletController.velocityVerlet,
-    verletController.updateState,
+
+// these functions will get run once every frame.
+// They should take the lattice data as an input
+var updates = [
+    verletController.integrationStep,
+    // verletController.updateState,
     debug
+];
+
+// These functions are run on every node every frame.
+// They should take a specific node and the lattice data
+// as arguments (in that order)
+var nodeUpdates = [
 ];
 
 renderer = Graphics.Renderer;
 renderer.setUI(ui);
-renderer.setUpdates(physics);
+renderer.setUpdates(updates);
+renderer.setNodeUpdates(nodeUpdates);
 renderer.setLattice(lattice);
 renderer.setFPS(30);
 renderer.setSpeed(1000);
