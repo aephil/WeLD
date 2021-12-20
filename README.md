@@ -6,8 +6,8 @@ https://htmlpreview.github.io/?https://github.com/aephil/WeLD/blob/master/index.
 
 ## Running the code
 First, install the required npm modules:
-`npm install --dev`
-Make sure you have `npx` installed.
+`npm install --dev`. <br>
+Make sure you have `npx` installed globally (`npm install -g npx`).<br>
 Run the http server with the command `npm start`
 
 ## Unit tests
