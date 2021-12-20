@@ -4,7 +4,7 @@
   "description": "Molecular dynamics in the browser",
   "main": "WeLD.js",
   "scripts": {
-    "start": "live-server",
+    "start": "live-server src",
     "_test": "jest",
     "transpile": "npx babel src --out-dir transpiled",
     "test": "npm run transpile && npm run _test"
