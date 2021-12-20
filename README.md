@@ -11,7 +11,7 @@ Make sure you have `npx` installed globally (`npm install -g npx`).<br>
 Run the http server with the command `npm start`
 
 ## Unit tests
-Unit tests for key bits of code should be put index
+Unit tests for key bits of code should be put in the `test` directory, for example
 `tests/someDirectory/testFileNumberOne.test.js`.
 To run the tests, run `npm test` from your terminal.
 If the source code has changed since it was last transpiled,
@@ -30,12 +30,12 @@ not `../src/transpiled/modules/physics/ForceMap`.
 ## Imports/exports
 When running code in the browser, use ES6 module syntax, e.g.:
 ```javascript
-// path/to/functionDefinedHere.js
+// src/path/to/functionDefinedHere.js
 export const myFunc = function(x, y, z) {
     // do stuff
 }
 
-// programs/iWantTheFunctionInThisFile.js
+// src/programs/iWantTheFunctionInThisFile.js
 import {myFunc} from '../path/to/functionDefinedHere.js';
 // Now w can use myFunc in this file
 ```
@@ -44,16 +44,16 @@ When running code in NODE, e.g. for running tests, first make
 sure you have transpiled the source code since the last change to
 the source code (Happens automatically if you use `npm test` to run the tests),
 and then use CommonJS module syntax, with
-the caveat that you need to access the `transpiled` directory isntead
+the caveat that you need to access the `transpiled` directory instead
 of the `src` directory, e.g.:
 
 ```javascript
-// path/to/functionDefinedHere.js
+// src/path/to/functionDefinedHere.js
 export const myFunc = function(x, y, z) {
     // do stuff
 }
 
-// tests/testMyFunc.test.js
+// tests/functions/testMyFunc.test.js
 const myFunc = require('../../transpiled/path/to/functionDefinedHere');
 // Now we can use myFunc in this file
 ```
