@@ -1,5 +1,11 @@
 import Physics from '../../namespaces/Physics.js';
 import Graphics from '../../namespaces/Graphics.js';
+import {
+    calculateQuantities,
+    KineticEnergy,
+    PotentialEnergy
+} from '../../modules/physics/quantities.js';
+
 
 const edgeLen = 20;
 
@@ -14,28 +20,28 @@ ui.setData(lattice.data);
 
 // Spring neighbour predicate
 const springPredicate = (d1, d2) => {
-if (d1.id === d2.id) return false;
+    if (d1.id === d2.id) return false;
 
-const dx2 = (d2.ri.x - d1.ri.x) ** 2;
-const dy2 = (d2.ri.y - d1.ri.y) ** 2;
-const dz2 = (d2.ri.z - d1.ri.z) ** 2;
-const distanceSquared = dx2 + dy2 + dz2;
+    const dx2 = (d2.ri.x - d1.ri.x) ** 2;
+    const dy2 = (d2.ri.y - d1.ri.y) ** 2;
+    const dz2 = (d2.ri.z - d1.ri.z) ** 2;
+    const distanceSquared = dx2 + dy2 + dz2;
 
-return distanceSquared <= edgeLen ** 2;
+    return distanceSquared <= edgeLen ** 2;
 }
 
 
-lattice.makePrimitive3D(2,1,1,edgeLen);
+lattice.makePrimitive3D(2, 1, 1, edgeLen);
 
 const k = 1;
 
 lattice.setInterAtomicForces(
-{
- name: "spring",
- params: [k /* spring constant k */, edgeLen /* equilibrium separation*/],
- color: "red" // currently not in use.
-},
-springPredicate // depending on the predicate sets the neighbour in params.
+    {
+        name: "spring",
+        params: [k /* spring constant k */, edgeLen /* equilibrium separation*/],
+        color: "red" // currently not in use.
+    },
+    springPredicate // depending on the predicate sets the neighbour in params.
 );
 
 ui.setData(lattice.data);
@@ -99,9 +105,30 @@ function debug(data) {
     }
 }
 
-console.log(Physics);
+i = 0;
+
+function debugQuantities(lattice) {
+    if (i % 100 === 0) {
+    console.log('----------------------')
+    lattice.quantities.forEach(quantity => {
+        console.log(quantity);
+    });
+    let KE = lattice.quantities[0].value;
+    let PE = lattice.quantities[1].value;
+    let TE = KE + PE;
+    console.log(`total energy: ${TE}`);
+    console.log('-------------------');
+    }
+    i += 1;
+}
+
+lattice.setQuantities([
+    new KineticEnergy(),
+    new PotentialEnergy()
+]);
+
 const verletController = Physics.verlet;
-const updates = [verletController.integrationStep]
+const updates = [verletController.integrationStep, calculateQuantities]
 const nodeUpdates = [];
 
 const renderer = Graphics.renderer;
@@ -109,7 +136,7 @@ const renderer = Graphics.renderer;
 renderer.setUI(ui);
 renderer.setUpdates(updates);
 renderer.setNodeUpdates(nodeUpdates);
-renderer.setDebug(debug);
+renderer.setDebug(debugQuantities);
 renderer.setLattice(lattice);
 renderer.setFPS(30);
 renderer.setSpeed(1000);
