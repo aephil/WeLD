@@ -1,5 +1,11 @@
 import Physics from '../../namespaces/Physics.js';
 import Graphics from '../../namespaces/Graphics.js';
+import {
+    calculateQuantities,
+    KineticEnergy,
+    PotentialEnergy
+} from '../../modules/physics/quantities.js';
+
 
 const edgeLen = 20;
 
@@ -14,28 +20,28 @@ ui.setData(lattice.data);
 
 // Spring neighbour predicate
 const springPredicate = (d1, d2) => {
-if (d1.id === d2.id) return false;
+    if (d1.id === d2.id) return false;
 
-const dx2 = (d2.ri.x - d1.ri.x) ** 2;
-const dy2 = (d2.ri.y - d1.ri.y) ** 2;
-const dz2 = (d2.ri.z - d1.ri.z) ** 2;
-const distanceSquared = dx2 + dy2 + dz2;
+    const dx2 = (d2.ri.x - d1.ri.x) ** 2;
+    const dy2 = (d2.ri.y - d1.ri.y) ** 2;
+    const dz2 = (d2.ri.z - d1.ri.z) ** 2;
+    const distanceSquared = dx2 + dy2 + dz2;
 
-return distanceSquared <= edgeLen ** 2;
+    return distanceSquared <= edgeLen ** 2;
 }
 
 
-lattice.makePrimitive3D(2,1,1,edgeLen);
+lattice.makePrimitive3D(2, 1, 1, edgeLen);
 
 const k = 1;
 
 lattice.setInterAtomicForces(
-{
- name: "spring",
- params: [k /* spring constant k */, edgeLen /* equilibrium separation*/],
- color: "red" // currently not in use.
-},
-springPredicate // depending on the predicate sets the neighbour in params.
+    {
+        name: "spring",
+        params: [k /* spring constant k */, edgeLen /* equilibrium separation*/],
+        color: "red" // currently not in use.
+    },
+    springPredicate // depending on the predicate sets the neighbour in params.
 );
 
 ui.setData(lattice.data);
@@ -56,8 +62,13 @@ let i = 0;
 let min = 100000
 let max = 0
 
-const separations = [];
-var mean = 0; 
+const separationSamples = [];
+const kineticEnergySamples = [];
+const potentialEnergySamples = [];
+
+var meanSeparation = 0; 
+var meanKE = 0;
+var meanPE = 0;
 var range = 0;
 
 function meanOf(arr) {
@@ -66,33 +77,58 @@ function meanOf(arr) {
     return mean;
 }
 
-function debug(data) {
-    // The lattice data can be accessed via the variable
-    // lattice.data
-    i += 1
+function debugQuantities(lattice) {
     if (i % 100 === 0) {
-    
-        mean = meanOf(separations);
         ui.clearTerminal();
-        ui.logDebug(`<br>sample size: ${separations.length}`);
-        ui.logDebug(`<br>Range: ${range}`);
-        ui.logDebug(`<br>Mean separation: ${mean}`);
-        ui.logDebug(`<br>Expected mean separation: ${edgeLen}`);
-        ui.logDebug(`<br>Expected range: ${2 * initialSeparation}`);
-        
+
+        meanSeparation = meanOf(separationSamples);
+        meanKE = meanOf(kineticEnergySamples);
+        meanPE = meanOf(potentialEnergySamples);
+
+        ui.logDebug('----------------------')
+
+        // separation ////////////////////////////////////////////////
+
+        ui.logDebug(`sample size: ${separationSamples.length}`);
+        ui.logDebug(`Range: ${range}`);
+        ui.logDebug(`mean separation: ${meanSeparation}`);
+
+        // energies /////////////////////////////////////////////////
+        let avgTE = meanKE + meanPE;
+        ui.logDebug(`mean kinetic energy: ${avgTE}`);
+        ui.logDebug(`mean potential energy: ${avgTE}`);
+        ui.logDebug(`mean total energy: ${avgTE}`);
+
+
+
+        ui.logDebug('--------------------');
     } else {
 
+        let KE = lattice.quantities[0].value;
+        let PE = lattice.quantities[1].value;
+
+        kineticEnergySamples.push(KE);
+        potentialEnergySamples.push(PE);
+
+
+        // seperation sampling //////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////
         const a = lattice.data[0].ri
         const b = lattice.data[1].ri
         const displacement = Physics.Vector.sub(b, a)
         const separation = Physics.Vector.norm(displacement)
-        separations.push(separation);
+        separationSamples.push(separation);
 
         // prevent samples from getting too big
-        if (separations.length>5000)
+        // (they will all be the same length)
+        if (separationSamples.length>5000)
         {
+
             ui.logDebug("resetting samples");
-            separations = [];
+            separationSamples = [];
+            kineticEnergySamples = [];
+            potentialEnergySamples = [];
         }
 
         if (separation > max) {
@@ -103,19 +139,18 @@ function debug(data) {
         }
 
         range = max - min;
-        
     }
-    // Use console.clear to clear the console so it doesn't get
-    // cluttered
-   
-   
-    // The debugger statement can be really useful here
-    // debugger
+
+    i += 1;
 }
 
-//console.log(Physics);
+lattice.setQuantities([
+    new KineticEnergy(),
+    new PotentialEnergy()
+]);
+
 const verletController = Physics.verlet;
-const updates = [verletController.integrationStep]
+const updates = [verletController.integrationStep, calculateQuantities]
 const nodeUpdates = [];
 
 const renderer = Graphics.renderer;
@@ -123,7 +158,7 @@ const renderer = Graphics.renderer;
 renderer.setUI(ui);
 renderer.setUpdates(updates);
 renderer.setNodeUpdates(nodeUpdates);
-renderer.setDebug(debug);
+renderer.setDebug(debugQuantities);
 renderer.setLattice(lattice);
 renderer.setFPS(30);
 renderer.setSpeed(1000);

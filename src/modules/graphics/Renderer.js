@@ -149,7 +149,7 @@ const Renderer = function () {
     let lattice = false;
     let nodeUpdates;
     let updates = [];
-    let debug = false;
+    let debug;
     let mouseX = 0;
     let mouseY = 0;
     let dragStartX = 0;
@@ -173,16 +173,16 @@ const Renderer = function () {
       // node updates
       lattice.data.forEach((d) => {
         nodeUpdates.forEach((fn) => {
-          fn(d,lattice.data);
+          fn(d,lattice);
         });
       });
       // updates
       updates.forEach((fn) => {
-        fn(lattice.data);
+        fn(lattice);
       });
       
       if (debug) {
-        debug(lattice.data);
+        debug(lattice);
       }
 
 
@@ -310,7 +310,7 @@ const Renderer = function () {
          ctx.fill();
          ctx.stroke();
 
-         if(lattice.showEdges())
+         if(lattice && lattice.showingEdges())
          {
            n.forces.forEach((force) => {
              if(force.name=="spring"){
