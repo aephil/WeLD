@@ -1,8 +1,10 @@
+export const translate = function(translation, v) {
+    return {x:v.x+translation.x, y:v.y+translation.y, z:v.z+translation.z };
+}
+
 export const normalise = function(v) {
     const norm = this.norm(v);
-
     if (norm === 0) { return v; }
-
     v.x /= norm;
     v.y /= norm;
     v.z /= norm;
@@ -66,6 +68,7 @@ export const Vector = {
     normalise, scale, angle, v3,
     dot, norm, add, sub,
     cross, distance, unitVector,
+    translate,
 }
 
 export default Vector;

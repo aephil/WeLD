@@ -1,3 +1,4 @@
+import Vector from '../physics/Vector.js';
 
 const UserInterface = function()
 {
@@ -90,7 +91,6 @@ const UserInterface = function()
       relative = true;
     }
 
-    console.log(args);
     if (nodeID && x && y && z) {
       nodeID = parseInt(nodeID)
       x = parseFloat(x);
@@ -214,9 +214,22 @@ const UserInterface = function()
         }
       }, false);
     }
+
+  const clearTerminal = function(){
+    output = input = "";
+  }
+  this.clearTerminal = function(){clearTerminal()};
+
   this.colouredText = function(msg, colour){
     return colouredText(msg, colour);
   }
+  const logDebug = function(msg, newline=true){
+      output += colouredText("WeLD (debug): ","blue") + msg + (newline?"<br/>":"");
+      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
+      updateScroll()
+  }
+  this.logDebug = function(msg, newline=true){logDebug(msg, newline)};
+
   const logWarning = function(msg, newline=true){
       output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
       document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
@@ -276,7 +289,7 @@ const UserInterface = function()
       tooltip.innerHTML += "force(s):"
       for(let i = 0; i<forces.length; i++)
       {
-        force = forces[i];
+        let force = forces[i];
         if (i==2)
         {
             tooltip.innerHTML += "</br>&emsp;" + (forces.length - i) + " more...</br>";
@@ -288,16 +301,16 @@ const UserInterface = function()
           tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+data[force.params[2]].name+")"+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
         }
 
         if(force.name=="valenceAngle")
         {
 
-          const ba = Physics.Vector.sub(datapoint.ri,data[force.params[2]].ri);
-          const bc = Physics.Vector.sub(datapoint.ri,data[force.params[3]].ri);
-          const abc = Physics.Vector.angle(ba, bc);
+          const ba = Vector.sub(datapoint.ri,data[force.params[2]].ri);
+          const bc = Vector.sub(datapoint.ri,data[force.params[3]].ri);
+          const abc = Vector.angle(ba, bc);
 
           tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
@@ -326,7 +339,7 @@ const UserInterface = function()
     sim.style.position = "fixed";
     sim.style.top = "2.5%";
     sim.style.left = "2.5%";
-    sim.style.width = "70%";
+    sim.style.width = "60%";
     sim.style.height = "95%";
     sim.style.backgroundColor = "none";
 
@@ -339,59 +352,58 @@ const UserInterface = function()
     this.canvas.style.borderStyle = "solid";
     sim.appendChild(this.canvas);
 
+    control = document.createElement("div");
+    document.body.appendChild(control);
+    control.setAttribute("id","control");
+    control.style.position = "absolute";
+    control.style.top = "2.5%";
+    control.style.right = "2.5%";
+    control.style.width = "33.5%";
+    control.style.height = "95%";
+    control.style.color = "rgb(173,172,173)";
+    control.style.padding = "2.5px";
+    control.style.fontFamily = "monospace";
+    control.style.overflowX = "hidden";
+    control.style.overflowY = "hidden";
+    
     const terminal = document.createElement("div");
-    document.body.appendChild(terminal);
+    control.appendChild(terminal);
     terminal.setAttribute("tabindex","0");
     terminal.setAttribute("id","terminal");
     terminal.innerHTML = output + "User: " + input + "<";
-    terminal.style.position = "fixed";
-    terminal.style.top = "2.5%";
-    terminal.style.right = "1.5%";
-    terminal.style.width = "25%";
-    terminal.style.height = "25%";
+    terminal.style.position = "relative";
+    terminal.style.top = "0%";
+    terminal.style.right = "0%";
+    terminal.style.width = "100%";
+    terminal.style.height = "33%";
     terminal.style.color = "rgb(173,172,173)";
     terminal.style.padding = "2.5px";
     terminal.style.fontFamily = "monospace";
-    terminal.style.overflowX = "scroll";
+    terminal.style.overflowX = "hidden";
     terminal.style.overflowY = "scroll";
+    terminal.style.backgroundColor = "white";
     terminal.addEventListener("focus",function(event){
         terminal.style.color = "black";
         terminal.innerHTML = output + "UserIn: " + input + "<";
     })
     terminal.addEventListener("focusout",function(event){
-        terminal.style.backgroundColor = "white";
         terminal.style.color = "rgb(173,172,173)";
     });
     initTerminal(terminal);
 
-    control = document.createElement("div");
-    document.body.appendChild(control);
-    control.setAttribute("id","control");
-    control.style.position = "fixed";
-    control.style.top = "28.0%";
-    control.style.right = "1.5%";
-    control.style.width = "25%";
-    control.style.height = "68.5%";
-    control.style.color = "rgb(173,172,173)";
-    control.style.padding = "2.5px";
-    control.style.fontFamily = "monospace";
-    control.style.overflowX = "scroll";
-    control.style.overflowY = "scroll";
-
     this.infoBox = document.createElement("div");
     this.infoBox.setAttribute("id", "infoBox");
-    this.infoBox.style.position = "fixed";
+    this.infoBox.style.position = "relative";
     this.infoBox.style.padding = "2.5px";
     this.infoBox.style.backgroundColor = "rgba(0,0,0,0.7)";
-    this.infoBox.style.width = "15%";
-    this.infoBox.style.height = "auto";
+    this.infoBox.style.width = "100%";
+    this.infoBox.style.top = "0%";
+    this.infoBox.style.height = "30";
     this.infoBox.style.color = "rgb(173,172,173)";
-    this.infoBox.style.top = document.getElementById("sim").style.top;
-    this.infoBox.style.left = document.getElementById("sim").style.left;
-    this.infoBox.style.zIndex = document.getElementById("sim").style.zIndex + 1;
-    this.infoBox.style.overflowX = "scroll";
+    this.infoBox.style.zIndex = document.getElementById("control").style.zIndex + 1;
+    this.infoBox.style.overflowX = "hidden";
     this.infoBox.style.overflowY = "scroll";
-    document.body.appendChild(this.infoBox);
+    control.appendChild(this.infoBox);
 
     sim.focus();
 

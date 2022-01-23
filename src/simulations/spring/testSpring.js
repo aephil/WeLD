@@ -57,6 +57,8 @@ let min = 100000
 let max = 0
 
 const separations = [];
+var mean = 0; 
+var range = 0;
 
 function meanOf(arr) {
     const sum = arr.reduce((a, b) => a + b, 0);
@@ -69,13 +71,29 @@ function debug(data) {
     // lattice.data
     i += 1
     if (i % 100 === 0) {
+    
+        mean = meanOf(separations);
+        ui.clearTerminal();
+        ui.logDebug(`<br>sample size: ${separations.length}`);
+        ui.logDebug(`<br>Range: ${range}`);
+        ui.logDebug(`<br>Mean separation: ${mean}`);
+        ui.logDebug(`<br>Expected mean separation: ${edgeLen}`);
+        ui.logDebug(`<br>Expected range: ${2 * initialSeparation}`);
+        
+    } else {
+
         const a = lattice.data[0].ri
         const b = lattice.data[1].ri
         const displacement = Physics.Vector.sub(b, a)
-
         const separation = Physics.Vector.norm(displacement)
-
         separations.push(separation);
+
+        // prevent samples from getting too big
+        if (separations.length>1000000)
+        {
+            ui.logDebug("resetting samples");
+            separations = [];
+        }
 
         if (separation > max) {
             max = separation;
@@ -84,22 +102,18 @@ function debug(data) {
             min = separation;
         }
 
-        const range = max - min;
-        const mean = meanOf(separations);
-        // Use console.clear to cleat the console so it doesn't get
-        // cluttered
-        console.clear()
-        console.log(`Separation: ${separation}`)
-        console.log(`Range: ${range}`);
-        console.log(`Mean separation: ${mean}`);
-        console.log(`Expected mean separation: ${edgeLen}`);
-        console.log(`Expected range: ${2 * initialSeparation}`);
-        // The debugger statement can be really useful here
-        //debugger
+        range = max - min;
+        
     }
+    // Use console.clear to clear the console so it doesn't get
+    // cluttered
+   
+   
+    // The debugger statement can be really useful here
+    // debugger
 }
 
-console.log(Physics);
+//console.log(Physics);
 const verletController = Physics.verlet;
 const updates = [verletController.integrationStep]
 const nodeUpdates = [];

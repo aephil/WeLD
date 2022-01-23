@@ -55,8 +55,3 @@ export const screenToCentreY = function(y, worldHeight = 1000){
  export const rotZ = function(d,gamma){
     return {x:Math.cos(gamma)*d.x - Math.sin(gamma)*d.y,y:Math.sin(gamma)*d.x+Math.cos(gamma)*d.y,z:d.z}
  }
-
-export const translateVec = function(d,vec)
-{
-    return {x:d.x+vec.x, y:d.y+vec.y, z:d.z+vec.z }
-}
