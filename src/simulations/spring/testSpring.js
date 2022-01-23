@@ -89,7 +89,7 @@ function debug(data) {
         separations.push(separation);
 
         // prevent samples from getting too big
-        if (separations.length>1000000)
+        if (separations.length>5000)
         {
             ui.logDebug("resetting samples");
             separations = [];
