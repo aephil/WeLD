@@ -4,8 +4,4 @@ import
 require-everything.js
 transpiled
 .DS_Store
-<<<<<<< HEAD
-package-lock.json
-=======
 hidden
->>>>>>> 82db7a433fcc2871509cea8b1c7e9087d775bc2c
