@@ -1,26 +1,5 @@
-/**
- * Renderer.js
- *
- * Copyright (C) 06-09-2021, Author Takudzwa Makoni
- * <https://github.com/aephil/WeLD>
- *
- * This Program is free software: you can redistribute
- * it and/or modify it under the terms of the GNU General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This Program is distributed in the hope that it will
- * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with This Program. If not, see <http://www.gnu.org/licenses/>.
- *
- * @license GPL-3.0+ <http://spdx.org/licenses/GPL-3.0+>
- */
-
 import {rotX, rotY, centreToScreenXPeriodic, centreToScreenYPeriodic} from '../helpers.js'
+import Vector from '../physics/Vector.js';
 
 const Renderer = function () {
 
@@ -143,7 +122,8 @@ const Renderer = function () {
     // private member variables
     let frames = 0;
     let elapsed = 0; // in seconds
-    let start = 0; // start timestamp
+    let start = performance.now(); // start timestamp
+
     let rho = 0
     let translate={x:0,y:0,z:0};
     let theta = 0
@@ -154,11 +134,22 @@ const Renderer = function () {
     let updateCounter = 0;
     let highlighted = false;
 
+    document.addEventListener("visibilitychange", event => {
+      if (document.visibilityState == "visible") {
+        ui.logWarning("starting live fps counter")
+      } else {
+        ui.logWarning("page was inactive, restarting fps counter");
+        // restart the clock and frame counter
+        start = performance.now();
+        frames = 0;
+      }
+    })
+
 
     let lattice = false;
     let nodeUpdates;
     let updates = [];
-    let debug = false;
+    let debug;
     let mouseX = 0;
     let mouseY = 0;
     let dragStartX = 0;
@@ -167,32 +158,32 @@ const Renderer = function () {
     let drawCall = false;
     let ui = false;
 
-    const cameraView = function(d){
+    const cameraView = function(pos){
 
       if(ui.highlighted()!==false)
       {
-        const origin = lattice.data[ui.highlighted()];
-        const translated = translateVec(d, {x:(-origin.ri.x),y:(-origin.ri.y),z:(-origin.ri.z)})
+        const origin = Vector.scale(-1,lattice.data[ui.highlighted()].ri);
+        const translated = Vector.translate(pos ,origin);
         return rotY(rotX(translated,theta),rho)
       }
-      return rotY(rotX(d,theta),rho);
+      return rotY(rotX(pos,theta),rho);
     }
 
     const update = function(){
       // node updates
       lattice.data.forEach((d) => {
         nodeUpdates.forEach((fn) => {
-          fn(d,lattice.data);
+          fn(d,lattice);
         });
       });
       // updates
       updates.forEach((fn) => {
-        fn(lattice.data);
-
-      if (debug) {
-          debug(lattice.data);
-      }
+        fn(lattice);
       });
+      
+      if (debug) {
+        debug(lattice);
+      }
 
 
     }
@@ -215,7 +206,6 @@ const Renderer = function () {
       if(ui.highlighted()!==false)
       {
         const datapoint = lattice.data[ui.highlighted()];
-
         ui.infoBox.innerHTML +="<text class=green>Focused node id: #"+ui.highlighted()+"</text></br>";
         ui.infoBox.innerHTML += "name: "+datapoint.name+"</br>";
         ui.infoBox.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
@@ -235,15 +225,15 @@ const Renderer = function () {
               ui.infoBox.innerHTML += "</br>&emsp;" +force.name + "</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+lattice.data[force.params[2]].name+")"+"</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Physics.Vector.norm(Physics.Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) ).toFixed(2)+"</br>"
+              ui.infoBox.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Vector.norm(Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) ).toFixed(2)+"</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
             }
 
             if(force.name=="valenceAngle")
             {
-              const ba = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[2]].ri);
-              const bc = Physics.Vector.sub(datapoint.ri,lattice.data[force.params[3]].ri);
-              const abc = Physics.Vector.angle(ba, bc);
+              const ba = Vector.sub(datapoint.ri,lattice.data[force.params[2]].ri);
+              const bc = Vector.sub(datapoint.ri,lattice.data[force.params[3]].ri);
+              const abc = Vector.angle(ba, bc);
 
               ui.infoBox.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
               ui.infoBox.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
@@ -256,8 +246,8 @@ const Renderer = function () {
         }
       }
 
-      if(ui.infoBox.getBoundingClientRect().height>document.getElementById("sim").getBoundingClientRect().height){
-        ui.infoBox.style.height = document.getElementById("sim").style.height;
+      if(ui.infoBox.getBoundingClientRect().height>document.getElementById("control").getBoundingClientRect().height/2){
+        ui.infoBox.style.height = document.getElementById("control").style.height/2;
       } else {
         ui.infoBox.style.height = "auto";
       }
@@ -320,7 +310,7 @@ const Renderer = function () {
          ctx.fill();
          ctx.stroke();
 
-         if(lattice.showEdges())
+         if(lattice && lattice.showingEdges())
          {
            n.forces.forEach((force) => {
              if(force.name=="spring"){

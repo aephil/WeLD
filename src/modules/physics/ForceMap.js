@@ -21,14 +21,14 @@ should simply calculate the force and return it.
 
 import Vector from './Vector.js';
 
-export const testForce = function(d, data, params) {
+export const testForce = function(d, lattice, params) {
             // just for testing purposes
             return [[d.id, { x: 100, y: 100, z: 0 }]]
         };
 
-export const spring = function(d, data, params) {
+export const spring = function(d, lattice, params) {
             const [k, nodesLen, neighbourIndex] = params;
-            const d2 = data[neighbourIndex];
+            const d2 = lattice.data[neighbourIndex];
 
             const dx = d.ri.x - d2.ri.x;
             const dy = d.ri.y - d2.ri.y;
@@ -40,20 +40,24 @@ export const spring = function(d, data, params) {
             const equilibrium = Vector.scale(nodesLen, unitSeparation);
             const extension = Vector.sub(separation, equilibrium);
 
-            const fx = -k * extension.x;
-            const fy = -k * extension.y;
-            const fz = -k * extension.z;
+            const fx = -2 * k * extension.x;
+            const fy = -2 * k * extension.y;
+            const fz = -2 * k * extension.z;
+            const force = {x: fx, y: fy, z: fz};
 
-            //debugging
-
-            return [[d.id, { x: fx, y: fy, z: fz }]]
+            // We return only the potential on one atom,
+            // we are only returning the force on one atom.
+            // Since the potential on both atoms is the same,
+            // we can just return half the potential of the sytem
+            const potential = k / 2 * Vector.norm(extension) ** 2;
+            return [[d.id, force, potential]]
         };
 
-export const valenceAngle = function(d, data, params) {
+export const valenceAngle = function(d, lattice, params) {
             const [k, eqAngle, index1, index2] = params;
-            const a = data[index1].ri;
+            const a = lattice.data[index1].ri;
             const b = d.ri; //central node
-            const c = data[index2].ri;
+            const c = lattice.data[index2].ri;
 
             const ba = Vector.sub(a, b);
             const bc = Vector.sub(c, b);
@@ -77,10 +81,10 @@ export const valenceAngle = function(d, data, params) {
             return [[index1, fa], [d.id, fb], [index2, fc]];
         };
 
-export const lennardJones = function(d, data, params) {
+export const lennardJones = function(d, lattice, params) {
             const [epsilon, sigma, neighbourIndex] = params;
             const a = d;
-            const b = data[neighbourIndex];
+            const b = lattice.data[neighbourIndex];
             const ba = Vector.sub(a.ri, b.ri);
             const r = Vector.norm(ba);
             const u = Vector.normalise(ba);
