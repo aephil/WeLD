@@ -88,18 +88,15 @@ function debugQuantities(lattice) {
         ui.logDebug(`mean kinetic energy: ${meanKE}`);
         ui.logDebug(`mean potential energy: ${meanPE}`);
        
-        let KE = lattice.quantities[0].value;
-        let PE = lattice.quantities[1].value;
-
-        ui.logDebug(`total energy: ${KE+PE}`);
-
-        ui.logDebug('--------------------');
         const KE = lattice.quantities[0].value;
         const PE = lattice.quantities[1].value;
         const TE = KE + PE;
         ui.logDebug(`Kinetic energy: ${KE}`);
         ui.logDebug(`Potential energy: ${PE}`);
         ui.logDebug(`Total energy: ${TE}`);
+
+        ui.logDebug('--------------------');
+
     }
     i += 1;
 }
