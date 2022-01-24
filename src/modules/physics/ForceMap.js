@@ -101,7 +101,11 @@ export const lennardJones = function(d, lattice, params) {
             const fa = Vector.scale(faMagnitude, u);
             const fb = Vector.scale(-1, fa);
 
-            return [[a.id, fa], [b.id, fb]];
+            const potential = 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
+
+    return [
+        [a.id, fa, potential / 2],
+        [b.id, fb], potential / 2];
         }
 export const forceMap = {
             "testForce": testForce,
