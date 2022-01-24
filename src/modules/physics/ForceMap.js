@@ -23,7 +23,9 @@ import Vector from './Vector.js';
 
 export const testForce = function(d, lattice, params) {
             // just for testing purposes
-            return [[d.id, { x: 100, y: 100, z: 0 }]]
+            const force = { x: 100, y: 100, z: 0 };
+            const potential = -100 * d.ri.x - 100 * d.ri.y;
+            return [[d.id, force, potential]]
         };
 
 export const spring = function(d, lattice, params) {
