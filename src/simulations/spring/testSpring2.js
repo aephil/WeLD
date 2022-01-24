@@ -1,5 +1,10 @@
 import Physics from '../../namespaces/Physics.js';
 import Graphics from '../../namespaces/Graphics.js';
+import {
+    KineticEnergy,
+    PotentialEnergy,
+    calculateQuantities
+} from '../../modules/physics/quantities.js';
 
 const edgeLen = 20;
 
@@ -10,9 +15,6 @@ const lattice = Physics.lattice;
 lattice.setUI(ui);
 lattice.setShowEdges(true);
 
-ui.setData(lattice.data);
-
-// Spring neighbour predicate
 const springPredicate = (d1, d2) => {
 if (d1.id === d2.id) return false;
 
@@ -40,13 +42,31 @@ springPredicate // depending on the predicate sets the neighbour in params.
 
 ui.setData(lattice.data);
 
+let i = 0;
+function debug() {
+    if (i % 100 == 0) {
+        ui.clearTerminal();
+        const KE = lattice.quantities[0].value;
+        const PE = lattice.quantities[1].value;
+        const TE = KE + PE;
+        console.log(lattice);
+        ui.logDebug(`Kinetic energy: ${KE}`);
+        ui.logDebug(`Potential energy: ${PE}`);
+        ui.logDebug(`Total energy: ${TE}`);
+    }
+    i += 1;
+}
 
+
+lattice.setQuantities([
+    new KineticEnergy(),
+    new PotentialEnergy()
+])
 
 // TESTING: push the first node in the x direction to simulate an initial Extension
-lattice.data[0].ri.x += 0;
 
 const verletController = Physics.verlet;
-const updates = [verletController.integrationStep]
+const updates = [verletController.integrationStep, calculateQuantities]
 const nodeUpdates = [];
 
 const renderer = Graphics.renderer;
@@ -54,6 +74,7 @@ const renderer = Graphics.renderer;
 renderer.setUI(ui);
 renderer.setUpdates(updates);
 renderer.setNodeUpdates(nodeUpdates);
+renderer.setDebug(debug);
 renderer.setLattice(lattice);
 renderer.setFPS(30);
 renderer.setSpeed(1000);
