@@ -70,17 +70,23 @@ export const valenceAngle = function(d, lattice, params) {
             const pa = Vector.normalise(Vector.cross(ba, Vector.cross(ba, bc)));
             const pc = Vector.normalise(Vector.cross(cb, Vector.cross(ba, bc)));
 
-            let faFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(ba));
+            let faFactor = (-2) * k * (abc - eqAngle) / (Vector.norm(ba));
             faFactor = (isNaN(faFactor) ? 0 : faFactor);
 
             const fa = Vector.scale(faFactor, pa);
 
-            let fcFactor = (-1) * k * (abc - eqAngle) / (Vector.norm(bc));
+            let fcFactor = (-2) * k * (abc - eqAngle) / (Vector.norm(bc));
             fcFactor = (isNaN(fcFactor) ? 0 : fcFactor);
 
             const fc = Vector.scale(fcFactor, pc);
             const fb = Vector.scale(-1, Vector.add(fa, fc));
-            return [[index1, fa], [d.id, fb], [index2, fc]];
+
+            const potential = k * (abc - eqAngle) ** 2;
+
+    return [
+        [index1, fa, potential / 3],
+        [d.id, fb, potential /3],
+        [index2, fc, potential /3]];
         };
 
 export const lennardJones = function(d, lattice, params) {
