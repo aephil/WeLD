@@ -105,7 +105,8 @@ export const lennardJones = function(d, lattice, params) {
 
     return [
         [a.id, fa, potential / 2],
-        [b.id, fb], potential / 2];
+        [b.id, fb, potential / 2]
+    ];
         }
 export const forceMap = {
             "testForce": testForce,
