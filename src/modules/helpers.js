@@ -1,4 +1,10 @@
 // helper functions
+export const meanOf = function(arr) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    const mean = (sum / arr.length) || 0;
+    return mean;
+}
+
 export const centreToScreenY = function(y, worldHeight=1000){
     return (worldHeight/2) - y;
 }

@@ -30,7 +30,6 @@ const springPredicate = (d1, d2) => {
     return distanceSquared <= edgeLen ** 2;
 }
 
-
 lattice.makePrimitive3D(2, 1, 1, edgeLen);
 
 const k = 1;
@@ -46,18 +45,10 @@ lattice.setInterAtomicForces(
 
 ui.setData(lattice.data);
 
-
-
 // TESTING: push the first node in the x direction to simulate an initial Extension
 lattice.data[0].ri.x += 10;
 
-const initialSeparation = edgeLen - Physics.Vector.norm(Physics.Vector.sub(lattice.data[1].ri, lattice.data[0].ri));
 
-// Define a function called debug here (must have
-// that exact name)
-// This function will get called every frame. The
-// example function below will console log the frame number
-// every 1000 frames
 let i = 0;
 let min = 100000
 let max = 0
@@ -103,45 +94,13 @@ function debugQuantities(lattice) {
         ui.logDebug(`total energy: ${KE+PE}`);
 
         ui.logDebug('--------------------');
-    } else {
-
-        let KE = lattice.quantities[0].value;
-        let PE = lattice.quantities[1].value;
-
-        kineticEnergySamples.push(KE);
-        potentialEnergySamples.push(PE);
-
-
-        // seperation sampling //////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////
-        const a = lattice.data[0].ri
-        const b = lattice.data[1].ri
-        const displacement = Physics.Vector.sub(b, a)
-        const separation = Physics.Vector.norm(displacement)
-        separationSamples.push(separation);
-
-        // prevent samples from getting too big
-        // (they will all be the same length)
-        if (separationSamples.length>5000)
-        {
-
-            ui.logDebug("resetting samples");
-            separationSamples = [];
-            kineticEnergySamples = [];
-            potentialEnergySamples = [];
-        }
-
-        if (separation > max) {
-            max = separation;
-        }
-        if (separation < min) {
-            min = separation;
-        }
-
-        range = max - min;
+        const KE = lattice.quantities[0].value;
+        const PE = lattice.quantities[1].value;
+        const TE = KE + PE;
+        ui.logDebug(`Kinetic energy: ${KE}`);
+        ui.logDebug(`Potential energy: ${PE}`);
+        ui.logDebug(`Total energy: ${TE}`);
     }
-
     i += 1;
 }
 
