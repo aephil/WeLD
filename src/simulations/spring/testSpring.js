@@ -62,9 +62,9 @@ let i = 0;
 let min = 100000
 let max = 0
 
-const separationSamples = [];
-const kineticEnergySamples = [];
-const potentialEnergySamples = [];
+var separationSamples = [];
+var kineticEnergySamples = [];
+var potentialEnergySamples = [];
 
 var meanSeparation = 0; 
 var meanKE = 0;
@@ -94,12 +94,13 @@ function debugQuantities(lattice) {
         ui.logDebug(`mean separation: ${meanSeparation}`);
 
         // energies /////////////////////////////////////////////////
-        let avgTE = meanKE + meanPE;
-        ui.logDebug(`mean kinetic energy: ${avgTE}`);
-        ui.logDebug(`mean potential energy: ${avgTE}`);
-        ui.logDebug(`mean total energy: ${avgTE}`);
+        ui.logDebug(`mean kinetic energy: ${meanKE}`);
+        ui.logDebug(`mean potential energy: ${meanPE}`);
+       
+        let KE = lattice.quantities[0].value;
+        let PE = lattice.quantities[1].value;
 
-
+        ui.logDebug(`total energy: ${KE+PE}`);
 
         ui.logDebug('--------------------');
     } else {

@@ -46,7 +46,7 @@ export const spring = function(d, lattice, params) {
             const force = {x: fx, y: fy, z: fz};
             //debugging
 
-            const potential = k * Vector.norm(extension) ** 2;
+            const potential = 0.5 * k * Vector.norm(extension) ** 2;
             return [[d.id, force, potential]]
         };
 

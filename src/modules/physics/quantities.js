@@ -33,8 +33,7 @@ export class PotentialEnergy {
     calculate(lattice) {
         let PE = 0;
         lattice.data.forEach(d => {
-            const nodePE = d.m * d.potential;
-            PE += nodePE;
+            PE += d.potential;
         })
         return PE;
     }
