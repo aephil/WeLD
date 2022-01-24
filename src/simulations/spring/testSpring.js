@@ -50,18 +50,6 @@ lattice.data[0].ri.x += 10;
 
 
 let i = 0;
-let min = 100000
-let max = 0
-
-var separationSamples = [];
-var kineticEnergySamples = [];
-var potentialEnergySamples = [];
-
-var meanSeparation = 0; 
-var meanKE = 0;
-var meanPE = 0;
-var range = 0;
-
 function meanOf(arr) {
     const sum = arr.reduce((a, b) => a + b, 0);
     const mean = (sum / arr.length) || 0;
@@ -70,24 +58,12 @@ function meanOf(arr) {
 
 function debugQuantities(lattice) {
     if (i % 100 === 0) {
+
         ui.clearTerminal();
-
-        meanSeparation = meanOf(separationSamples);
-        meanKE = meanOf(kineticEnergySamples);
-        meanPE = meanOf(potentialEnergySamples);
-
         ui.logDebug('----------------------')
 
-        // separation ////////////////////////////////////////////////
-
-        ui.logDebug(`sample size: ${separationSamples.length}`);
-        ui.logDebug(`Range: ${range}`);
-        ui.logDebug(`mean separation: ${meanSeparation}`);
-
         // energies /////////////////////////////////////////////////
-        ui.logDebug(`mean kinetic energy: ${meanKE}`);
-        ui.logDebug(`mean potential energy: ${meanPE}`);
-       
+
         const KE = lattice.quantities[0].value;
         const PE = lattice.quantities[1].value;
         const TE = KE + PE;
