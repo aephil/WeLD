@@ -44,9 +44,12 @@ export const spring = function(d, lattice, params) {
             const fy = -2 * k * extension.y;
             const fz = -2 * k * extension.z;
             const force = {x: fx, y: fy, z: fz};
-            //debugging
 
-            const potential = k * Vector.norm(extension) ** 2;
+            // We return only the potential on one atom,
+            // we are only returning the force on one atom.
+            // Since the potential on both atoms is the same,
+            // we can just return half the potential of the sytem
+            const potential = k / 2 * Vector.norm(extension) ** 2;
             return [[d.id, force, potential]]
         };
 
