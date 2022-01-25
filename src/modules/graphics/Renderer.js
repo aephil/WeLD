@@ -133,20 +133,21 @@ const Renderer = function () {
     let freq = 1 // do physics updates at this rate in seconds^-1
     let updateCounter = 0;
     let highlighted = false;
+    let pause = false;
 
     document.addEventListener("visibilitychange", event => {
       if (document.visibilityState == "visible") {
-        ui.logWarning("starting live fps counter")
-      } else {
-        ui.logWarning("page was inactive, restarting fps counter");
-        // restart the clock and frame counter
+        pause = false;
         start = performance.now();
         frames = 0;
+      } else {
+        pause = true;
       }
     })
 
 
     let lattice = false;
+    
     let nodeUpdates;
     let updates = [];
     let debug;
@@ -369,31 +370,33 @@ const Renderer = function () {
          defaultDrawCall();
        }
    }
-    const animate = function(){
-      const end = performance.now();
-      elapsed = (end - start)/1000;
+    const animate = function()
+    {
+      if (!pause) 
+      {
+        const end = performance.now();
+        elapsed = (end - start)/1000;
 
-      if(elapsed > (1/freq* updateCounter)){
-        update();
-        updateCounter++;
-      }
-      requestAnimationFrame(animate);
-     if (elapsed > frames * (1/fps))
-     {
-       drawInfo();
-       drawToolTip();
-       redraw();
-       if (probe) {
-          ui.drawChart(samples1, 'red', 0);
-          ui.drawChart(samples2, 'blue', 0, true);
-          ui.drawChart(samples3, 'green', 0, true);
-          probeCounter++;
+        if(elapsed > (1/freq* updateCounter)){
+          update();
+          updateCounter++;
         }
-       frames++;
-     }
-
-
-   }
+        requestAnimationFrame(animate);
+        if (elapsed > frames * (1/fps))
+        {
+          drawInfo();
+          drawToolTip();
+          redraw();
+          if (probe) {
+              ui.drawChart(samples1, 'red', 0);
+              ui.drawChart(samples2, 'blue', 0, true);
+              ui.drawChart(samples3, 'green', 0, true);
+              probeCounter++;
+            }
+          frames++;
+        }
+      }
+    }
 
   return this;
 };
