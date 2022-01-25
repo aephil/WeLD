@@ -8,13 +8,13 @@ const Renderer = function () {
     freq = n;
     if(ui)
     {
-      ui.log("frequency set to "+n +" updates/s")
+      ui.terminal.log("frequency set to "+n +" updates/s")
     }
   };
   this.setFPS = function(n){
     fps = n;
     if(ui){
-      ui.log("fps set to "+ui.colouredText(n,"blue"))
+      ui.terminal.log("fps set to "+ui.colouredText(n,"blue"))
     }
   };
   this.render = function(){
@@ -24,6 +24,20 @@ const Renderer = function () {
   this.setLattice = function(l){
 
     lattice = l
+    // inspect lattice settings
+    if (this.ui) 
+    {
+      this.ui.terminal.log("loaded " + this.ui.colouredText(lattice.name, "blue")
+       + " lattice data with " + this.ui.colouredText(this.sizeX, "blue")
+        + " x " + this.ui.colouredText(this.sizeY, "blue")
+         + " x " + this.ui.colouredText(this.sizeY, "blue")
+          + " unit cells. Total of " + this.ui.colouredText(this.data.length, "blue")
+           + " nodes.");
+
+        if(lattice.showEdges){
+          this.ui.terminal.logWarning("enabling edges may cause a significant hit to the frame rate.");
+        }
+      }
   }
   //this.setCanvas = function(c){
   //  ui.canvas = c
@@ -93,7 +107,7 @@ const Renderer = function () {
 
       if(active.length!=0)
       {
-        ui.highlight(active[0].id)
+        ui.highlight(active[0].id, lattice.data)
       }
     }, false)
 
@@ -138,7 +152,7 @@ const Renderer = function () {
     document.addEventListener("visibilitychange", event => {
       if (document.visibilityState == "visible") {
         pause = false;
-        start = performance.now();
+        start = performance.now()-500; // add small delay from end.
         frames = 0;
       } else {
         pause = true;
@@ -168,9 +182,9 @@ const Renderer = function () {
 
     const cameraView = function(pos){
 
-      if(ui.highlighted()!==false)
+      if(ui.highlighted!==false)
       {
-        const origin = Vector.scale(-1,lattice.data[ui.highlighted()].ri);
+        const origin = Vector.scale(-1,lattice.data[ui.highlighted].ri);
         const translated = Vector.translate(pos ,origin);
         return rotY(rotX(translated,theta),rho)
       }
@@ -241,9 +255,9 @@ const Renderer = function () {
       }
       ui.textInfo.innerHTML += "fps: " + fpsDisplay + "</br>";
 
-      if(ui.highlighted()!==false)
+      if(ui.highlighted!==false)
       {
-        const datapoint = lattice.data[ui.highlighted()];
+        const datapoint = lattice.data[ui.highlighted];
         ui.textInfo.innerHTML +="<text class=green>Focused node id: #"+ui.highlighted()+"</text></br>";
         ui.textInfo.innerHTML += "name: "+datapoint.name+"</br>";
         ui.textInfo.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";

@@ -13,10 +13,7 @@ const ui = Graphics.userInterface;
 ui.loadBasic(); // loads divs for simulation, control and terminal, and initialises the terminal
 
 const lattice = Physics.lattice;
-lattice.setUI(ui);
 lattice.setShowEdges(true);
-
-ui.setData(lattice.data);
 
 // Spring neighbour predicate
 const springPredicate = (d1, d2) => {
@@ -42,8 +39,6 @@ lattice.setInterAtomicForces(
     },
     springPredicate // depending on the predicate sets the neighbour in params.
 );
-
-ui.setData(lattice.data);
 
 // TESTING: push the first node in the x direction to simulate an initial Extension
 lattice.data[0].ri.x += 10;
@@ -88,10 +83,11 @@ const nodeUpdates = [];
 const renderer = Graphics.renderer;
 
 renderer.setUI(ui);
+renderer.setLattice(lattice);
 renderer.setUpdates(updates);
 renderer.setNodeUpdates(nodeUpdates);
 //renderer.setDebug(debugQuantities);
-renderer.setLattice(lattice);
+
 renderer.setFPS(30);
 renderer.setSpeed(1000);
 renderer.ui = ui;

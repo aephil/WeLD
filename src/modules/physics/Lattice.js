@@ -2,7 +2,10 @@ import { randomNumber } from '../helpers.js';
 
 class Lattice {
     constructor() {
-        this.ui = false;
+        this.name;
+        this.sizeX;
+        this.sizeY;
+        this.sizeZ;
         this.predicate = false;
         this.showEdges = false;
         this.data = [];
@@ -15,17 +18,9 @@ class Lattice {
     };
 
     setShowEdges(bool) {
-        if (bool && this.ui) {
-            this.ui.logWarning("enabling edges may cause a significant hit to the frame rate.");
-        }
         this.showEdges = bool;
     };
 
-
-    setUI(x) {
-        // typescript to check type maybe?
-        this.ui = x;
-    };
     setQuantities(quantities) {
         this.quantities = quantities;
     };
@@ -126,17 +121,16 @@ class Lattice {
             }
         }
 
-
-        if (this.ui) {
-            this.ui.log("loaded" + this.ui.colouredText(" Face-Centred Cubic ", "blue") + "lattice data with " + this.ui.colouredText(cellsX, "blue") + " x " + this.ui.colouredText(cellsY, "blue") + " x " + this.ui.colouredText(cellsZ, "blue") + " unit cells. Total of " + this.ui.colouredText(this.data.length, "blue") + " nodes.");
-        }
+        this.name = "Face-Centred Cubic";
+        this.sizeX = cellsX;
+        this.sizeY = cellsY;
+        this.sizeZ = cellsZ;
     };
 
     // creates a free-particle lattice
     makePrimitive3D(cellsX, cellsY, cellsZ, a) {
         this.a = a;
         this.data = [];
-        const nodes = [];
         let counter = 0;
         for (let h = 0; h < cellsZ; h++) {
             for (let i = 0; i < cellsX; i++) {
@@ -172,9 +166,11 @@ class Lattice {
             }
         }
 
-        if (this.ui) {
-            this.ui.log("loaded" + this.ui.colouredText(" Primitive Cubic ", "blue") + "lattice data with " + this.ui.colouredText(cellsX, "blue") + " x " + this.ui.colouredText(cellsY, "blue") + " x " + this.ui.colouredText(cellsZ, "blue") + " unit cells. Total of " + this.ui.colouredText(this.data.length, "blue") + " nodes.");
-        }
+        this.name = "Primitive Cubic";
+        this.sizeX = cellsX;
+        this.sizeY = cellsY;
+        this.sizeZ = cellsZ;
+
     };
 
     makePerovskite3D(cellsX, cellsY, cellsZ, a, sim) {
@@ -330,10 +326,11 @@ class Lattice {
             }
         }
 
-        // create bonds based on a given predicate
-        if (this.ui) {
-            this.ui.log("loaded" + this.ui.colouredText(" Perovskite Cubic ", "blue") + "lattice data with " + this.ui.colouredText(cellsX, "blue") + " x " + this.ui.colouredText(cellsY, "blue") + " x " + this.ui.colouredText(cellsZ, "blue") + " unit cells. Total of " + this.ui.colouredText(this.data.length, "blue") + " nodes.");
-        }
+        this.name = "Perovskite Cubic";
+        this.sizeX = cellsX;
+        this.sizeY = cellsY;
+        this.sizeZ = cellsZ;
+        
 
     };
 
