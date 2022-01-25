@@ -150,6 +150,12 @@ const Renderer = function () {
     let nodeUpdates;
     let updates = [];
     let debug;
+    let probe = true;
+    let probeCounter = 0;
+    let probesPerSecond = 3;
+    let samples1 = [];
+    let samples2 = [];
+    let samples3 = [];
     let mouseX = 0;
     let mouseY = 0;
     let dragStartX = 0;
@@ -185,12 +191,30 @@ const Renderer = function () {
         debug(lattice);
       }
 
+      if (probe) { 
+    
+        if (samples1.length>200) {
+          samples1.shift();
+        }
+        if (samples2.length>200) {
+          samples2.shift();
+        }
+        if (samples3.length>200) {
+          samples3.shift();
+        }
 
+        const KE = lattice.quantities[0].value;
+        const PE = lattice.quantities[1].value;
+        samples1.push(KE);
+        samples2.push(PE);
+        samples3.push(KE+PE);
+        
+      }
     }
     const drawInfo = function(){
 
-      ui.infoBox.innerHTML = "rho: " + parseFloat(rho).toFixed(2) +"</br> "
-      ui.infoBox.innerHTML += "theta: " + parseFloat(theta).toFixed(2) + "</br>";
+      ui.textInfo.innerHTML = "rho: " + parseFloat(rho).toFixed(2) +"</br> "
+      ui.textInfo.innerHTML += "theta: " + parseFloat(theta).toFixed(2) + "</br>";
       const realFPS = (frames / elapsed).toFixed(2);
       const fpsRatio = (realFPS/fps)
       let fpsDisplay;
@@ -201,32 +225,32 @@ const Renderer = function () {
       } else {
         fpsDisplay = "<text class='red'>"+realFPS+"</text>"
       }
-      ui.infoBox.innerHTML += "fps: " + fpsDisplay + "</br>";
+      ui.textInfo.innerHTML += "fps: " + fpsDisplay + "</br>";
 
       if(ui.highlighted()!==false)
       {
         const datapoint = lattice.data[ui.highlighted()];
-        ui.infoBox.innerHTML +="<text class=green>Focused node id: #"+ui.highlighted()+"</text></br>";
-        ui.infoBox.innerHTML += "name: "+datapoint.name+"</br>";
-        ui.infoBox.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
-        ui.infoBox.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
-        ui.infoBox.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
+        ui.textInfo.innerHTML +="<text class=green>Focused node id: #"+ui.highlighted()+"</text></br>";
+        ui.textInfo.innerHTML += "name: "+datapoint.name+"</br>";
+        ui.textInfo.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
+        ui.textInfo.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
+        ui.textInfo.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
         const forces = datapoint.forces;
         if(Array.isArray(forces) && forces.length)
         {
-          ui.infoBox.innerHTML += "force(s): (<text class=green>" + forces.length + "</text>) total"
+          ui.textInfo.innerHTML += "force(s): (<text class=green>" + forces.length + "</text>) total"
           for(let i = 0; i<forces.length; i++)
           {
             const force = forces[i];
 
             if(force.name=="spring")
             {
-              ui.infoBox.innerHTML += "</br>&emsp;" +force.name + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+lattice.data[force.params[2]].name+")"+"</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Vector.norm(Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) ).toFixed(2)+"</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+              ui.textInfo.innerHTML += "</br>&emsp;" +force.name + "</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+lattice.data[force.params[2]].name+")"+"</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Vector.norm(Vector.sub(datapoint.ri, lattice.data[force.params[2]].ri)) ).toFixed(2)+"</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
             }
 
             if(force.name=="valenceAngle")
@@ -235,21 +259,15 @@ const Renderer = function () {
               const bc = Vector.sub(datapoint.ri,lattice.data[force.params[3]].ri);
               const abc = Vector.angle(ba, bc);
 
-              ui.infoBox.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
+              ui.textInfo.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
               +" ("+lattice.data[force.params[2]].name+")"+", "+force.params[3]+" ("+lattice.data[force.params[3]].name+")"+"</br>";
-              ui.infoBox.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
-              ui.infoBox.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+              ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
             }
           }
         }
-      }
-
-      if(ui.infoBox.getBoundingClientRect().height>document.getElementById("control").getBoundingClientRect().height/2){
-        ui.infoBox.style.height = document.getElementById("control").style.height/2;
-      } else {
-        ui.infoBox.style.height = "auto";
       }
     }
     const drawToolTip = function()
@@ -282,7 +300,7 @@ const Renderer = function () {
       const ctx = ui.canvas.getContext("2d");
       ctx.clearRect(0,0, ui.canvas.width, ui.canvas.height);
 
-       ctx.fillStyle = "cornsilk";
+       ctx.fillStyle = "white";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
        // need to copy and reorder ids for sorting draw order
@@ -352,8 +370,16 @@ const Renderer = function () {
        drawInfo();
        drawToolTip();
        redraw();
+       if (probe) {
+          ui.drawChart(samples1, 'red', 0);
+          ui.drawChart(samples2, 'blue', 0, true);
+          ui.drawChart(samples3, 'green', 0, true);
+          probeCounter++;
+        }
        frames++;
      }
+
+
    }
 
   return this;

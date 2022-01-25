@@ -133,7 +133,12 @@ const UserInterface = function()
   let input = "";
 
   this.canvas = false;
+  this.chart = false;
+  this.chartDesc = false;
+
   this.infoBox;
+  this.textInfo;
+  this.graphicInfo;
   let control = false;
 
   const updateScroll = function(){
@@ -365,17 +370,16 @@ const UserInterface = function()
     control.style.fontFamily = "monospace";
     control.style.overflowX = "hidden";
     control.style.overflowY = "hidden";
-    
+
     const terminal = document.createElement("div");
     control.appendChild(terminal);
     terminal.setAttribute("tabindex","0");
     terminal.setAttribute("id","terminal");
     terminal.innerHTML = output + "User: " + input + "<";
-    terminal.style.position = "relative";
-    terminal.style.top = "0%";
+    terminal.style.position = "static";
     terminal.style.right = "0%";
     terminal.style.width = "100%";
-    terminal.style.height = "33%";
+    terminal.style.height = "33.333%";
     terminal.style.color = "rgb(173,172,173)";
     terminal.style.padding = "2.5px";
     terminal.style.fontFamily = "monospace";
@@ -390,24 +394,76 @@ const UserInterface = function()
         terminal.style.color = "rgb(173,172,173)";
     });
     initTerminal(terminal);
+    sim.focus();
+    
 
+    
     this.infoBox = document.createElement("div");
+    control.appendChild(this.infoBox);
     this.infoBox.setAttribute("id", "infoBox");
-    this.infoBox.style.position = "relative";
+    this.infoBox.style.position = "static";
     this.infoBox.style.padding = "2.5px";
     this.infoBox.style.backgroundColor = "rgba(0,0,0,0.7)";
     this.infoBox.style.width = "100%";
-    this.infoBox.style.top = "0%";
-    this.infoBox.style.height = "30";
+    this.infoBox.style.height = "33.333%";
     this.infoBox.style.color = "rgb(173,172,173)";
     this.infoBox.style.zIndex = document.getElementById("control").style.zIndex + 1;
     this.infoBox.style.overflowX = "hidden";
     this.infoBox.style.overflowY = "scroll";
-    control.appendChild(this.infoBox);
+    
+    this.textInfo = document.createElement("div");
+    this.infoBox.appendChild(this.textInfo);
+    this.textInfo.setAttribute("id", "textInfo");
+    this.textInfo.style.position = "static";
+    this.textInfo.style.width = "100%";
+    this.textInfo.style.height = "50%";
+    this.textInfo.style.overflowX = "hidden";
+    this.textInfo.style.overflowY = "auto";
 
-    sim.focus();
+    this.graphicInfo = document.createElement("div");
+    this.infoBox.appendChild(this.graphicInfo);
+    this.graphicInfo.setAttribute("id", "graphicInfo");
+    this.graphicInfo.style.position = "static";
+    this.graphicInfo.style.top = 0;
+    this.graphicInfo.style.width = "100%";
+    this.graphicInfo.style.height = "50%";
+    this.graphicInfo.style.overflowX = "hidden";
+    this.graphicInfo.style.overflowY = "hidden";
 
+    this.chart = document.createElement("canvas");
+    this.graphicInfo.appendChild(this.chart);
+    this.chart.style.position = "static";
+    this.chart.style.bottom = 0;
+    this.chart.width = this.graphicInfo.clientWidth / 2;
+    this.chart.height = this.graphicInfo.clientHeight;
+    this.chart.id = "chart";
+    this.chart.style.cursor= "crosshair";
+    this.drawChart([], 0);
+    this.drawChart([], 1);
+    
+    this.chartDesc = document.createElement("div");
+    this.graphicInfo.appendChild(this.chartDesc);
+    this.chartDesc.setAttribute("id", "chartDesc");
+    this.chartDesc.style.position = "static";
+    this.chartDesc.style.top = "0%";
+    this.chartDesc.style.display = "inline-block";
+    this.chartDesc.style.verticalAlign = "top";
+    this.chartDesc.style.textAlign = "right";
+    this.chartDesc.style.right = "0%";
+    this.chartDesc.style.width = "49%";
+    this.chartDesc.style.height = "100%"
+
+    this.chartDesc.innerHTML =
+    `
+    <p>
+    <text class="red">Kinetic Energy</text><br>
+    <text class="blue">Potential Energy</text><br>
+    <text class="green">Total Energy</text><br>
+    </p>
+    `
+    
   }
+
   this.slider = function(min=0, max=100, step=1){
 
     const container = document.createElement("div");
@@ -431,6 +487,92 @@ const UserInterface = function()
     container.appendChild(label);
 
       return [container, slider, label];
+  }
+
+   this.drawChart = function(dataArr, col='black', pos=0, onto=false, div=1)
+  {
+    var canvas = document.getElementById( "chart" );  
+    var context = canvas.getContext( "2d" );
+    
+    var GRAPH_HEIGHT = (this.chart.clientHeight / div) - 5;
+    var GRAPH_TOP = 5 + (pos * GRAPH_HEIGHT);  
+    var GRAPH_BOTTOM = 375;  
+    var GRAPH_LEFT = 5;  
+    var GRAPH_RIGHT = 475;  
+  
+    var GRAPH_WIDTH = this.chart.clientWidth;  
+    var arrayLen = dataArr.length;  
+  
+    var largest = 0;  
+    for( var i = 0; i < arrayLen; i++ ){  
+        if( dataArr[ i ] > largest ){  
+            largest = dataArr[ i ];  
+        }  
+    }  
+  
+    if (!onto) {
+      context.clearRect( 0, 0, 500, 400 );  
+    }
+    // set font for fillText()  
+    context.font = "16px Arial";  
+       
+    // draw X and Y axis  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, GRAPH_BOTTOM );  
+    context.lineTo( GRAPH_RIGHT, GRAPH_BOTTOM );  
+    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );  
+    context.stroke();
+       
+    // draw reference line  
+    context.beginPath();  
+    context.strokeStyle = "#BBB";  
+    context.moveTo( GRAPH_LEFT, GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest, GRAPH_RIGHT + 15, GRAPH_TOP);  
+    context.stroke();  
+   
+    // draw reference line  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest / 4, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP);  
+    context.stroke();  
+   
+    // draw reference line  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest / 2, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP);  
+    context.stroke();  
+   
+    // draw reference line  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest / 4 * 3, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP);  
+    context.stroke();  
+  
+    // draw titles  
+    context.fillText( "Day of the week", GRAPH_RIGHT / 3, GRAPH_BOTTOM + 50);  
+    context.fillText( "Hours", GRAPH_RIGHT + 30, GRAPH_HEIGHT / 2);  
+  
+    context.beginPath();  
+    context.lineJoin = "round";  
+    context.strokeStyle = col;  
+  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ 0 ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );  
+    // draw reference value for day of the week  
+    context.fillText( "1", 15, GRAPH_BOTTOM + 25);  
+    for( var i = 1; i < arrayLen; i++ ){  
+        context.lineTo( GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ i ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );  
+        // draw reference value for day of the week  
+        context.fillText( ( i + 1 ), GRAPH_RIGHT / arrayLen * i, GRAPH_BOTTOM + 25);  
+    }  
+    context.stroke();  
   }
 
   return this;

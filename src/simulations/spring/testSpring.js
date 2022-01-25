@@ -70,8 +70,7 @@ function debugQuantities(lattice) {
         ui.logDebug(`Kinetic energy: ${KE}`);
         ui.logDebug(`Potential energy: ${PE}`);
         ui.logDebug(`Total energy: ${TE}`);
-
-        ui.logDebug('--------------------');
+        ui.logDebug('----------------------');
 
     }
     i += 1;
