@@ -74,7 +74,7 @@ const renderer = Graphics.renderer;
 renderer.setUI(ui);
 renderer.setUpdates(updates);
 renderer.setNodeUpdates(nodeUpdates);
-renderer.setDebug(debug);
+//renderer.setDebug(debug);
 renderer.setLattice(lattice);
 renderer.setFPS(30);
 renderer.setSpeed(1000);

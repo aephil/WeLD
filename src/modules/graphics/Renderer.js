@@ -129,8 +129,8 @@ const Renderer = function () {
     let theta = 0
     let rhoLast = 0
     let thetaLast = 0
-    let fps = 30
-    let freq = 1 // in seconds^-1
+    let fps = 30 // framerate for drawing graphics
+    let freq = 1 // do physics updates at this rate in seconds^-1
     let updateCounter = 0;
     let highlighted = false;
 
@@ -152,7 +152,8 @@ const Renderer = function () {
     let debug;
     let probe = true;
     let probeCounter = 0;
-    let probesPerSecond = 3;
+    let sampleSize = 300;
+    let probeRate = 100;
     let samples1 = [];
     let samples2 = [];
     let samples3 = [];
@@ -193,13 +194,13 @@ const Renderer = function () {
 
       if (probe) { 
     
-        if (samples1.length>200) {
+        if (samples1.length>sampleSize) {
           samples1.shift();
         }
-        if (samples2.length>200) {
+        if (samples2.length>sampleSize) {
           samples2.shift();
         }
-        if (samples3.length>200) {
+        if (samples3.length>sampleSize) {
           samples3.shift();
         }
 
@@ -208,7 +209,19 @@ const Renderer = function () {
         samples1.push(KE);
         samples2.push(PE);
         samples3.push(KE+PE);
-        
+
+        if (probeCounter % probeRate === 0){
+            ui.chartDesc.innerHTML =
+          `
+          <p>
+          <text class="grey">Probing every ${probeRate} updates</text><br>
+          <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
+          <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
+          <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
+          </p>
+          `
+        }
+        probeCounter++;
       }
     }
     const drawInfo = function(){
@@ -300,7 +313,7 @@ const Renderer = function () {
       const ctx = ui.canvas.getContext("2d");
       ctx.clearRect(0,0, ui.canvas.width, ui.canvas.height);
 
-       ctx.fillStyle = "white";
+       ctx.fillStyle = "cornsilk";
        ctx.fillRect(0, 0, ui.canvas.width, ui.canvas.height);
 
        // need to copy and reorder ids for sorting draw order

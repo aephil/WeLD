@@ -451,16 +451,8 @@ const UserInterface = function()
     this.chartDesc.style.textAlign = "right";
     this.chartDesc.style.right = "0%";
     this.chartDesc.style.width = "49%";
-    this.chartDesc.style.height = "100%"
-
-    this.chartDesc.innerHTML =
-    `
-    <p>
-    <text class="red">Kinetic Energy</text><br>
-    <text class="blue">Potential Energy</text><br>
-    <text class="green">Total Energy</text><br>
-    </p>
-    `
+    this.chartDesc.style.height = "100%";
+    this.chartDesc.style.fontSize = "11px";
     
   }
 
