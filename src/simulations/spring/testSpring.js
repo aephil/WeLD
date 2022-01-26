@@ -90,5 +90,4 @@ renderer.setUpdates(updates);
 
 renderer.setFPS(30);
 renderer.setSpeed(1000);
-renderer.ui = ui;
 renderer.render()
