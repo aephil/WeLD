@@ -30,6 +30,5 @@
   "jest": {
     "verbose": true,
     "testRegex": "./tests/*"
-  },
-  "dependencies": {}
+  }
 }

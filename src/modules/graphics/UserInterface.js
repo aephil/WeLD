@@ -1,38 +1,78 @@
 import Vector from '../physics/Vector.js';
+import {colouredText, Data, assert} from '../helpers.js';
 
-const UserInterface = function()
-{
-  const focus = function(args){
+export class Terminal extends Data {
+  // TODO: bind data to terminal
+  constructor(shared) {
+    super(shared);
 
-    if(args.length > 0){
+    this.sharedData.highlighted = false;
+
+    this.commandMap = new Map(
+      [
+        ["focus", this.focusCommand],
+        ["unfocus", this.unfocus],
+        ["centre", this.highlightCommand],
+        ["move", this.moveCommand]
+      ]
+    );
+    this.output = "";
+    this.input = "";
+    this.element = document.createElement("div");
+  }
+
+  focusCommand = (args) => {
+
+    if(args.length > 0)
+    {
       // check input is int
       const selection = args[0];
-      if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
+      if (!isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
       {
-        if(parseInt(selection)<=(data.length -1))
+        if (parseInt(selection)<=(this.sharedData.nodes.length -1))
         {
-          //highlighted = selection;
-          highlight(selection);
-          log("focused node #"+selection);
-        } else {
-          logError("invalid range");
-        }
-      } else {
-              logError("input is not an integer");
+          const datapoint = this.sharedData.nodes[parseInt(selection)];
+          if(datapoint.stroke=="red")
+          {
+            datapoint.stroke="black";
+            this.sharedData.highlighted=false;
+          } 
+          else 
+          {
+            datapoint.stroke = "red";
+            if(this.sharedData.highlighted!==false)
+            {
+              this.sharedData.nodes[this.sharedData.highlighted].stroke = "black";
             }
-  } else if(highlighted!==false) {
+            this.sharedData.highlighted=parseInt(selection);
+            this.log("selected node "+colouredText("#"+selection,"green"))
+          }
+        } 
+        else 
+        {
+          this.logError("invalid range");
+        }
+      } 
+      else 
+      {
+        this.logError("input is not an integer");
+      }
+    } 
+    else if (this.sharedData.highlighted!==false) 
+    {
+      this.log("focused on existing highlighed node.")
+    } 
+    else 
+    {
+      this.logError("no user input or highlighted node.")
+      return;
+    }
 
-    log("focused highlighed node.")
-
-  } else {
-    logError("no user input or highlighted node.")
-    return;
-  }
-    data[highlighted].edgeStroke = "red";
-    data.forEach((node) => {
-      const neighbours = data[highlighted].neighbours;
+    //TODO: neighbours are now stored in forces, check for springs...
+    this.sharedData.nodes.forEach((node) => {
+      const neighbours = this.sharedData.nodes[this.sharedData.highlighted].neighbours;
       let isNeighbour = false;
-
+      debugger;
       for(let i = 0; i < neighbours.length; i++)
       {
         if(node.id === neighbours[i][0])
@@ -43,7 +83,7 @@ const UserInterface = function()
 
       if(node.id != highlighted)
       {
-        data[node.id].showEdges = false;
+        this.sharedData.nodes[node.id].showEdges = false;
 
         if(!isNeighbour){
           node.visible = false;
@@ -55,23 +95,138 @@ const UserInterface = function()
 
   }
 
-  const unfocus = function(){
+  unfocus(){
     data.forEach((node) => {
         node.showEdges = true;
         node.visible = true;
         node.edgeStroke = "black";
     });
+
     log("focus off")
   }
 
-  const highlightCommand = function(args){
+  updateScroll(){
+    this.element.scrollTop = this.element.scrollHeight;
+  }
+
+  initTerminal()
+  {
+
+    this.element.addEventListener("focus", (event) =>{
+      this.element.style.color = "black";
+      this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+    })
+
+    this.element.addEventListener("focusout", (event) => {
+      this.element.style.color = "rgb(173,172,173)";
+    });
+
+    this.element.addEventListener("keydown", (event) => {
+
+      const key = event.keyCode;
+      const char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
+
+      // If the user has pressed enter
+
+      switch (key) {
+        case 32 /*space*/:
+        {
+          this.input+=(this.input.slice(-1)===" "?"":" ");
+          this.element.innerHTML = this.output + "UserIn: " + this.input + "<";;
+          break;
+        }
+        case 13 /*enter*/:
+        {
+          const args = this.input.split(" ");
+          const command = args[0]
+          if(!this.commandMap.has(command))
+          {
+            this.input = "";
+            logError("no such command.")
+            break;
+          } else {
+            const fn = this.commandMap.get(command);
+            fn(args.slice(1));
+            this.input = "";
+            this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+            break;
+          }
+        }
+        case 8/*backspace*/:
+        {
+          if(this.input.length>0)
+          {
+            this.input = this.input.slice(0, -1);
+            this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+          }
+          break;
+        }
+        case 37/*left*/:
+        {
+
+          break;
+        }
+        case 39/*right*/:
+        {
+
+          break;
+        }
+          case 38/*up*/:
+        {
+
+          break;
+        }
+          case 40/*down*/:
+
+            break;
+        default:
+        {
+          this.input += char;
+          this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+        }
+
+      }
+    }, false);
+  }
+
+  clearTerminal(){
+    output = input = "";
+  }
+
+  logDebug (msg, newline=true){
+    this.output += colouredText("WeLD (debug): ","blue") + msg + (newline?"<br/>":"");
+    this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+    this.updateScroll()
+}
+
+  logWarning (msg, newline=true){
+    this.output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
+    this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+    this.updateScroll()
+  }
+
+
+  logError (msg, newline=true){
+    this.output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
+    this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+    this.updateScroll()
+  }
+
+
+  log (msg, newline=true) {
+    this.output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"") ;
+    this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+    this.updateScroll()
+  };
+
+  highlightCommand(args){
     const selection = args[0];
     if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
     {
       if(parseInt(selection)<=(data.length -1))
       {
         //highlighted = selection;
-        highlight(selection);
+        this.focus(selection);
         log("centred node #"+selection);
       } else {
         logError("invalid range");
@@ -83,8 +238,9 @@ const UserInterface = function()
 
   // move a node to the specified location
   // for debugging purposes
-  const moveCommand = function(args) {
-    const [nodeID, x, y, z] = args;
+  moveCommand = (args) =>
+  {
+    var [nodeID, x, y, z] = args;
     let relative = false;
 
     if (args.length >= 5 && args[4] == "r") {
@@ -97,7 +253,7 @@ const UserInterface = function()
       y = parseFloat(y);
       z = parseFloat(z);
 
-      const node = data[nodeID];
+      const node = this.sharedData.nodes[nodeID];
 
       if (relative) {
         node.ri.x += x;
@@ -114,170 +270,31 @@ const UserInterface = function()
       logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
     }
 
-    }
-
-  const commandMap = new Map(
-    [
-      ["focus", focus],
-      ["unfocus", unfocus],
-      ["centre", highlightCommand],
-      ["move", moveCommand]
-    ]
-  )
-
-  let data=[]; //data associated with the simulation
-  let nodes=[];
-  let highlighted=false;
-
-  let output = "";
-  let input = "";
-
-  this.canvas = false;
-  this.infoBox;
-  let control = false;
-
-  const updateScroll = function(){
-    terminal.scrollTop = terminal.scrollHeight;
   }
-  const colouredText = function(msg, colour) {
-    return "<text class='"+colour+"'>"+msg+"</text>";
+
+}
+
+export class UserInterface extends Data
+{
+
+  constructor(shared){
+    super(shared);
+
+    this.canvas = false;
+    this.chart = false;
+    this.chartDesc = false;
+    this.infoBox;
+    this.textInfo;
+    this.graphicInfo;
+    this.control = false;
+    this.terminal = new Terminal(shared);
   }
-  const initTerminal = function(terminal){
 
-    terminal = document.getElementById("terminal");
-
-      terminal.focus();
-      terminal.addEventListener("keydown", function( event ) {
-
-        const key = event.keyCode;
-        const char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
-
-        // If the user has pressed enter
-
-        switch (key) {
-          case 32 /*space*/:
-          {
-            input+=(input.slice(-1)===" "?"":" ");
-            terminal.innerHTML = output + "UserIn: " + input + "<";;
-            break;
-          }
-          case 13 /*enter*/:
-          {
-            const args = input.split(" ");
-            const command = args[0]
-            if(!commandMap.has(command))
-            {
-              input = "";
-              logError("no such command.")
-              break;
-            } else {
-              const fn = commandMap.get(command);
-              fn(args.slice(1));
-              input = "";
-              terminal.innerHTML = output + "UserIn: " +input + "<";
-              break;
-            }
-          }
-          case 8/*backspace*/:
-          {
-            if(input.length>0)
-            {
-              input = input.slice(0, -1);
-              terminal.innerHTML = output + "UserIn: " +input + "<";
-            }
-            break;
-          }
-          case 37/*left*/:
-          {
-
-            break;
-          }
-          case 39/*right*/:
-          {
-
-            break;
-          }
-            case 38/*up*/:
-          {
-
-            break;
-          }
-            case 40/*down*/:
-
-              break;
-          default:
-          {
-            input += char;
-            terminal.innerHTML = output + "UserIn: " + input + "<";
-          }
-
-        }
-      }, false);
-    }
-
-  const clearTerminal = function(){
-    output = input = "";
-  }
-  this.clearTerminal = function(){clearTerminal()};
-
-  this.colouredText = function(msg, colour){
-    return colouredText(msg, colour);
-  }
-  const logDebug = function(msg, newline=true){
-      output += colouredText("WeLD (debug): ","blue") + msg + (newline?"<br/>":"");
-      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
-      updateScroll()
-  }
-  this.logDebug = function(msg, newline=true){logDebug(msg, newline)};
-
-  const logWarning = function(msg, newline=true){
-      output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
-      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
-      updateScroll()
-    }
-  this.logWarning = function(msg,newline=true){logWarning(msg,newline)}
-
-  const logError = function(msg, newline=true){
-      output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
-      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
-      updateScroll()
-    }
-  this.logError = function(msg,newline=true){logError(msg,newline)}
-
-  const log = function (msg, newline=true) {
-      output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"") ;
-      document.getElementById("terminal").innerHTML = output + "UserIn: " + input + "<";
-      updateScroll()
-    };
-  this.log = function(msg,newline=true){log(msg,newline)}
-
-  this.setData = function(d){data=d}
-  this.setNodes = function(n){nodes=n}
-  const highlight = function(i){
-    const datapoint = data[parseInt(i)];
-    if(datapoint.stroke=="red")
-    {
-      datapoint.stroke="black";
-      highlighted=false;
-    } else {
-        datapoint.stroke = "red";
-        if(highlighted!==false){
-          data[highlighted].stroke = "black";
-        }
-        highlighted=parseInt(i);
-        log("selected node "+colouredText("#"+i,"green"))
-      }
-  }
-  this.highlight = function(i){
-    highlight(i);
-  }
-  this.highlighted = function(){
-    return highlighted;
-  }
-  this.showTooltip = function(pos, i) {
+  showTooltip(pos, i) 
+  {
 
     let tooltip = document.getElementById("tooltip");
-    const datapoint = data[parseInt(i)];
+    const datapoint = this.sharedData.nodes[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
@@ -299,9 +316,9 @@ const UserInterface = function()
         if(force.name=="spring")
         {
           tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+data[force.params[2]].name+")"+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+this.sharedData.nodes[force.params[2]].name+")"+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, this.sharedData.nodes[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
         }
 
@@ -327,11 +344,14 @@ const UserInterface = function()
     tooltip.style.top =  (pos[1]) + 50 + 'px';
 
   }
-  this.hideTooltip = function() {
+
+  hideTooltip()
+  {
     const tooltip = document.getElementById("tooltip");
     tooltip.style.display = "none";
   }
-  this.loadBasic = function(){
+  
+  loadBasic(){
 
     const sim = document.createElement("div");
     document.body.appendChild(sim);
@@ -352,63 +372,99 @@ const UserInterface = function()
     this.canvas.style.borderStyle = "solid";
     sim.appendChild(this.canvas);
 
-    control = document.createElement("div");
-    document.body.appendChild(control);
-    control.setAttribute("id","control");
-    control.style.position = "absolute";
-    control.style.top = "2.5%";
-    control.style.right = "2.5%";
-    control.style.width = "33.5%";
-    control.style.height = "95%";
-    control.style.color = "rgb(173,172,173)";
-    control.style.padding = "2.5px";
-    control.style.fontFamily = "monospace";
-    control.style.overflowX = "hidden";
-    control.style.overflowY = "hidden";
-    
-    const terminal = document.createElement("div");
-    control.appendChild(terminal);
-    terminal.setAttribute("tabindex","0");
-    terminal.setAttribute("id","terminal");
-    terminal.innerHTML = output + "User: " + input + "<";
-    terminal.style.position = "relative";
-    terminal.style.top = "0%";
-    terminal.style.right = "0%";
-    terminal.style.width = "100%";
-    terminal.style.height = "33%";
-    terminal.style.color = "rgb(173,172,173)";
-    terminal.style.padding = "2.5px";
-    terminal.style.fontFamily = "monospace";
-    terminal.style.overflowX = "hidden";
-    terminal.style.overflowY = "scroll";
-    terminal.style.backgroundColor = "white";
-    terminal.addEventListener("focus",function(event){
-        terminal.style.color = "black";
-        terminal.innerHTML = output + "UserIn: " + input + "<";
-    })
-    terminal.addEventListener("focusout",function(event){
-        terminal.style.color = "rgb(173,172,173)";
-    });
-    initTerminal(terminal);
+    this.control = document.createElement("div");
+    document.body.appendChild(this.control);
+    this.control.setAttribute("id","control");
+    this.control.style.position = "absolute";
+    this.control.style.top = "2.5%";
+    this.control.style.right = "2.5%";
+    this.control.style.width = "33.5%";
+    this.control.style.height = "95%";
+    this.control.style.color = "rgb(173,172,173)";
+    this.control.style.padding = "2.5px";
+    this.control.style.fontFamily = "monospace";
+    this.control.style.overflowX = "hidden";
+    this.control.style.overflowY = "hidden";
 
+    control.appendChild(this.terminal.element);
+    this.terminal.element.setAttribute("tabindex","0");
+    this.terminal.element.setAttribute("id","terminal");
+    this.terminal.element.innerHTML = this.terminal.output + "User: " + this.terminal.input + "<";
+    this.terminal.element.style.position = "static";
+    this.terminal.element.style.right = "0%";
+    this.terminal.element.style.width = "100%";
+    this.terminal.element.style.height = "33.333%";
+    this.terminal.element.style.color = "rgb(173,172,173)";
+    this.terminal.element.style.padding = "2.5px";
+    this.terminal.element.style.fontFamily = "monospace";
+    this.terminal.element.style.overflowX = "hidden";
+    this.terminal.element.style.overflowY = "scroll";
+    this.terminal.element.style.backgroundColor = "white";
+
+    // initialise terminal after styling;
+    this.terminal.initTerminal();
+    
+
+    
     this.infoBox = document.createElement("div");
+    control.appendChild(this.infoBox);
     this.infoBox.setAttribute("id", "infoBox");
-    this.infoBox.style.position = "relative";
+    this.infoBox.style.position = "static";
     this.infoBox.style.padding = "2.5px";
     this.infoBox.style.backgroundColor = "rgba(0,0,0,0.7)";
     this.infoBox.style.width = "100%";
-    this.infoBox.style.top = "0%";
-    this.infoBox.style.height = "30";
+    this.infoBox.style.height = "33.333%";
     this.infoBox.style.color = "rgb(173,172,173)";
     this.infoBox.style.zIndex = document.getElementById("control").style.zIndex + 1;
     this.infoBox.style.overflowX = "hidden";
     this.infoBox.style.overflowY = "scroll";
-    control.appendChild(this.infoBox);
+    
+    this.textInfo = document.createElement("div");
+    this.infoBox.appendChild(this.textInfo);
+    this.textInfo.setAttribute("id", "textInfo");
+    this.textInfo.style.position = "static";
+    this.textInfo.style.width = "100%";
+    this.textInfo.style.height = "50%";
+    this.textInfo.style.overflowX = "hidden";
+    this.textInfo.style.overflowY = "auto";
 
-    sim.focus();
+    this.graphicInfo = document.createElement("div");
+    this.infoBox.appendChild(this.graphicInfo);
+    this.graphicInfo.setAttribute("id", "graphicInfo");
+    this.graphicInfo.style.position = "static";
+    this.graphicInfo.style.top = 0;
+    this.graphicInfo.style.width = "100%";
+    this.graphicInfo.style.height = "50%";
+    this.graphicInfo.style.overflowX = "hidden";
+    this.graphicInfo.style.overflowY = "hidden";
 
+    this.chart = document.createElement("canvas");
+    this.graphicInfo.appendChild(this.chart);
+    this.chart.style.position = "static";
+    this.chart.style.bottom = 0;
+    this.chart.width = this.graphicInfo.clientWidth / 2;
+    this.chart.height = this.graphicInfo.clientHeight;
+    this.chart.id = "chart";
+    this.chart.style.cursor= "crosshair";
+    this.drawChart([], 0);
+    this.drawChart([], 1);
+    
+    this.chartDesc = document.createElement("div");
+    this.graphicInfo.appendChild(this.chartDesc);
+    this.chartDesc.setAttribute("id", "chartDesc");
+    this.chartDesc.style.position = "static";
+    this.chartDesc.style.top = "0%";
+    this.chartDesc.style.display = "inline-block";
+    this.chartDesc.style.verticalAlign = "top";
+    this.chartDesc.style.textAlign = "right";
+    this.chartDesc.style.right = "0%";
+    this.chartDesc.style.width = "49%";
+    this.chartDesc.style.height = "100%";
+    this.chartDesc.style.fontSize = "11px";
+    
   }
-  this.slider = function(min=0, max=100, step=1){
+
+  slider(min=0, max=100, step=1){
 
     const container = document.createElement("div");
     container.style.position = "relative";
@@ -433,8 +489,89 @@ const UserInterface = function()
       return [container, slider, label];
   }
 
-  return this;
+  drawChart(dataArr, col='black', pos=0, onto=false, div=1)
+  {
+    var canvas = document.getElementById( "chart" );  
+    var context = canvas.getContext( "2d" );
+    
+    var GRAPH_HEIGHT = (this.chart.clientHeight / div) - 5;
+    var GRAPH_TOP = 5 + (pos * GRAPH_HEIGHT);  
+    var GRAPH_BOTTOM = 375;  
+    var GRAPH_LEFT = 5;  
+    var GRAPH_RIGHT = 475;  
+  
+    var GRAPH_WIDTH = this.chart.clientWidth;  
+    var arrayLen = dataArr.length;  
+  
+    var largest = 0;  
+    for( var i = 0; i < arrayLen; i++ ){  
+        if( dataArr[ i ] > largest ){  
+            largest = dataArr[ i ];  
+        }  
+    }  
+  
+    if (!onto) {
+      context.clearRect( 0, 0, 500, 400 );  
+    }
+    // set font for fillText()  
+    context.font = "16px Arial";  
+       
+    // draw X and Y axis  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, GRAPH_BOTTOM );  
+    context.lineTo( GRAPH_RIGHT, GRAPH_BOTTOM );  
+    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );  
+    context.stroke();
+       
+    // draw reference line  
+    context.beginPath();  
+    context.strokeStyle = "#BBB";  
+    context.moveTo( GRAPH_LEFT, GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest, GRAPH_RIGHT + 15, GRAPH_TOP);  
+    context.stroke();  
+   
+    // draw reference line  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest / 4, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP);  
+    context.stroke();  
+   
+    // draw reference line  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest / 2, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP);  
+    context.stroke();  
+   
+    // draw reference line  
+    context.beginPath();  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );  
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );  
+    // draw reference value for hours  
+    context.fillText( largest / 4 * 3, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP);  
+    context.stroke();  
+  
+    // draw titles  
+    context.fillText( "Day of the week", GRAPH_RIGHT / 3, GRAPH_BOTTOM + 50);  
+    context.fillText( "Hours", GRAPH_RIGHT + 30, GRAPH_HEIGHT / 2);  
+  
+    context.beginPath();  
+    context.lineJoin = "round";  
+    context.strokeStyle = col;  
+  
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ 0 ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );  
+    // draw reference value for day of the week  
+    context.fillText( "1", 15, GRAPH_BOTTOM + 25);  
+    for( var i = 1; i < arrayLen; i++ ){  
+        context.lineTo( GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ i ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );  
+        // draw reference value for day of the week  
+        context.fillText( ( i + 1 ), GRAPH_RIGHT / arrayLen * i, GRAPH_BOTTOM + 25);  
+    }  
+    context.stroke();  
+  }
 }
-
-export const userInterface = new UserInterface();
-export default userInterface;

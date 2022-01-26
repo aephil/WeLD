@@ -21,16 +21,16 @@ should simply calculate the force and return it.
 
 import Vector from './Vector.js';
 
-export const testForce = function(d, lattice, params) {
+export const testForce = function(d, shared, params) {
             // just for testing purposes
             const force = { x: 100, y: 100, z: 0 };
             const potential = -100 * d.ri.x - 100 * d.ri.y;
             return [[d.id, force, potential]]
         };
 
-export const spring = function(d, lattice, params) {
+export const spring = function(d, shared, params) {
             const [k, nodesLen, neighbourIndex] = params;
-            const d2 = lattice.data[neighbourIndex];
+            const d2 = shared.nodes[neighbourIndex];
 
             const dx = d.ri.x - d2.ri.x;
             const dy = d.ri.y - d2.ri.y;
@@ -55,11 +55,11 @@ export const spring = function(d, lattice, params) {
             return [[d.id, force, potential]]
         };
 
-export const valenceAngle = function(d, lattice, params) {
+export const valenceAngle = function(d, shared, params) {
             const [k, eqAngle, index1, index2] = params;
-            const a = lattice.data[index1].ri;
+            const a = shared.nodes[index1].ri;
             const b = d.ri; //central node
-            const c = lattice.data[index2].ri;
+            const c = shared.nodes[index2].ri;
 
             const ba = Vector.sub(a, b);
             const bc = Vector.sub(c, b);
@@ -89,10 +89,10 @@ export const valenceAngle = function(d, lattice, params) {
         [index2, fc, potential /3]];
         };
 
-export const lennardJones = function(d, lattice, params) {
+export const lennardJones = function(d, shared, params) {
             const [epsilon, sigma, neighbourIndex] = params;
             const a = d;
-            const b = lattice.data[neighbourIndex];
+            const b = shared.nodes[neighbourIndex];
             const ba = Vector.sub(a.ri, b.ri);
             const r = Vector.norm(ba);
             const u = Vector.normalise(ba);
@@ -115,19 +115,19 @@ export const forceMap = {
             "lennardJones": lennardJones
         };
 
-export const initValence = function(lattice, k = 1) {
+export const initValence = function(shared, k = 1) {
     /*
     Performs the necessary initial setup for the Physics.Forcemap.valenceAngle method
     */
-    lattice.data.forEach((d1) => {
+    shared.nodes.forEach((d1) => {
         d1.forces.forEach((f1) => {
             if (f1.name == "spring") {
                 const index1 = f1.params[2]
-                const d2 = lattice.data[index1];
+                const d2 = shared.nodes[index1];
                 d1.forces.forEach((f2) => {
                     const index2 = f2.params[2]
                     if (f2.name == "spring" && index2 != index1) {
-                        const d3 = lattice.data[index2];
+                        const d3 = shared.nodes[index2];
                         // calculate their equilibrium angles
                         const vec1 = Vector.sub(d3.ri, d1.ri);
                         const vec2 = Vector.sub(d2.ri, d1.ri);

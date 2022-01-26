@@ -6,13 +6,13 @@ import {
     calculateQuantities
 } from '../../modules/physics/quantities.js';
 
+var shared = {};
 const edgeLen = 20;
 
-const ui = Graphics.userInterface;
+const ui = new Graphics.UserInterface(shared);
 ui.loadBasic(); // loads divs for simulation, control and terminal, and initialises the terminal
 
-const lattice = Physics.lattice;
-lattice.setUI(ui);
+const lattice = new Physics.Lattice(shared);
 lattice.setShowEdges(true);
 
 const springPredicate = (d1, d2) => {
@@ -40,7 +40,6 @@ lattice.setInterAtomicForces(
 springPredicate // depending on the predicate sets the neighbour in params.
 );
 
-ui.setData(lattice.data);
 
 let i = 0;
 function debug() {
@@ -69,14 +68,12 @@ const verletController = Physics.verlet;
 const updates = [verletController.integrationStep, calculateQuantities]
 const nodeUpdates = [];
 
-const renderer = Graphics.renderer;
+const renderer = new Graphics.Renderer(shared);
 
 renderer.setUI(ui);
 renderer.setUpdates(updates);
-renderer.setNodeUpdates(nodeUpdates);
-renderer.setDebug(debug);
-renderer.setLattice(lattice);
+//renderer.setNodeUpdates(nodeUpdates);
+//renderer.setDebug(debug);
 renderer.setFPS(30);
 renderer.setSpeed(1000);
-renderer.ui = ui;
 renderer.render()

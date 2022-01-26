@@ -61,3 +61,22 @@ export const screenToCentreY = function(y, worldHeight = 1000){
  export const rotZ = function(d,gamma){
     return {x:Math.cos(gamma)*d.x - Math.sin(gamma)*d.y,y:Math.sin(gamma)*d.x+Math.cos(gamma)*d.y,z:d.z}
  }
+
+export const colouredText = function(msg, colour) {
+    return "<text class='"+colour+"'>"+msg+"</text>";
+}
+
+export const assert = function(condition, message) {
+    if (!condition) {
+        throw new Error(message || "Assertion failed");
+    }
+}
+
+// container for sharing data accross classes
+export class Data {
+    constructor(shared) {
+        this.sharedData = shared;
+    }
+}
+
+
