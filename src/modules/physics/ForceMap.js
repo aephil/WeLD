@@ -29,7 +29,7 @@ export const testForce = function(d, shared, params) {
         };
 
 export const spring = function(d, shared, params) {
-            const [k, sharedLen, neighbourIndex] = params;
+            const [k, nodesLen, neighbourIndex] = params;
             const d2 = shared.nodes[neighbourIndex];
 
             const dx = d.ri.x - d2.ri.x;
@@ -39,7 +39,7 @@ export const spring = function(d, shared, params) {
             const separation = { x: dx, y: dy, z: dz };
             const unitSeparation = Vector.unitVector(separation);
 
-            const equilibrium = Vector.scale(sharedLen, unitSeparation);
+            const equilibrium = Vector.scale(nodesLen, unitSeparation);
             const extension = Vector.sub(separation, equilibrium);
 
             const fx = -2 * k * extension.x;
