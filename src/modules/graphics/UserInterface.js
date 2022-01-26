@@ -1,11 +1,16 @@
 import Vector from '../physics/Vector.js';
+import {colouredText, Data, assert} from '../helpers.js';
 
-class Terminal {
+export class Terminal extends Data {
   // TODO: bind data to terminal
-  constructor() {
+  constructor(shared) {
+    super(shared);
+
+    this.sharedData.highlighted = false;
+
     this.commandMap = new Map(
       [
-        ["focus", this.focus],
+        ["focus", this.focusCommand],
         ["unfocus", this.unfocus],
         ["centre", this.highlightCommand],
         ["move", this.moveCommand]
@@ -16,41 +21,58 @@ class Terminal {
     this.element = document.createElement("div");
   }
 
-  colouredText(msg, colour) {
-    return "<text class='"+colour+"'>"+msg+"</text>";
-  }
+  focusCommand = (args) => {
 
-  focus(args){
-
-    if(args.length > 0){
+    if(args.length > 0)
+    {
       // check input is int
       const selection = args[0];
-      if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
+      if (!isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
       {
-        if(parseInt(selection)<=(data.length -1))
+        if (parseInt(selection)<=(this.sharedData.nodes.length -1))
         {
-          //highlighted = selection;
-          highlight(selection);
-          log("focused node #"+selection);
-        } else {
-          logError("invalid range");
-        }
-      } else {
-              logError("input is not an integer");
+          const datapoint = this.sharedData.nodes[parseInt(selection)];
+          if(datapoint.stroke=="red")
+          {
+            datapoint.stroke="black";
+            this.sharedData.highlighted=false;
+          } 
+          else 
+          {
+            datapoint.stroke = "red";
+            if(this.sharedData.highlighted!==false)
+            {
+              this.sharedData.nodes[this.sharedData.highlighted].stroke = "black";
             }
-  } else if(highlighted!==false) {
+            this.sharedData.highlighted=parseInt(selection);
+            this.log("selected node "+colouredText("#"+selection,"green"))
+          }
+        } 
+        else 
+        {
+          this.logError("invalid range");
+        }
+      } 
+      else 
+      {
+        this.logError("input is not an integer");
+      }
+    } 
+    else if (this.sharedData.highlighted!==false) 
+    {
+      this.log("focused on existing highlighed node.")
+    } 
+    else 
+    {
+      this.logError("no user input or highlighted node.")
+      return;
+    }
 
-    log("focused highlighed node.")
-
-  } else {
-    logError("no user input or highlighted node.")
-    return;
-  }
-    data[highlighted].edgeStroke = "red";
-    data.forEach((node) => {
-      const neighbours = data[highlighted].neighbours;
+    //TODO: neighbours are now stored in forces, check for springs...
+    this.sharedData.nodes.forEach((node) => {
+      const neighbours = this.sharedData.nodes[this.sharedData.highlighted].neighbours;
       let isNeighbour = false;
-
+      debugger;
       for(let i = 0; i < neighbours.length; i++)
       {
         if(node.id === neighbours[i][0])
@@ -61,7 +83,7 @@ class Terminal {
 
       if(node.id != highlighted)
       {
-        data[node.id].showEdges = false;
+        this.sharedData.nodes[node.id].showEdges = false;
 
         if(!isNeighbour){
           node.visible = false;
@@ -87,124 +109,115 @@ class Terminal {
     this.element.scrollTop = this.element.scrollHeight;
   }
 
-  initTerminal(){
+  initTerminal()
+  {
 
-      this.element.addEventListener("keydown", (event) => {
+    this.element.addEventListener("focus", (event) =>{
+      this.element.style.color = "black";
+      this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+    })
 
-        const key = event.keyCode;
-        const char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
+    this.element.addEventListener("focusout", (event) => {
+      this.element.style.color = "rgb(173,172,173)";
+    });
 
-        // If the user has pressed enter
+    this.element.addEventListener("keydown", (event) => {
 
-        switch (key) {
-          case 32 /*space*/:
+      const key = event.keyCode;
+      const char = String.fromCharCode((96 <= key && key <= 105) ? key-48 : key).toLowerCase();
+
+      // If the user has pressed enter
+
+      switch (key) {
+        case 32 /*space*/:
+        {
+          this.input+=(this.input.slice(-1)===" "?"":" ");
+          this.element.innerHTML = this.output + "UserIn: " + this.input + "<";;
+          break;
+        }
+        case 13 /*enter*/:
+        {
+          const args = this.input.split(" ");
+          const command = args[0]
+          if(!this.commandMap.has(command))
           {
-            this.input+=(this.input.slice(-1)===" "?"":" ");
-            this.element.innerHTML = this.output + "UserIn: " + this.input + "<";;
+            this.input = "";
+            logError("no such command.")
+            break;
+          } else {
+            const fn = this.commandMap.get(command);
+            fn(args.slice(1));
+            this.input = "";
+            this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
             break;
           }
-          case 13 /*enter*/:
+        }
+        case 8/*backspace*/:
+        {
+          if(this.input.length>0)
           {
-            const args = this.input.split(" ");
-            const command = args[0]
-            if(!this.commandMap.has(command))
-            {
-              this.input = "";
-              logError("no such command.")
-              break;
-            } else {
-              const fn = this.commandMap.get(command);
-              fn(args.slice(1));
-              this.input = "";
-              this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
-              break;
-            }
-          }
-          case 8/*backspace*/:
-          {
-            if(this.input.length>0)
-            {
-              this.input = this.input.slice(0, -1);
-              this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
-            }
-            break;
-          }
-          case 37/*left*/:
-          {
-
-            break;
-          }
-          case 39/*right*/:
-          {
-
-            break;
-          }
-            case 38/*up*/:
-          {
-
-            break;
-          }
-            case 40/*down*/:
-
-              break;
-          default:
-          {
-            this.input += char;
+            this.input = this.input.slice(0, -1);
             this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
           }
-
+          break;
         }
-      }, false);
-    }
+        case 37/*left*/:
+        {
+
+          break;
+        }
+        case 39/*right*/:
+        {
+
+          break;
+        }
+          case 38/*up*/:
+        {
+
+          break;
+        }
+          case 40/*down*/:
+
+            break;
+        default:
+        {
+          this.input += char;
+          this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
+        }
+
+      }
+    }, false);
+  }
 
   clearTerminal(){
     output = input = "";
   }
 
-  logDebug(msg, newline=true){
-    this.output += this.colouredText("WeLD (debug): ","blue") + msg + (newline?"<br/>":"");
+  logDebug (msg, newline=true){
+    this.output += colouredText("WeLD (debug): ","blue") + msg + (newline?"<br/>":"");
     this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
     this.updateScroll()
 }
 
-logWarning(msg, newline=true){
-    this.output += this.colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
+  logWarning (msg, newline=true){
+    this.output += colouredText("WeLD (warning): ","orange") + msg + (newline?"<br/>":"");
     this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
     this.updateScroll()
   }
 
 
-logError(msg, newline=true){
-    this.output += this.colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
+  logError (msg, newline=true){
+    this.output += colouredText("WeLD (error): ","red") + msg + (newline?"<br/>":"");
     this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
     this.updateScroll()
   }
 
 
-log (msg, newline=true) {
-    this.output += this.colouredText("WeLD: ","green") + msg + (newline?"<br/>":"") ;
+  log (msg, newline=true) {
+    this.output += colouredText("WeLD: ","green") + msg + (newline?"<br/>":"") ;
     this.element.innerHTML = this.output + "UserIn: " + this.input + "<";
     this.updateScroll()
   };
-
-
-  
-}
-
-class UserInterface
-{
-
-  constructor(){
-    this.highlighted = false;
-    this.canvas = false;
-    this.chart = false;
-    this.chartDesc = false;
-    this.infoBox;
-    this.textInfo;
-    this.graphicInfo;
-    this.control = false;
-    this.terminal = new Terminal();
-  }
 
   highlightCommand(args){
     const selection = args[0];
@@ -213,7 +226,7 @@ class UserInterface
       if(parseInt(selection)<=(data.length -1))
       {
         //highlighted = selection;
-        highlight(selection);
+        this.focus(selection);
         log("centred node #"+selection);
       } else {
         logError("invalid range");
@@ -225,7 +238,8 @@ class UserInterface
 
   // move a node to the specified location
   // for debugging purposes
-  moveCommand(args) {
+  moveCommand(args) 
+  {
     const [nodeID, x, y, z] = args;
     let relative = false;
 
@@ -256,33 +270,31 @@ class UserInterface
       logError("Usage: move [ID] [x] [y] [z] [r (optional)], e.g. move 0 -13 45 -279");
     }
 
-    }
-
-  colouredText(msg, colour) {
-    return "<text class='"+colour+"'>"+msg+"</text>";
   }
 
-   highlight(i, data){
-    const datapoint = data[parseInt(i)];
-    if(datapoint.stroke=="red")
-    {
-      datapoint.stroke="black";
-      this.highlighted=false;
-    } else {
-        datapoint.stroke = "red";
-        if(this.highlighted!==false){
-          data[this.highlighted].stroke = "black";
-        }
-        this.highlighted=parseInt(i);
-        log("selected node "+colouredText("#"+i,"green"))
-      }
+}
+
+export class UserInterface extends Data
+{
+
+  constructor(shared){
+    super(shared);
+
+    this.canvas = false;
+    this.chart = false;
+    this.chartDesc = false;
+    this.infoBox;
+    this.textInfo;
+    this.graphicInfo;
+    this.control = false;
+    this.terminal = new Terminal(shared);
   }
 
-  
-  showTooltip(pos, i, data) {
+  showTooltip(pos, i) 
+  {
 
     let tooltip = document.getElementById("tooltip");
-    const datapoint = data[parseInt(i)];
+    const datapoint = this.sharedData.nodes[parseInt(i)];
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
@@ -304,9 +316,9 @@ class UserInterface
         if(force.name=="spring")
         {
           tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+data[force.params[2]].name+")"+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+this.sharedData.nodes[force.params[2]].name+")"+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, data[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, this.sharedData.nodes[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
         }
 
@@ -333,7 +345,8 @@ class UserInterface
 
   }
 
-  hideTooltip() {
+  hideTooltip()
+  {
     const tooltip = document.getElementById("tooltip");
     tooltip.style.display = "none";
   }
@@ -387,14 +400,8 @@ class UserInterface
     this.terminal.element.style.overflowX = "hidden";
     this.terminal.element.style.overflowY = "scroll";
     this.terminal.element.style.backgroundColor = "white";
-    this.terminal.element.addEventListener("focus", (event) =>{
-      this.terminal.element.style.color = "black";
-      this.terminal.element.innerHTML = this.terminal.output + "UserIn: " + this.terminal.input + "<";
-    })
-    this.terminal.element.addEventListener("focusout", (event) => {
-      this.terminal.element.style.color = "rgb(173,172,173)";
-    });
 
+    // initialise terminal after styling;
     this.terminal.initTerminal();
     
 
@@ -568,6 +575,3 @@ class UserInterface
     context.stroke();  
   }
 }
-
-export const userInterface = new UserInterface();
-export default userInterface;

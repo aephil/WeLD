@@ -1,39 +1,37 @@
-import { randomNumber } from '../helpers.js';
+import { randomNumber, Data, assert} from '../helpers.js';
 
-class Lattice {
-    constructor() {
-        this.name;
-        this.sizeX;
-        this.sizeY;
-        this.sizeZ;
-        this.predicate = false;
-        this.showEdges = false;
-        this.data = [];
-        this.a = 20; // default
-        this.quantities = [];
+export class Lattice extends Data {
+    constructor(shared) {
+        
+        super(shared);
+
+        this.sharedData.name;
+        this.sharedData.sizeX;
+        this.sharedData.sizeY;
+        this.sharedData.sizeZ;
+        this.sharedData.predicate = false;
+        this.sharedData.showEdges = false;
+        this.sharedData.a = 20; // default
+        this.sharedData.quantities = [];
     }
 
-    showingEdges() {
-        return this.showingEdges;
-    };
-
     setShowEdges(bool) {
-        this.showEdges = bool;
+        this.sharedData.showingEdges = bool;
     };
 
     setQuantities(quantities) {
-        this.quantities = quantities;
+        this.sharedData.quantities = quantities;
     };
 
 
     makeFCC3D(cellsX, cellsY, cellsZ, a, sim) {
-        this.data = [];
+        this.sharedData.nodes = [];
         let counter = 0;
         for (let h = 0; h < cellsZ; h++) {
             for (let i = 0; i < cellsX; i++) {
                 for (let j = 0; j < cellsY; j++) {
 
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: {
                                 x: (a * i) + (0.5 * a),
@@ -63,7 +61,7 @@ class Lattice {
 
 
 
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: {
                                 x: (a * i),
@@ -91,7 +89,7 @@ class Lattice {
                         });
 
 
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             // displacement
                             ri: {
@@ -121,22 +119,22 @@ class Lattice {
             }
         }
 
-        this.name = "Face-Centred Cubic";
-        this.sizeX = cellsX;
-        this.sizeY = cellsY;
-        this.sizeZ = cellsZ;
+        this.sharedData.name = "Face-Centred Cubic";
+        this.sharedData.sizeX = cellsX;
+        this.sharedData.sizeY = cellsY;
+        this.sharedData.sizeZ = cellsZ;
     };
 
     // creates a free-particle lattice
     makePrimitive3D(cellsX, cellsY, cellsZ, a) {
         this.a = a;
-        this.data = [];
+        this.sharedData.nodes = [];
         let counter = 0;
         for (let h = 0; h < cellsZ; h++) {
             for (let i = 0; i < cellsX; i++) {
                 for (let j = 0; j < cellsY; j++) {
 
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             // displacement
                             ri: { x: a * i, y: a * j, z: a * h },
@@ -166,22 +164,22 @@ class Lattice {
             }
         }
 
-        this.name = "Primitive Cubic";
-        this.sizeX = cellsX;
-        this.sizeY = cellsY;
-        this.sizeZ = cellsZ;
+        this.sharedData.name = "Primitive Cubic";
+        this.sharedData.sizeX = cellsX;
+        this.sharedData.sizeY = cellsY;
+        this.sharedData.sizeZ = cellsZ;
 
     };
 
     makePerovskite3D(cellsX, cellsY, cellsZ, a, sim) {
-        this.data = [];
+        this.sharedData.nodes = [];
         let counter = 0;
         for (h = 0; h < cellsZ; h++) {
             for (i = 0; i < cellsX; i++) {
                 for (j = 0; j < cellsY; j++) {
 
                     // A cation
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: { x: a * i, y: a * j, z: a * h },
                             rf: { x: 0, y: 0, z: 0 },
@@ -206,7 +204,7 @@ class Lattice {
                     );
 
                     // B cation
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: {
                                 x: (a * i) + (a * 0.5),
@@ -236,7 +234,7 @@ class Lattice {
                     );
 
                     // O anion(s)
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: {
                                 x: (a * i) + (a * 0.5),
@@ -265,7 +263,7 @@ class Lattice {
                         }
                     );
 
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: {
                                 x: (a * i) + (a * 0.5),
@@ -294,7 +292,7 @@ class Lattice {
                         }
                     );
 
-                    this.data.push(
+                    this.sharedData.nodes.push(
                         {
                             ri: {
                                 x: (a * i),
@@ -326,10 +324,10 @@ class Lattice {
             }
         }
 
-        this.name = "Perovskite Cubic";
-        this.sizeX = cellsX;
-        this.sizeY = cellsY;
-        this.sizeZ = cellsZ;
+        this.sharedData.name = "Perovskite Cubic";
+        this.sharedData.sizeX = cellsX;
+        this.sharedData.sizeY = cellsY;
+        this.sharedData.sizeZ = cellsZ;
         
 
     };
@@ -338,7 +336,7 @@ class Lattice {
     // set forces on all nodes given a predicate. e.g. if a force should
     // behave as though in some field
     setForces(force, predicate = false) {
-        this.data.forEach(d => {
+        this.sharedData.nodes.forEach(d => {
             if (predicate) {
                 if (predicate(d))
                     d.forces.push(force);
@@ -350,10 +348,10 @@ class Lattice {
 
     // Set forces for all node pairs which satisfy a given a predicate.
     setInterAtomicForces(force, predicate = false) {
-        for (let i = 0; i < this.data.length; i++) {
-            let d1 = this.data[i];
-            for (let j = 0; j < this.data.length; j++) {
-                let d2 = this.data[j];
+        for (let i = 0; i < this.sharedData.nodes.length; i++) {
+            let d1 = this.sharedData.nodes[i];
+            for (let j = 0; j < this.sharedData.nodes.length; j++) {
+                let d2 = this.sharedData.nodes[j];
                 if (predicate) {
                     if (predicate(d1, d2) && i !== j) {
                         // last parameter for interatomic force is always
@@ -377,9 +375,7 @@ class Lattice {
 
     // sets force for a user-specific node
     setForce(index, force) {
-        this.data[index].forces.push(force);
+        this.sharedData.nodes[index].forces.push(force);
     };
-
 }
-export const lattice = new Lattice();
-export default lattice;
+

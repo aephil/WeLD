@@ -1,6 +1,6 @@
-import userInterface from '../modules/graphics/UserInterface.js';
-import renderer from '../modules/graphics/Renderer.js';
+import {UserInterface, Terminal} from '../modules/graphics/UserInterface.js';
+import { Renderer } from '../modules/graphics/Renderer.js';
 
-const Graphics = {userInterface, renderer};
+const Graphics = {UserInterface, Terminal, Renderer};
 
 export default Graphics;

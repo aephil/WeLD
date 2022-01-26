@@ -6,13 +6,13 @@ import {
     PotentialEnergy
 } from '../../modules/physics/quantities.js';
 
-
+var shared = {};
 const edgeLen = 20;
 
-const ui = Graphics.userInterface;
+const ui = new Graphics.UserInterface(shared);
 ui.loadBasic(); // loads divs for simulation, control and terminal, and initialises the terminal
 
-const lattice = Physics.lattice;
+const lattice = new Physics.Lattice(shared);
 lattice.setShowEdges(true);
 
 // Spring neighbour predicate
@@ -41,7 +41,7 @@ lattice.setInterAtomicForces(
 );
 
 // TESTING: push the first node in the x direction to simulate an initial Extension
-lattice.data[0].ri.x += 10;
+lattice.sharedData.nodes[0].ri.x += 10;
 
 
 let i = 0;
@@ -80,12 +80,12 @@ const verletController = Physics.verlet;
 const updates = [verletController.integrationStep, calculateQuantities]
 const nodeUpdates = [];
 
-const renderer = Graphics.renderer;
+const renderer = new Graphics.Renderer(shared);
 
 renderer.setUI(ui);
-renderer.setLattice(lattice);
+//renderer.setLattice(lattice);
 renderer.setUpdates(updates);
-renderer.setNodeUpdates(nodeUpdates);
+//renderer.setNodeUpdates(nodeUpdates);
 //renderer.setDebug(debugQuantities);
 
 renderer.setFPS(30);
