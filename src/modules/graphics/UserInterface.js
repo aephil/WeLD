@@ -238,9 +238,9 @@ export class Terminal extends Data {
 
   // move a node to the specified location
   // for debugging purposes
-  moveCommand(args) 
+  moveCommand = (args) =>
   {
-    const [nodeID, x, y, z] = args;
+    var [nodeID, x, y, z] = args;
     let relative = false;
 
     if (args.length >= 5 && args[4] == "r") {
@@ -253,7 +253,7 @@ export class Terminal extends Data {
       y = parseFloat(y);
       z = parseFloat(z);
 
-      const node = data[nodeID];
+      const node = this.sharedData.nodes[nodeID];
 
       if (relative) {
         node.ri.x += x;

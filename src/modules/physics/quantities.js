@@ -1,4 +1,4 @@
-// This module contains shared
+// This module contains nodes
 // that we can continually monitor, for example
 // the total energy
 

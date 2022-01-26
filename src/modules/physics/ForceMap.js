@@ -10,9 +10,9 @@ velocityVerlet uses. The forces should all have the same function signature:
 ]
 i.e. it should return a list of 2-tuples (arrays) containing the index
 of the node the force should act on as well as the actual force.
-d is the data for one node, data is the data for all shared, and params is an array
+d is the data for one node, data is the data for all nodes, and params is an array
 containing all the parameters necessary to compute the force, e.g. spring constants etc.
-The forces should all the pure functions, i.e. they should not mutate any shared or have side effects. They
+The forces should all the pure functions, i.e. they should not mutate any nodes or have side effects. They
 should simply calculate the force and return it.
 */
 
