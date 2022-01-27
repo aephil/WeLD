@@ -48,7 +48,7 @@ export class Renderer extends Data
     document.addEventListener("visibilitychange", (event) => {
       if (document.visibilityState == "visible") {
         this.pause = false;
-        this.start = performance.now()-500; // add small delay from end.
+        this.start = performance.now(); // add small delay from end.
         this.frames = 0;
       } else {
         this.pause = true;
@@ -244,33 +244,68 @@ cameraView(pos)
 
     if (this.probe) { 
   
-      if (this.samples1.length>this.sampleSize) {
+      if (this.samples1.length>this.sampleSize) 
+      {
         this.samples1.shift();
       }
-      if (this.samples2.length>this.sampleSize) {
+      if (this.samples2.length>this.sampleSize) 
+      {
         this.samples2.shift();
       }
-      if (this.samples3.length>this.sampleSize) {
+      if (this.samples3.length>this.sampleSize) 
+      {
         this.samples3.shift();
       }
 
-      const KE = this.sharedData.quantities[0].value;
-      const PE = this.sharedData.quantities[1].value;
-      this.samples1.push(KE);
-      this.samples2.push(PE);
-      this.samples3.push(KE+PE);
+      if (this.sharedData.highlighted===false)
+      {
+        const KE = this.sharedData.quantities[0].value;
+        const PE = this.sharedData.quantities[1].value;
+  
+        this.samples1.push(KE);
+        this.samples2.push(PE);
+        this.samples3.push(KE+PE);
 
-      if (this.probeCounter % this.probeRate === 0){
+        if (this.probeCounter % this.probeRate === 0)
+        {
           this.ui.chartDesc.innerHTML =
-        `
-        <p>
-        <text class="grey">Probing every ${this.probeRate} updates</text><br>
-        <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
-        <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
-        <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
-        </p>
-        `
+          `
+          <p>
+          <text class="grey">Probing lattice every ${this.probeRate} updates</text><br>
+          <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
+          <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
+          <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
+          </p>
+          `
+        }
       }
+      else 
+      {
+        const i = this.sharedData.highlighted;
+        const d = this.sharedData.nodes[i];
+        const KE = 0.5 * d.m *  (d.vi.x ** 2 + d.vi.y ** 2 + d.vi.z ** 2);
+        const PE = this.sharedData.nodes[i].potential;
+
+        this.samples1.push(KE);
+        this.samples2.push(PE);
+        this.samples3.push(KE+PE);
+
+        if (this.probeCounter % (this.probeRate/10.) === 0)
+        {
+          
+          this.ui.chartDesc.innerHTML =
+          `
+          <p>
+          <text class="grey">Probing node #${i} every ${(this.probeRate/10.)} updates</text><br>
+          <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
+          <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
+          <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
+          </p>
+          `
+        }
+      }
+
+      
       this.probeCounter++;
     }
   }
