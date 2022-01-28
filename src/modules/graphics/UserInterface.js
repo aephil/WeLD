@@ -13,7 +13,8 @@ export class Terminal extends Data {
         ["focus", this.focusCommand],
         ["unfocus", this.unfocus],
         ["centre", this.highlightCommand],
-        ["move", this.moveCommand]
+        ["move", this.moveCommand],
+        ["sample", this.setSampleSizeCommand]
       ]
     );
     this.output = "";
@@ -36,8 +37,8 @@ export class Terminal extends Data {
           {
             datapoint.stroke="black";
             this.sharedData.highlighted=false;
-          } 
-          else 
+          }
+          else
           {
             datapoint.stroke = "red";
             if(this.sharedData.highlighted!==false)
@@ -47,22 +48,22 @@ export class Terminal extends Data {
             this.sharedData.highlighted=parseInt(selection);
             this.log("selected node "+colouredText("#"+selection,"green"))
           }
-        } 
-        else 
+        }
+        else
         {
           this.logError("invalid range");
         }
-      } 
-      else 
+      }
+      else
       {
         this.logError("input is not an integer");
       }
-    } 
-    else if (this.sharedData.highlighted!==false) 
+    }
+    else if (this.sharedData.highlighted!==false)
     {
       this.log("focused on existing highlighed node.")
-    } 
-    else 
+    }
+    else
     {
       this.logError("no user input or highlighted node.")
       return;
@@ -219,6 +220,26 @@ export class Terminal extends Data {
     this.updateScroll()
   };
 
+  setSampleSizeCommand = (args) => {
+    // TODO formalise commands
+    var size = args[0];
+    if( !isNaN(size) && (parseFloat(size) | 0) === parseFloat(size))
+    {
+      size = parseInt(size)
+      if(this.sharedData.sampleSize > size){
+        this.sharedData.samples1 = this.sharedData.samples1.slice(-size, -1);
+        this.sharedData.samples2 = this.sharedData.samples2.slice(-size, -1);
+        this.sharedData.samples3 = this.sharedData.samples3.slice(-size, -1);
+      }
+      this.sharedData.sampleSize = size
+      this.log(`sample size is now ${size}`);
+    }
+    else
+    {
+      this.logError("input is not an integer");
+    }
+  }
+
   highlightCommand(args){
     const selection = args[0];
     if( !isNaN(selection) && (parseFloat(selection) | 0) === parseFloat(selection))
@@ -227,12 +248,12 @@ export class Terminal extends Data {
       {
         //highlighted = selection;
         this.focus(selection);
-        log("centred node #"+selection);
+        this.log("centred node #"+selection);
       } else {
-        logError("invalid range");
+        this.logError("invalid range");
       }
     } else {
-            logError("input is not an integer");
+            this.logError("input is not an integer");
           }
   }
 
@@ -290,7 +311,7 @@ export class UserInterface extends Data
     this.terminal = new Terminal(shared);
   }
 
-  showTooltip(pos, i) 
+  showTooltip(pos, i)
   {
 
     let tooltip = document.getElementById("tooltip");
@@ -350,7 +371,7 @@ export class UserInterface extends Data
     const tooltip = document.getElementById("tooltip");
     tooltip.style.display = "none";
   }
-  
+
   loadBasic(){
 
     const sim = document.createElement("div");
@@ -403,9 +424,9 @@ export class UserInterface extends Data
 
     // initialise terminal after styling;
     this.terminal.initTerminal();
-    
 
-    
+
+
     this.infoBox = document.createElement("div");
     control.appendChild(this.infoBox);
     this.infoBox.setAttribute("id", "infoBox");
@@ -418,7 +439,7 @@ export class UserInterface extends Data
     this.infoBox.style.zIndex = document.getElementById("control").style.zIndex + 1;
     this.infoBox.style.overflowX = "hidden";
     this.infoBox.style.overflowY = "scroll";
-    
+
     this.textInfo = document.createElement("div");
     this.infoBox.appendChild(this.textInfo);
     this.textInfo.setAttribute("id", "textInfo");
@@ -448,7 +469,7 @@ export class UserInterface extends Data
     this.chart.style.cursor= "crosshair";
     this.drawChart([], 0);
     this.drawChart([], 1);
-    
+
     this.chartDesc = document.createElement("div");
     this.graphicInfo.appendChild(this.chartDesc);
     this.chartDesc.setAttribute("id", "chartDesc");
@@ -460,8 +481,8 @@ export class UserInterface extends Data
     this.chartDesc.style.right = "0%";
     this.chartDesc.style.width = "49%";
     this.chartDesc.style.height = "100%";
-    this.chartDesc.style.fontSize = "11px";
-    
+    this.chartDesc.style.fontSize = "16px";
+
   }
 
   slider(min=0, max=100, step=1){
@@ -491,87 +512,78 @@ export class UserInterface extends Data
 
   drawChart(dataArr, col='black', pos=0, onto=false, div=1)
   {
-    var canvas = document.getElementById( "chart" );  
+    var canvas = document.getElementById( "chart" );
     var context = canvas.getContext( "2d" );
-    
-    var GRAPH_HEIGHT = (this.chart.clientHeight / div) - 5;
-    var GRAPH_TOP = 5 + (pos * GRAPH_HEIGHT);  
-    var GRAPH_BOTTOM = 375;  
-    var GRAPH_LEFT = 5;  
-    var GRAPH_RIGHT = 475;  
-  
-    var GRAPH_WIDTH = this.chart.clientWidth;  
-    var arrayLen = dataArr.length;  
-  
-    var largest = 0;  
-    for( var i = 0; i < arrayLen; i++ ){  
-        if( dataArr[ i ] > largest ){  
-            largest = dataArr[ i ];  
-        }  
-    }  
-  
-    if (!onto) {
-      context.clearRect( 0, 0, 500, 400 );  
+
+    var GRAPH_HEIGHT = 100;
+    var GRAPH_TOP = 10;
+    var GRAPH_BOTTOM = 130;
+    var GRAPH_LEFT = 5;
+    var GRAPH_RIGHT = this.chart.clientWidth;
+
+    var GRAPH_WIDTH = this.chart.clientWidth;
+    var arrayLen = dataArr.length;
+
+    var largest = 0;
+    for( var i = 0; i < arrayLen; i++ ){
+        if( dataArr[ i ] > largest ){
+            largest = dataArr[ i ];
+        }
     }
-    // set font for fillText()  
-    context.font = "16px Arial";  
-       
-    // draw X and Y axis  
-    context.beginPath();  
-    context.moveTo( GRAPH_LEFT, GRAPH_BOTTOM );  
-    context.lineTo( GRAPH_RIGHT, GRAPH_BOTTOM );  
-    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );  
+
+    if (!onto) {
+      context.clearRect( 0, 0, 500, 400 );
+    }
+    // set font for fillText()
+    context.font = "9px Arial";
+
+    // draw X and Y axis
+    context.beginPath();
+    context.moveTo( GRAPH_LEFT, GRAPH_BOTTOM );
+    context.lineTo( GRAPH_RIGHT, GRAPH_BOTTOM );
+    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );
     context.stroke();
-       
-    // draw reference line  
-    context.beginPath();  
-    context.strokeStyle = "#BBB";  
-    context.moveTo( GRAPH_LEFT, GRAPH_TOP );  
-    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );  
-    // draw reference value for hours  
-    context.fillText( largest, GRAPH_RIGHT + 15, GRAPH_TOP);  
-    context.stroke();  
-   
-    // draw reference line  
-    context.beginPath();  
-    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );  
-    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );  
-    // draw reference value for hours  
-    context.fillText( largest / 4, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP);  
-    context.stroke();  
-   
-    // draw reference line  
-    context.beginPath();  
-    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );  
-    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );  
-    // draw reference value for hours  
-    context.fillText( largest / 2, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP);  
-    context.stroke();  
-   
-    // draw reference line  
-    context.beginPath();  
-    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );  
-    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );  
-    // draw reference value for hours  
-    context.fillText( largest / 4 * 3, GRAPH_RIGHT + 15, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP);  
-    context.stroke();  
-  
-    // draw titles  
-    context.fillText( "Day of the week", GRAPH_RIGHT / 3, GRAPH_BOTTOM + 50);  
-    context.fillText( "Hours", GRAPH_RIGHT + 30, GRAPH_HEIGHT / 2);  
-  
-    context.beginPath();  
-    context.lineJoin = "round";  
-    context.strokeStyle = col;  
-  
-    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ 0 ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );  
-    // draw reference value for day of the week  
-    context.fillText( "1", 15, GRAPH_BOTTOM + 25);  
-    for( var i = 1; i < arrayLen; i++ ){  
-        context.lineTo( GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ i ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );  
-        // draw reference value for day of the week  
-        context.fillText( ( i + 1 ), GRAPH_RIGHT / arrayLen * i, GRAPH_BOTTOM + 25);  
-    }  
-    context.stroke();  
+
+    // draw reference line
+    context.beginPath();
+    context.strokeStyle = "#BBB";
+    context.moveTo( GRAPH_LEFT, GRAPH_TOP );
+    context.lineTo( GRAPH_RIGHT, GRAPH_TOP );
+    // draw reference value for hours
+    context.stroke();
+
+    // draw reference line
+    context.beginPath();
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 * 3 + GRAPH_TOP );
+    // draw reference value for hours
+    context.stroke();
+
+    // draw reference line
+    context.beginPath();
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 2 + GRAPH_TOP );
+    // draw reference value for hours
+    context.stroke();
+
+    // draw reference line
+    context.beginPath();
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );
+    context.lineTo( GRAPH_RIGHT, ( GRAPH_HEIGHT ) / 4 + GRAPH_TOP );
+    // draw reference value for hours
+    context.stroke();
+
+    context.beginPath();
+    context.lineJoin = "round";
+    context.strokeStyle = col;
+
+    context.moveTo( GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ 0 ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );
+    // draw reference value for day of the week
+    for( var i = 1; i < arrayLen; i++ ){
+        context.lineTo( GRAPH_RIGHT / arrayLen * i + GRAPH_LEFT, ( GRAPH_HEIGHT - dataArr[ i ] / largest * GRAPH_HEIGHT ) + GRAPH_TOP );
+        // draw reference value for day of the week
+    }
+
+    context.stroke();
   }
 }

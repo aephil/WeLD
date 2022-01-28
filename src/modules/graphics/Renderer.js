@@ -1,7 +1,7 @@
 import {assert, Data, rotX, rotY, centreToScreenXPeriodic, centreToScreenYPeriodic, colouredText} from '../helpers.js'
 import Vector from '../physics/Vector.js';
 
-export class Renderer extends Data 
+export class Renderer extends Data
 {
   constructor(shared)
   {
@@ -32,11 +32,11 @@ export class Renderer extends Data
     this.debug;
     this.probe = true;
     this.probeCounter = 0;
-    this.sampleSize = 300;
-    this.probeRate = 100;
-    this.samples1 = [];
-    this.samples2 = [];
-    this.samples3 = [];
+    this.sharedData.sampleSize = 100;
+    this.probeRate = 50;
+    this.sharedData.samples1 = [];
+    this.sharedData.samples2 = [];
+    this.sharedData.samples3 = [];
     this.mouseX = 0;
     this.mouseY = 0;
     this.dragStartX = 0;
@@ -54,7 +54,7 @@ export class Renderer extends Data
         this.pause = true;
       }
     })
-    
+
   }
 
   setSpeed(n){
@@ -74,7 +74,7 @@ export class Renderer extends Data
 
   animate = () =>
   {
-    if (!(this.pause)) 
+    if (!(this.pause))
     {
       const end = performance.now();
       this.elapsed = (end - this.start)/1000;
@@ -90,9 +90,10 @@ export class Renderer extends Data
         this.drawToolTip();
         this.redraw();
         if (this.probe) {
-            this.ui.drawChart(this.samples1, 'red', 0);
-            this.ui.drawChart(this.samples2, 'blue', 0, true);
-            this.ui.drawChart(this.samples3, 'green', 0, true);
+            this.ui.drawChart(this.sharedData.samples1, 'red', 0);
+            this.ui.drawChart(this.sharedData.samples2, 'blue', 0, true);
+            this.ui.drawChart(this.sharedData.samples3, 'green', 0, true);
+            console.log(this.sharedData.samples3.length)
           }
         this.frames++;
       }
@@ -154,7 +155,7 @@ export class Renderer extends Data
       this.sharedData.nodes.forEach( (n) => {
         const onScreenPos = this.cameraView(n.ri);
 
-        const isHit = (Math.abs(centreToScreenXPeriodic(onScreenPos.x, this.ui.canvas.width) - this.mouseX) < n.r) 
+        const isHit = (Math.abs(centreToScreenXPeriodic(onScreenPos.x, this.ui.canvas.width) - this.mouseX) < n.r)
         && (Math.abs(centreToScreenYPeriodic(onScreenPos.y, this.ui.canvas.height)- this.mouseY) < n.r)
 
         if (isHit && n.visible){
@@ -177,8 +178,8 @@ export class Renderer extends Data
         {
           datapoint.stroke="black";
           this.sharedData.highlighted=false;
-        } 
-        else 
+        }
+        else
         {
           datapoint.stroke = "red";
           if (this.sharedData.highlighted!==false)
@@ -237,34 +238,34 @@ cameraView(pos)
     this.updates.forEach((fn) => {
       fn(this.sharedData);
     });
-    
+
     if (this.debug) {
       //this.debug(lattice);
     }
 
-    if (this.probe) { 
-  
-      if (this.samples1.length>this.sampleSize) 
+    if (this.probe) {
+
+      if (this.sharedData.samples1.length>this.sharedData.sampleSize)
       {
-        this.samples1.shift();
+        this.sharedData.samples1.shift();
       }
-      if (this.samples2.length>this.sampleSize) 
+      if (this.sharedData.samples2.length>this.sharedData.sampleSize)
       {
-        this.samples2.shift();
+        this.sharedData.samples2.shift();
       }
-      if (this.samples3.length>this.sampleSize) 
+      if (this.sharedData.samples3.length>this.sharedData.sampleSize)
       {
-        this.samples3.shift();
+        this.sharedData.samples3.shift();
       }
 
       if (this.sharedData.highlighted===false)
       {
         const KE = this.sharedData.quantities[0].value;
         const PE = this.sharedData.quantities[1].value;
-  
-        this.samples1.push(KE);
-        this.samples2.push(PE);
-        this.samples3.push(KE+PE);
+
+        this.sharedData.samples1.push(KE);
+        this.sharedData.samples2.push(PE);
+        this.sharedData.samples3.push(KE+PE);
 
         if (this.probeCounter % this.probeRate === 0)
         {
@@ -279,20 +280,20 @@ cameraView(pos)
           `
         }
       }
-      else 
+      else
       {
         const i = this.sharedData.highlighted;
         const d = this.sharedData.nodes[i];
         const KE = 0.5 * d.m *  (d.vi.x ** 2 + d.vi.y ** 2 + d.vi.z ** 2);
         const PE = this.sharedData.nodes[i].potential;
 
-        this.samples1.push(KE);
-        this.samples2.push(PE);
-        this.samples3.push(KE+PE);
+        this.sharedData.samples1.push(KE);
+        this.sharedData.samples2.push(PE);
+        this.sharedData.samples3.push(KE+PE);
 
         if (this.probeCounter % (this.probeRate/10.) === 0)
         {
-          
+
           this.ui.chartDesc.innerHTML =
           `
           <p>
@@ -305,7 +306,7 @@ cameraView(pos)
         }
       }
 
-      
+
       this.probeCounter++;
     }
   }
@@ -440,7 +441,7 @@ drawToolTip()
     const active = []
     this.sharedData.nodes.forEach((n) => {
       const imagePos = this.cameraView(n.ri);
-      const isHit = (Math.abs(centreToScreenXPeriodic(imagePos.x, this.ui.canvas.width) - this.mouseX) < n.r) 
+      const isHit = (Math.abs(centreToScreenXPeriodic(imagePos.x, this.ui.canvas.width) - this.mouseX) < n.r)
       && (Math.abs(centreToScreenYPeriodic(imagePos.y, this.ui.canvas.height) - this.mouseY) < n.r)
       if (isHit && n.visible){
         active.push(n)
@@ -461,7 +462,7 @@ drawToolTip()
     }
   }
 
-  
+
 
 }
 
@@ -476,7 +477,7 @@ const Renderer2 = function () {
   this.setLattice = function(l){
 
     // inspect lattice settings
-    if (this.ui) 
+    if (this.ui)
     {
       this.ui.terminal.log("loaded " + this.colouredText(this.sharedData.name, "blue")
        + " lattice data with " + this.colouredText(this.sharedData.sizeX, "blue")
@@ -487,7 +488,7 @@ const Renderer2 = function () {
 
         if(this.sharedData.showEdges){
           this.ui.terminal.logWarning(
-            `enabling edges may cause a significant 
+            `enabling edges may cause a significant
             hit to the frame rate.`
            );
         }
@@ -495,4 +496,3 @@ const Renderer2 = function () {
   }
 
 };
-
