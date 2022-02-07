@@ -6,10 +6,10 @@ import {
     PotentialEnergy
 } from '../../modules/physics/quantities.js';
 
-const epsilon = 1;
+const epsilon = 10;
 const sigma = 100;
-const r0 = sigma * (2 ** 1/6);
-const edgeLen = r0 * 3;
+const r0 = sigma * (2 ** (1/6));
+const edgeLen = r0 * 1.5;
 
 var shared = {};
 
@@ -31,13 +31,6 @@ lattice.setInterAtomicForces(
     },
     () => true // depending on the predicate sets the neighbour in params.
 );
-
-const d1 = shared.nodes[0];
-const d2 = shared.nodes[1];
-d2.ri.x = d1.ri.x + r0 * 2;
-d2.ri.y = d1.ri.y;
-d2.ri.z = d1.ri.z;
-
 
 let i = 0;
 function debugQuantities(lattice) {
