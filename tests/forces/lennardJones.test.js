@@ -1,21 +1,23 @@
 const Vector = require('../../transpiled/modules/physics/Vector');
 const ForceMap = require('../../transpiled/modules/physics/ForceMap');
 
-let data = [
+let shared = {
+    nodes: [
     {id: 0, ri: {x: 0, y: 0, z: 0}},
     {id: 1, ri: {x: 0, y: 10, z: 0}}
-]
+    ]
+}
 
 const params = [1, 10, 1];
 const [epsilon, sigma, neighbourIndex] = params;
-const r0 = sigma * (2 ** (1/6))
+const r0 = sigma * (2 ** (1/6));
 
 describe('Lennard Jones force', () => {
     it("Force is zero at distance equal to r0", () => {
-        data[1].ri.y = r0;
-        const d = data[0];
+        shared.nodes[1].ri.y = r0;
+        const d = shared.nodes[0];
 
-        const actions = ForceMap.lennardJones(d, data, params);
+        const actions = ForceMap.lennardJones(d, shared, params);
         const fa = actions[0][1];
         const fb = actions[1][1];
         // Use toBeClose to instead of toEqual because
@@ -28,11 +30,11 @@ describe('Lennard Jones force', () => {
     })
 
     it("Force is attractive at distance greater than sigma * 2^(1/6)", () => {
-        data[1].ri = {x: r0, y: r0, z: r0};
-        const d = data[0];
+        shared.nodes[1].ri = {x: r0, y: r0, z: r0};
+        const d = shared.nodes[0];
         const a = d;
-        const b = data[1];
-        const actions = ForceMap.lennardJones(d, data, params);
+        const b = shared.nodes[1];
+        const actions = ForceMap.lennardJones(d, shared, params);
         const fa = actions[0][1];
         const fb = actions[1][1];
         const ab = Vector.sub(b.ri, a.ri);
@@ -47,11 +49,11 @@ describe('Lennard Jones force', () => {
     })
 
     it("Force is repelling at distance less than r0", () => {
-        data[1].ri = {x: r0 * 0.1, y: r0 * 0.1, z: r0 * 0.1};
-        const d = data[0];
+        shared.nodes[1].ri = {x: r0 * 0.1, y: r0 * 0.1, z: r0 * 0.1};
+        const d = shared.nodes[0];
         const a = d;
-        const b = data[1];
-        const actions = ForceMap.lennardJones(d, data, params);
+        const b = shared.nodes[1];
+        const actions = ForceMap.lennardJones(d, shared, params);
         const fa = actions[0][1];
         const fb = actions[1][1];
         const ab = Vector.sub(b.ri, a.ri);
@@ -61,11 +63,11 @@ describe('Lennard Jones force', () => {
     })
 
     it("Force should be very small at distance much larger than r0", () => {
-        data[1].ri = {x: r0 * 1000, y: r0 * 1000, z: r0 * 1000};
-        const d = data[0];
+        shared.nodes[1].ri = {x: r0 * 1000, y: r0 * 1000, z: r0 * 1000};
+        const d = shared.nodes[0];
         const a = d;
-        const b = data[1];
-        const actions = ForceMap.lennardJones(d, data, params);
+        const b = shared.nodes[1];
+        const actions = ForceMap.lennardJones(d, shared, params);
         const fa = actions[0][1];
         const fb = actions[1][1];
         const ab = Vector.sub(b.ri, a.ri);
@@ -75,11 +77,11 @@ describe('Lennard Jones force', () => {
     })
 
     it("Force should be very large at distance much smaller than r0", () => {
-        data[1].ri = {x: r0 * 0.001, y: r0 * 0.001, z: r0 * 0.001};
-        const d = data[0];
+        shared.nodes[1].ri = {x: r0 * 0.001, y: r0 * 0.001, z: r0 * 0.001};
+        const d = shared.nodes[0];
         const a = d;
-        const b = data[1];
-        const actions = ForceMap.lennardJones(d, data, params);
+        const b = shared.nodes[1];
+        const actions = ForceMap.lennardJones(d, shared, params);
         const fa = actions[0][1];
         const fb = actions[1][1];
         const ab = Vector.sub(b.ri, a.ri);

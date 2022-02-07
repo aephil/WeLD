@@ -96,12 +96,14 @@ export const lennardJones = function(d, shared, params) {
             const ba = Vector.sub(a.ri, b.ri);
             const r = Vector.norm(ba);
             const u = Vector.normalise(ba);
+            const A = (sigma / r) ** 12;
+            const B = (sigma / r) ** 6;
             const faMagnitude = 24 * epsilon / r
-                * (2 * (sigma / r) ** 12 - (sigma / r) ** 6)
+                * (2 * A - B);
             const fa = Vector.scale(faMagnitude, u);
             const fb = Vector.scale(-1, fa);
 
-            const potential = 4 * epsilon * ((sigma / r) ** 12 - (sigma / r) ** 6)
+            const potential = 4 * epsilon * (A - B)
 
     return [
         [a.id, fa, potential / 2],
