@@ -6,27 +6,30 @@ const k = 1
 const r0 = 10
 const neighbourIndex = 1
 
-let data = [
-    { id: 0, ri: { x: 0, y: 0, z: 0 } },
-    { id: 1, ri: { x: 0, y: 0, z: 0 } }
-];
+let data = {
+    nodes:
+        [
+            { id: 0, ri: { x: 0, y: 0, z: 0 } },
+            { id: 1, ri: { x: 0, y: 0, z: 0 } }
+        ]
+};
 
 const params = [k, r0, neighbourIndex]
-let d = data[0]
+let d = data.nodes[0]
 
 describe('Harmonic spring potential', () => {
     it("Force should be zero when nodes are at equilibrium separation", () => {
-        data[1].ri = { x: r0, y: 0, z: 0 };
+        data.nodes[1].ri = { x: r0, y: 0, z: 0 };
         const actions = ForceMap.spring(d, data, params)
         const force = actions[0][1]
         expect(Vector.norm(force)).toEqual(0)
     })
 
     it("Force should be attractive when nodes are further away then equilibrium separation", () => {
-        data[1].ri = { x: r0, y: r0, z: r0 };
+        data.nodes[1].ri = { x: r0, y: r0, z: r0 };
         const actions = ForceMap.spring(d, data, params)
         const force = actions[0][1]
-        const ab = Vector.sub(data[1].ri, d.ri)
+        const ab = Vector.sub(data.nodes[1].ri, d.ri)
         const dot = Vector.dot(force, ab)
         // Check that direction of the force is positive on the axis
         // towards the other node
@@ -37,10 +40,10 @@ describe('Harmonic spring potential', () => {
     })
 
     it("Force should be repulsive when nodes are closer than equilibrium separation", () => {
-        data[1].ri = { x: r0 * 0.1, y: r0 * 0.1, z: r0 * 0.1 };
+        data.nodes[1].ri = { x: r0 * 0.1, y: r0 * 0.1, z: r0 * 0.1 };
         const actions = ForceMap.spring(d, data, params)
         const force = actions[0][1]
-        const ab = Vector.sub(data[1].ri, d.ri)
+        const ab = Vector.sub(data.nodes[1].ri, d.ri)
         const dot = Vector.dot(force, ab)
         // Check that the direction of the force is negative
         // on the axis towards the other node
@@ -52,12 +55,12 @@ describe('Harmonic spring potential', () => {
 
     it("Force should scale linearly with separation", () => {
         // separation of 10 units
-        data[1].ri = { x: r0 + 10, y: 0, z: 0 };
+        data.nodes[1].ri = { x: r0 + 10, y: 0, z: 0 };
         const actions1 = ForceMap.spring(d, data, params)
         const force1 = actions1[0][1]
 
         // separation of 20 units
-        data[1].ri = {x: r0 + 20, y: 0, z: 0};
+        data.nodes[1].ri = { x: r0 + 20, y: 0, z: 0 };
         const actions2 = ForceMap.spring(d, data, params);
         const force2 = actions2[0][1]
 
