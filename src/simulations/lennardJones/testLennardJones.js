@@ -6,7 +6,7 @@ import {
     PotentialEnergy
 } from '../../modules/physics/quantities.js';
 
-const epsilon = 10;
+const epsilon = 1000;
 const sigma = 100;
 const r0 = sigma * (2 ** (1/6));
 const edgeLen = r0 * 1.5;
