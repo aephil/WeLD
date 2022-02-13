@@ -12,17 +12,25 @@ export class Renderer extends Data
 
     // shared member variables
     this.sharedData.highlighted = false;
+    this.sharedData.sampleSize = 100;
+    this.sharedData.probeRate = 50;
+    this.sharedData.samples1 = [];
+    this.sharedData.samples2 = [];
+    this.sharedData.samples3 = [];
+    this.sharedData.fps = 30 // framerate for drawing graphics
+    this.sharedData.frames = 0;
+    this.sharedData.fstart = performance.now();
 
     // private member variables
-    this.frames = 0;
     this.elapsed = 0; // in seconds
     this.start = performance.now(); // start timestamp
+ 
     this.rho = 0
     this.translate={x:0,y:0,z:0};
     this.theta = 0;
     this.rhoLast = 0
     this.thetaLast = 0
-    this.fps = 30 // framerate for drawing graphics
+
     this.freq = 1 // do physics updates at this rate in seconds^-1
     this.updateCounter = 0;
     this.pause = false;
@@ -32,11 +40,7 @@ export class Renderer extends Data
     this.debug;
     this.probe = true;
     this.probeCounter = 0;
-    this.sharedData.sampleSize = 100;
-    this.probeRate = 50;
-    this.sharedData.samples1 = [];
-    this.sharedData.samples2 = [];
-    this.sharedData.samples3 = [];
+
     this.mouseX = 0;
     this.mouseY = 0;
     this.dragStartX = 0;
@@ -46,12 +50,11 @@ export class Renderer extends Data
     this.ui;
 
     document.addEventListener("visibilitychange", (event) => {
-      if (document.visibilityState == "visible") {
-        this.pause = false;
-        this.start = performance.now(); // add small delay from end.
-        this.frames = 0;
-      } else {
-        this.pause = true;
+      if (document.visibilityState != "visible") {
+        this.ui.terminal.logWarning(
+        `unfocusing this webpage for extended lengths of time will cause the real-time FPS
+         reading to be momentarirly inaccurate before stabilising!`
+         )
       }
     })
 
@@ -66,7 +69,7 @@ export class Renderer extends Data
   };
 
   setFPS(n){
-    this.fps = n;
+    this.sharedData.fps = n;
     if(this.ui){
       this.ui.terminal.log("fps set to "+colouredText(n,"blue"))
     }
@@ -78,13 +81,14 @@ export class Renderer extends Data
     {
       const end = performance.now();
       this.elapsed = (end - this.start)/1000;
+      var felapsed = (end - this.sharedData.fstart)/1000;
 
       if(this.elapsed > (1/this.freq* this.updateCounter)){
         this.update();
         this.updateCounter++;
       }
       requestAnimationFrame(this.animate);
-      if (this.elapsed > this.frames * (1/this.fps))
+      if (felapsed > this.sharedData.frames * (1/this.sharedData.fps))
       {
         this.drawInfo();
         this.drawToolTip();
@@ -93,9 +97,8 @@ export class Renderer extends Data
             this.ui.drawChart(this.sharedData.samples1, 'red', 0);
             this.ui.drawChart(this.sharedData.samples2, 'blue', 0, true);
             this.ui.drawChart(this.sharedData.samples3, 'green', 0, true);
-            console.log(this.sharedData.samples3.length)
           }
-        this.frames++;
+        this.sharedData.frames++;
       }
     }
   }
@@ -267,12 +270,12 @@ cameraView(pos)
         this.sharedData.samples2.push(PE);
         this.sharedData.samples3.push(KE+PE);
 
-        if (this.probeCounter % this.probeRate === 0)
+        if (this.probeCounter % this.sharedData.probeRate === 0)
         {
           this.ui.chartDesc.innerHTML =
           `
           <p>
-          <text class="grey">Probing lattice every ${this.probeRate} updates</text><br>
+          <text class="grey">Probing lattice every ${this.sharedData.probeRate} updates</text><br>
           <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
           <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
           <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
@@ -291,13 +294,13 @@ cameraView(pos)
         this.sharedData.samples2.push(PE);
         this.sharedData.samples3.push(KE+PE);
 
-        if (this.probeCounter % (this.probeRate/10.) === 0)
+        if (this.probeCounter % (this.sharedData.probeRate/10.) === 0)
         {
 
           this.ui.chartDesc.innerHTML =
           `
           <p>
-          <text class="grey">Probing node #${i} every ${(this.probeRate/10.)} updates</text><br>
+          <text class="grey">Probing node #${i} every ${(this.sharedData.probeRate/10.)} updates</text><br>
           <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
           <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
           <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
@@ -376,10 +379,11 @@ cameraView(pos)
 
 drawInfo(){
 
+    var felapsed = (performance.now() - this.sharedData.fstart)/ 1000;
     this.ui.textInfo.innerHTML = "rho: " + parseFloat(this.rho).toFixed(2) +"</br> "
     this.ui.textInfo.innerHTML += "theta: " + parseFloat(this.theta).toFixed(2) + "</br>";
-    const realFPS = (this.frames / this.elapsed).toFixed(2);
-    const fpsRatio = (realFPS/this.fps)
+    const realFPS = (this.sharedData.frames / felapsed).toFixed(2);
+    const fpsRatio = (realFPS/this.sharedData.fps)
     let fpsDisplay;
     if(fpsRatio > 0.7){
       fpsDisplay = "<text class='green'>"+realFPS+"</text>"
@@ -389,6 +393,7 @@ drawInfo(){
       fpsDisplay = "<text class='red'>"+realFPS+"</text>"
     }
     this.ui.textInfo.innerHTML += "fps: " + fpsDisplay + "</br>";
+    this.ui.textInfo.innerHTML += "elapsec (s): " + this.elapsed.toFixed(2) + "</br>";
 
     if(this.sharedData.highlighted!==false)
     {
@@ -417,19 +422,28 @@ drawInfo(){
             this.ui.textInfo.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Vector.norm(Vector.sub(datapoint.ri, nodes[force.params[2]].ri)) ).toFixed(2)+"</br>"
             this.ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
           }
-
+          else
           if(force.name=="valenceAngle")
           {
             const ba = Vector.sub(datapoint.ri,nodes[force.params[2]].ri);
             const bc = Vector.sub(datapoint.ri,nodes[force.params[3]].ri);
             const abc = Vector.angle(ba, bc);
 
-            ui.textInfo.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-            ui.textInfo.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
+            this.ui.textInfo.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
             +" ("+nodes[force.params[2]].name+")"+", "+force.params[3]+" ("+nodes[force.params[3]].name+")"+"</br>";
-            ui.textInfo.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
-            ui.textInfo.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
-            ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+          }
+          else
+          if(force.name=="lennardJones")
+          {
+            this.ui.textInfo.innerHTML += "</br>&emsp;" + "lennard jones" + "</br>"
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
+            +" ("+nodes[force.params[2]].name+")"+"</br>";
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;&emsp;&emsp;epsilon: "+(force.params[0]).toFixed(2) + "</br>"
+            this.ui.textInfo.innerHTML += "&emsp;&emsp;&emsp;&emsp;sigma: "+(force.params[1]).toFixed(2) + "</br>"
           }
         }
       }
