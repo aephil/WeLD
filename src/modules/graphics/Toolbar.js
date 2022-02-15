@@ -4,6 +4,9 @@ export class Toolbar extends Data
 {
     constructor(shared) {
         super(shared);
+        this.sharedData.temperature = 0.1;
+        this.sharedData.realTemp = 0;
+
         this.optionMap =  new Map(
             [
               ["temperature", this.temperatureSlider],
@@ -14,9 +17,6 @@ export class Toolbar extends Data
 
         this.element = document.createElement("div");
         this.selection = "none";
-
-        // temperature settings
-        this.sharedData.temperature = 0;
       }
 
     temperatureSlider = ()=>
@@ -28,22 +28,27 @@ export class Toolbar extends Data
       container.style.position = "absolute";
       container.style.width = (this.element.clientWidth/4) + "px";
       container.style.height = "50px";
-      container.style.top = this.element.clientHeight + "px";
+      container.style.top = this.element.clientHeight + 10 + "px";
+      container.style.left = 10 + "px";
       container.style.backgroundColor = "rgba(0,0,0,0.5)";
-      container.innerHTML = 
-      `
-      <p>
-      temperature: ${this.sharedData.temperature}
-      </p>
-      `
+      container.style.borderRadius = "10px";
+
+      const label = document.createElement("p");
+      container.appendChild(label);
+      label.innerHTML = `Temperature: ${this.sharedData.temperature}`;
 
       const slider = document.createElement("input");
       container.appendChild(slider);
       slider.setAttribute("type","range");
-      slider.setAttribute("min",0);
+      slider.setAttribute("min",0.001);
       slider.setAttribute("max",100);
       slider.setAttribute("step",1);
       slider.setAttribute("value",this.sharedData.temperature);
+
+      slider.oninput = ()=> {
+        this.sharedData.temperature = slider.value;
+        label.innerHTML = `Temperature: ${this.sharedData.temperature}`;
+      }
 
     }
 

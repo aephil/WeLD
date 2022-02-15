@@ -382,6 +382,8 @@ drawInfo(){
     var felapsed = (performance.now() - this.sharedData.fstart)/ 1000;
     this.ui.textInfo.innerHTML = "rho: " + parseFloat(this.rho).toFixed(2) +"</br> "
     this.ui.textInfo.innerHTML += "theta: " + parseFloat(this.theta).toFixed(2) + "</br>";
+    this.ui.textInfo.innerHTML += "temperature: " + parseFloat(this.sharedData.realTemp).toFixed(2) + "</br>";
+    this.ui.textInfo.innerHTML += "temperature stability: " + parseFloat((this.sharedData.temperature/ this.sharedData.realTemp)*100).toFixed(0) + "%</br>";
     const realFPS = (this.sharedData.frames / felapsed).toFixed(2);
     const fpsRatio = (realFPS/this.sharedData.fps)
     let fpsDisplay;

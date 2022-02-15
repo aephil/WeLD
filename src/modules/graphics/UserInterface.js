@@ -137,7 +137,7 @@ export class UserInterface extends Data
     this.terminal.element.style.padding = "2.5px";
     this.terminal.element.style.fontFamily = "monospace";
     this.terminal.element.style.overflowX = "hidden";
-    this.terminal.element.style.overflowY = "scroll";
+    this.terminal.element.style.overflowY = "auto";
     this.terminal.element.style.backgroundColor = "white";
 
     // initialise terminal after styling;
@@ -165,7 +165,7 @@ export class UserInterface extends Data
     this.infoBox.style.color = "black"//"rgb(173,172,173)";
     this.infoBox.style.zIndex = document.getElementById("control").style.zIndex + 1;
     this.infoBox.style.overflowX = "hidden";
-    this.infoBox.style.overflowY = "scroll";
+    this.infoBox.style.overflowY = "auto";
 
     this.textInfo = document.createElement("div");
     this.infoBox.appendChild(this.textInfo);
