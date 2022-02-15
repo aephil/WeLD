@@ -4,13 +4,18 @@ export class Toolbar extends Data
 {
     constructor(shared) {
         super(shared);
+
+        // temperature shared variables
         this.sharedData.temperature = 0.1;
         this.sharedData.realTemp = 0;
+
+        // spring shared variable
+        this.sharedData.springK = 1;
 
         this.optionMap =  new Map(
             [
               ["temperature", this.temperatureSlider],
-              ["something1", ()=>{console.log("you pressed something1")}],
+              ["spring", this.springKSlider],
               ["something2", ()=>{console.log("you pressed something2")}],
             ]
           );
@@ -42,12 +47,45 @@ export class Toolbar extends Data
       slider.setAttribute("type","range");
       slider.setAttribute("min",0.001);
       slider.setAttribute("max",100);
-      slider.setAttribute("step",1);
+      slider.setAttribute("step",0.001);
       slider.setAttribute("value",this.sharedData.temperature);
 
       slider.oninput = ()=> {
         this.sharedData.temperature = slider.value;
         label.innerHTML = `Temperature: ${this.sharedData.temperature}`;
+      }
+
+    }
+
+    springKSlider = ()=>
+    {
+      let container = document.createElement("div");
+      this.element.appendChild(container);
+      container.setAttribute("id", "spring_opt_ui");
+      container.style.padding = "20px 10px";
+      container.style.position = "absolute";
+      container.style.width = (this.element.clientWidth/4) + "px";
+      container.style.height = "50px";
+      container.style.top = this.element.clientHeight + 10 + "px";
+      container.style.left = 10 + "px";
+      container.style.backgroundColor = "rgba(0,0,0,0.5)";
+      container.style.borderRadius = "10px";
+
+      const label = document.createElement("p");
+      container.appendChild(label);
+      label.innerHTML = `Spring Constant: ${this.sharedData.springK}`;
+
+      const slider = document.createElement("input");
+      container.appendChild(slider);
+      slider.setAttribute("type","range");
+      slider.setAttribute("min",0.01);
+      slider.setAttribute("max",2);
+      slider.setAttribute("step",0.01);
+      slider.setAttribute("value",this.sharedData.springK);
+
+      slider.oninput = ()=> {
+        this.sharedData.springK = slider.value;
+        label.innerHTML = `Spring Constant: ${this.sharedData.springK}`;
       }
 
     }

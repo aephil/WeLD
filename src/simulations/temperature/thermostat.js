@@ -28,7 +28,7 @@ const springPredicate = (d1, d2) => {
     return distanceSquared <= edgeLen ** 2;
 }
 
-lattice.makePrimitive3D(2, 1, 1, edgeLen);
+lattice.makePrimitive3D(9, 1, 1, edgeLen);
 
 const k = 1;
 
