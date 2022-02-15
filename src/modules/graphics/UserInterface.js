@@ -1,6 +1,7 @@
 import Vector from '../physics/Vector.js';
 import { Data } from '../helpers.js';
 import { Terminal } from './Terminal.js';
+import { Toolbar } from './Toolbar.js';
 
 export class UserInterface extends Data
 {
@@ -16,13 +17,15 @@ export class UserInterface extends Data
     this.graphicInfo;
     this.control = false;
     this.terminal = new Terminal(shared);
+    this.toolbar = new Toolbar(shared);
   }
 
   showTooltip(pos, i)
   {
 
-    let tooltip = document.getElementById("tooltip");
+    const tooltip = document.getElementById("tooltip");
     const datapoint = this.sharedData.nodes[parseInt(i)];
+    const nodes = this.sharedData.nodes;
     tooltip.innerHTML = datapoint.name + ", id: #"+i+"</br>";
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
@@ -40,28 +43,36 @@ export class UserInterface extends Data
             tooltip.innerHTML += "</br>&emsp;" + (forces.length - i) + " more...</br>";
             break;
         }
-
         if(force.name=="spring")
         {
           tooltip.innerHTML += "</br>&emsp;" +force.name + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+this.sharedData.nodes[force.params[2]].name+")"+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+nodes[force.params[2]].name+")"+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, this.sharedData.nodes[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Extension: "+ Math.abs(Vector.norm(Vector.sub(datapoint.ri, nodes[force.params[2]].ri)) - force.params[1]).toFixed(2)+"</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
         }
-
+        else
         if(force.name=="valenceAngle")
         {
 
-          const ba = Vector.sub(datapoint.ri,data[force.params[2]].ri);
-          const bc = Vector.sub(datapoint.ri,data[force.params[3]].ri);
+          const ba = Vector.sub(datapoint.ri,nodes[force.params[2]].ri);
+          const bc = Vector.sub(datapoint.ri,nodes[force.params[3]].ri);
           const abc = Vector.angle(ba, bc);
 
           tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
+          tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+nodes[force.params[2]].name+")"+", "+force.params[3]+" ("+nodes[force.params[3]].name+")"+"</br>";
           tooltip.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
           tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+        }
+        else
+        if(force.name=="lennardJones")
+        {
+          tooltip.innerHTML += "</br>&emsp;" + "lennard jones" + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
+          +" ("+nodes[force.params[2]].name+")"+"</br>";
+          tooltip.innerHTML += "&emsp;&emsp;&emsp;&emsp;epsilon: "+(force.params[0]).toFixed(2) + "</br>"
+          tooltip.innerHTML += "&emsp;&emsp;&emsp;&emsp;sigma: "+(force.params[1]).toFixed(2) + "</br>"
         }
 
       }
@@ -130,7 +141,18 @@ export class UserInterface extends Data
     this.terminal.element.style.backgroundColor = "white";
 
     // initialise terminal after styling;
-    this.terminal.initTerminal();
+    this.terminal.init();
+
+    sim.appendChild(this.toolbar.element);
+    this.toolbar.element.setAttribute("id", "toolbar");
+    this.toolbar.element.style.position = "absolute";
+    this.toolbar.element.style.width = (sim.clientWidth)+"px"
+    this.toolbar.element.style.height = "auto";
+    this.toolbar.element.style.top = 3 + "px";
+    this.toolbar.element.style.left = 3 + "px";
+    this.toolbar.element.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+
+    this.toolbar.init();
 
     this.infoBox = document.createElement("div");
     control.appendChild(this.infoBox);

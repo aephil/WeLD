@@ -251,7 +251,7 @@ Terminal.prototype.updateScroll = function()
   this.element.scrollTop = this.element.scrollHeight;
 }
 
-Terminal.prototype.initTerminal = function()
+Terminal.prototype.init = function()
 {
   this.element.addEventListener("focus", (event) =>{
     this.element.style.color = "black";
