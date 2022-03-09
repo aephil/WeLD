@@ -65,7 +65,7 @@ const renderer = new Graphics.Renderer(shared);
 renderer.setUI(ui);
 renderer.setUpdates(updates);
 //renderer.setNodeUpdates(nodeUpdates);
-renderer.setDebug(debugQuantities);
+//renderer.setDebug(debugQuantities);
 
 renderer.setFPS(30);
 renderer.setSpeed(1000);

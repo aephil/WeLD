@@ -72,6 +72,11 @@ export const assert = function(condition, message) {
     }
 }
 
+export const approxEqual = function(a, b, precision)
+{
+    return Math.abs(a-b) < precision;
+}
+
 // container for sharing data accross classes
 export class Data {
     constructor(shared) {
