@@ -21,6 +21,12 @@ should simply calculate the force and return it.
 
 import Vector from './Vector.js';
 
+export const emptyForce = function(d, shared, params) {
+    const force = {x: 0, y: 0, z: 0};
+    const potential = 0;
+    return [[d.id, force, potential]];
+}
+
 export const testForce = function(d, shared, params) {
             // just for testing purposes
             const force = { x: 100, y: 100, z: 0 };
@@ -112,6 +118,7 @@ export const lennardJones = function(d, shared, params) {
         }
 export const forceMap = {
             "testForce": testForce,
+            "empty": emptyForce,
             "spring": spring,
             "valenceAngle": valenceAngle,
             "lennardJones": lennardJones
@@ -126,7 +133,10 @@ export const initValence = function(shared, k = 1) {
             if (f1.name == "spring") {
                 const index1 = f1.params[2]
                 const d2 = shared.nodes[index1];
-                d1.forces.forEach((f2) => {
+                // loop over d2, not d1 again, as we want to
+                // find a set of three nodes that are connected
+                // together by bonds, for example a---b---c
+                d2.forces.forEach((f2) => {
                     const index2 = f2.params[2]
                     if (f2.name == "spring" && index2 != index1) {
                         const d3 = shared.nodes[index2];
@@ -134,7 +144,9 @@ export const initValence = function(shared, k = 1) {
                         const vec1 = Vector.sub(d3.ri, d1.ri);
                         const vec2 = Vector.sub(d2.ri, d1.ri);
                         const eqAngle = Vector.angle(vec1, vec2)
-                        d1.forces.push(
+                        // push force onto d2 as it is the central
+                        // node in the interaction
+                        d2.forces.push(
                             {
                                 name: "valenceAngle",
                                 params: [k, eqAngle, index1, index2]

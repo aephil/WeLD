@@ -320,8 +320,8 @@ export class UserInterface extends Data
     tooltip.innerHTML += "x: "+parseFloat(datapoint.ri.x).toFixed(2)+", y: "+parseFloat(datapoint.ri.y).toFixed(2)+", z: "+parseFloat(datapoint.ri.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
     tooltip.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
-
     const forces = datapoint.forces;
+
     if(Array.isArray(forces) && forces.length)
     {
       tooltip.innerHTML += "force(s):"
@@ -345,16 +345,17 @@ export class UserInterface extends Data
 
         if(force.name=="valenceAngle")
         {
+          nValence++;
+          // commenting this out because it causes way too much lag
+          // const ba = Vector.sub(datapoint.ri,data[force.params[2]].ri);
+          // const bc = Vector.sub(datapoint.ri,data[force.params[3]].ri);
+          // const abc = Vector.angle(ba, bc);
 
-          const ba = Vector.sub(datapoint.ri,data[force.params[2]].ri);
-          const bc = Vector.sub(datapoint.ri,data[force.params[3]].ri);
-          const abc = Vector.angle(ba, bc);
-
-          tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
-          tooltip.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
-          tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+          // tooltip.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
+          // tooltip.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]+" ("+data[force.params[2]].name+")"+", "+force.params[3]+" ("+data[force.params[3]].name+")"+"</br>";
+          // tooltip.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+          // tooltip.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+          // tooltip.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
         }
 
       }

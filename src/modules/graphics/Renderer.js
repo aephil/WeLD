@@ -93,7 +93,6 @@ export class Renderer extends Data
             this.ui.drawChart(this.sharedData.samples1, 'red', 0);
             this.ui.drawChart(this.sharedData.samples2, 'blue', 0, true);
             this.ui.drawChart(this.sharedData.samples3, 'green', 0, true);
-            console.log(this.sharedData.samples3.length)
           }
         this.frames++;
       }
@@ -401,6 +400,10 @@ drawInfo(){
       this.ui.textInfo.innerHTML += "v: "+parseFloat(datapoint.vi.x).toFixed(2)+", y: "+parseFloat(datapoint.vi.y).toFixed(2)+", z: "+parseFloat(datapoint.vi.z).toFixed(2) + "</br>";
       this.ui.textInfo.innerHTML += "mass: "+parseFloat(datapoint.m).toFixed(2)+", radius: " + parseFloat(datapoint.r).toFixed(2)+"</br>";
 
+
+      // variable for counting the number of valence interaction
+      // a node is part of
+      let nValence = 0;
       const forces = datapoint.forces;
       if(Array.isArray(forces) && forces.length)
       {
@@ -419,21 +422,34 @@ drawInfo(){
           }
 
           if(force.name=="valenceAngle")
+            nValence++;
+            // commented this out because it causes way too much lag
           {
-            const ba = Vector.sub(datapoint.ri,nodes[force.params[2]].ri);
-            const bc = Vector.sub(datapoint.ri,nodes[force.params[3]].ri);
-            const abc = Vector.angle(ba, bc);
-
-            ui.textInfo.innerHTML += "</br>&emsp;" + "valence angle" + "</br>"
-            ui.textInfo.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
-            +" ("+nodes[force.params[2]].name+")"+", "+force.params[3]+" ("+nodes[force.params[3]].name+")"+"</br>";
-            ui.textInfo.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
-            ui.textInfo.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
-            ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+              //            const ba = Vector.sub(datapoint.ri,nodes[force.params[2]].ri);
+              //            const bc = Vector.sub(datapoint.ri,nodes[force.params[3]].ri);
+              //            const abc = Vector.angle(ba, bc);
+              //
+              //            this.ui.textInfo.innerHTML += "</br>&emsp;" +force.name + "</br>"
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;Neighbour: "+force.params[2] +" ("+nodes[force.params[2]].name+")"+"</br>"
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;equil. distance: "+(force.params[1]).toFixed(2) + "</br>"
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;Extension: "+ (force.params[1] - Vector.norm(Vector.sub(datapoint.ri, nodes[force.params[2]].ri)) ).toFixed(2)+"</br>"
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
+              //
+              //              this.ui.textInfo.innerHTML += `&emsp;&emsp;equilibrium angle: ${force.params[1]}`;
+              //              this.ui.textInfo.innerHTML += "<br>";
+              //              this.ui.textInfo.innerHTML += `&emsp;&emsp;Neighbours: <br>&emsp;&emsp;${force.params[2]}`
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;Neighbours:</br>&emsp;&emsp;&emsp;"+force.params[2]
+              //            // +" ("+nodes[force.params[2]].name+")"+", "+force.params[3]+" ("+nodes[force.params[3]].name+")"+"</br>";
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;equil. angle: "+(force.params[1]).toFixed(2) + "</br>"
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;angle: "+ abc.toFixed(2) + "</br>"
+              //            // this.ui.textInfo.innerHTML += "&emsp;&emsp;K: "+force.params[0] + "</br>"
           }
         }
       }
+
+      this.ui.textInfo.innerHTML += `${nValence} different valence interactions`
     }
+
   }
 
 drawToolTip()
