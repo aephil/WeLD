@@ -8,10 +8,27 @@ import {
 import { testThermostat } from '../../modules/physics/Thermostat.js';
 
 var shared = {};
+
+// 'forward declare' physics shared variables
+shared.temperature = 0;
+
 const edgeLen = 20;
 
 const ui = new Graphics.UserInterface(shared);
 ui.loadBasic(); // loads divs for simulation, control and terminal, and initialises the terminal
+
+// setup toolbar for canvas
+ui.canvasToolbar.addSlider("temperature", "temperature", 0.1, 1, 0.001);
+ui.canvasToolbar.addSlider("spring constant", "springK", 0.1, 2, 0.001);
+ui.canvasToolbar.init();
+
+
+// setup toolbar for chart
+ui.chartToolbar.addSlider("chart height", "analysisChartsLargest", 0.001, 2.5, 0.001)
+ui.chartToolbar.addSlider("sample size", "sampleSize", 100, 500, 1)
+ui.chartToolbar.init();
+
+
 
 const lattice = new Physics.Lattice(shared);
 lattice.setShowEdges(true);
@@ -28,10 +45,9 @@ const springPredicate = (d1, d2) => {
     return distanceSquared <= edgeLen ** 2;
 }
 
-lattice.makePrimitive3D(5, 5, 1, edgeLen);
+lattice.makePrimitive3D(2, 2, 1, edgeLen);
 
 const k = 1;
-
 lattice.setInterAtomicForces(
     {
         name: "spring",

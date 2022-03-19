@@ -14,7 +14,8 @@ export class Terminal extends Data {
           ["sample", this.setSampleSizeCommand],
           ["probe",this.setProbeRateCommand],
           ["fps", this.setFPSCommand],
-          ["clear", this.clearTerminalCommand]
+          ["clear", this.clearTerminalCommand],
+          ["chartheight", this.setChartHeightCommand]
         ]
       );
       this.output = "";
@@ -64,7 +65,6 @@ export class Terminal extends Data {
       }
     }
 
-
     setSampleSizeCommand = (args) =>
     {
       var size = args[0];
@@ -72,12 +72,30 @@ export class Terminal extends Data {
       {
           size = parseInt(size)
           if(this.sharedData.sampleSize > size){
-          this.sharedData.samples1 = this.sharedData.samples1.slice(-size, -1);
-          this.sharedData.samples2 = this.sharedData.samples2.slice(-size, -1);
-          this.sharedData.samples3 = this.sharedData.samples3.slice(-size, -1);
+            this.sharedData.analysisCharts.forEach(
+              (chart)=>
+              {
+                chart.data = chart.data.slice(-size, -1);
+              }
+            )
           }
           this.sharedData.sampleSize = size;
           this.log(`lattice sample size is now ${size}`);
+      }
+      else
+      {
+          this.logError("input is not an integer");
+      }
+    }
+
+    setChartHeightCommand = (args) =>
+    {
+      var size = args[0];
+      if( !isNaN(size) && (parseFloat(size) | 0) === parseFloat(size))
+      {
+          size = parseInt(size)
+          this.sharedData.analysisChartsLargest = size/100;
+          this.log(`chart height is now ${size/100}`);
       }
       else
       {

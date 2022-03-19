@@ -13,49 +13,12 @@ export class Toolbar extends Data
         this.sharedData.springK = 1;
 
         this.optionMap =  new Map(
-            [
-              ["temperature", this.temperatureSlider],
-              ["spring", this.springKSlider],
-              ["something2", ()=>{console.log("you pressed something2")}],
-            ]
+            []
           );
 
         this.element = document.createElement("div");
         this.selection = "none";
       }
-
-    temperatureSlider = ()=>
-    {
-      let container = document.createElement("div");
-      this.element.appendChild(container);
-      container.setAttribute("id", "temperature_opt_ui");
-      container.style.padding = "20px 10px";
-      container.style.position = "absolute";
-      container.style.width = (this.element.clientWidth/4) + "px";
-      container.style.height = "50px";
-      container.style.top = this.element.clientHeight + 10 + "px";
-      container.style.left = 10 + "px";
-      container.style.backgroundColor = "rgba(0,0,0,0.5)";
-      container.style.borderRadius = "10px";
-
-      const label = document.createElement("p");
-      container.appendChild(label);
-      label.innerHTML = `Temperature: ${this.sharedData.temperature}`;
-
-      const slider = document.createElement("input");
-      container.appendChild(slider);
-      slider.setAttribute("type","range");
-      slider.setAttribute("min",0.001);
-      slider.setAttribute("max",100);
-      slider.setAttribute("step",0.001);
-      slider.setAttribute("value",this.sharedData.temperature);
-
-      slider.oninput = ()=> {
-        this.sharedData.temperature = slider.value;
-        label.innerHTML = `Temperature: ${this.sharedData.temperature}`;
-      }
-
-    }
 
     springKSlider = ()=>
     {
@@ -90,6 +53,43 @@ export class Toolbar extends Data
 
     }
 
+}
+
+Toolbar.prototype.addSlider = function(name,variable, min, max, step)
+{
+  var fn = ()=>
+  {
+    let container = document.createElement("div");
+    this.element.appendChild(container);
+    container.setAttribute("id", name+"_opt_ui");
+    container.style.padding = "20px 10px";
+    container.style.position = "absolute";
+    container.style.width = (this.element.clientWidth/4) + "px";
+    container.style.height = "50px";
+    container.style.top = this.element.clientHeight + 10 + "px";
+    container.style.left = 10 + "px";
+    container.style.backgroundColor = "rgba(0,0,0,0.5)";
+    container.style.borderRadius = "10px";
+
+    const label = document.createElement("p");
+    container.appendChild(label);
+    label.innerHTML = `${name}: ${this.sharedData[variable]}`;
+
+    const slider = document.createElement("input");
+    container.appendChild(slider);
+    slider.setAttribute("type","range");
+    slider.setAttribute("min",min);
+    slider.setAttribute("max",max);
+    slider.setAttribute("step",step);
+    slider.setAttribute("value",this.sharedData[variable]);
+
+    slider.oninput = ()=> {
+      this.sharedData[variable] = slider.value;
+      label.innerHTML = `${name}: ${this.sharedData[variable]}`;
+    }
+
+  }
+  this.optionMap.set(name, fn);
 }
 
 

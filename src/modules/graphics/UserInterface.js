@@ -17,7 +17,8 @@ export class UserInterface extends Data
     this.graphicInfo;
     this.control = false;
     this.terminal = new Terminal(shared);
-    this.toolbar = new Toolbar(shared);
+    this.canvasToolbar = new Toolbar(shared);
+    this.chartToolbar = new Toolbar(shared);
   }
 
   showTooltip(pos, i)
@@ -143,16 +144,14 @@ export class UserInterface extends Data
     // initialise terminal after styling;
     this.terminal.init();
 
-    sim.appendChild(this.toolbar.element);
-    this.toolbar.element.setAttribute("id", "toolbar");
-    this.toolbar.element.style.position = "absolute";
-    this.toolbar.element.style.width = (sim.clientWidth)+"px"
-    this.toolbar.element.style.height = "auto";
-    this.toolbar.element.style.top = 3 + "px";
-    this.toolbar.element.style.left = 3 + "px";
-    this.toolbar.element.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
-
-    this.toolbar.init();
+    sim.appendChild(this.canvasToolbar.element);
+    this.canvasToolbar.element.setAttribute("id", "canvasToolbar");
+    this.canvasToolbar.element.style.position = "absolute";
+    this.canvasToolbar.element.style.width = (sim.clientWidth)+"px"
+    this.canvasToolbar.element.style.height = "auto";
+    this.canvasToolbar.element.style.top = 3 + "px";
+    this.canvasToolbar.element.style.left = 3 + "px";
+    this.canvasToolbar.element.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
 
     this.infoBox = document.createElement("div");
     control.appendChild(this.infoBox);
@@ -161,7 +160,7 @@ export class UserInterface extends Data
     this.infoBox.style.padding = "2.5px";
     this.infoBox.style.backgroundColor = "rgba(0,0,0,0.2)";
     this.infoBox.style.width = "100%";
-    this.infoBox.style.height = "33.333%";
+    this.infoBox.style.height = "66.6666%";
     this.infoBox.style.color = "black"//"rgb(173,172,173)";
     this.infoBox.style.zIndex = document.getElementById("control").style.zIndex + 1;
     this.infoBox.style.overflowX = "hidden";
@@ -171,8 +170,8 @@ export class UserInterface extends Data
     this.infoBox.appendChild(this.textInfo);
     this.textInfo.setAttribute("id", "textInfo");
     this.textInfo.style.position = "static";
-    this.textInfo.style.width = "100%";
-    this.textInfo.style.height = "50%";
+    this.textInfo.style.width = "99%";
+    this.textInfo.style.height = "24%";
     this.textInfo.style.overflowX = "hidden";
     this.textInfo.style.overflowY = "auto";
 
@@ -180,36 +179,47 @@ export class UserInterface extends Data
     this.infoBox.appendChild(this.graphicInfo);
     this.graphicInfo.setAttribute("id", "graphicInfo");
     this.graphicInfo.style.position = "static";
-    this.graphicInfo.style.top = 0;
-    this.graphicInfo.style.width = "100%";
+    this.graphicInfo.style.top = "0%";
+    this.graphicInfo.style.width = "99%";
     this.graphicInfo.style.height = "50%";
     this.graphicInfo.style.overflowX = "hidden";
     this.graphicInfo.style.overflowY = "hidden";
+    this.graphicInfo.style.backgroundColor = "white";
 
     this.chart = document.createElement("canvas");
     this.graphicInfo.appendChild(this.chart);
     this.chart.style.position = "static";
-    this.chart.style.bottom = 0;
-    this.chart.width = this.graphicInfo.clientWidth / 2;
-    this.chart.height = this.graphicInfo.clientHeight;
+    this.chart.style.top = "0%";
+    this.chart.width = this.graphicInfo.clientWidth * 0.99;
+    this.chart.height = 2*this.graphicInfo.clientHeight/3;
     this.chart.id = "chart";
     this.chart.style.cursor= "crosshair";
-    this.drawChart([], 0);
-    this.drawChart([], 1);
+    this.chart.style.borderColor = "black";
+    this.chart.style.borderStyle = "solid";
+
+    this.graphicInfo.appendChild(this.chartToolbar.element);
+    this.chartToolbar.element.setAttribute("id", "chartToolbar");
+    this.chartToolbar.element.style.position = "static";
+    this.chartToolbar.element.style.width = (sim.clientWidth)+"px"
+    this.chartToolbar.element.style.height = "auto";
+    this.chartToolbar.element.style.top = 3 + "px";
+    this.chartToolbar.element.style.left = 3 + "px";
+    this.chartToolbar.element.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
 
     this.chartDesc = document.createElement("div");
-    this.graphicInfo.appendChild(this.chartDesc);
-    this.chartDesc.setAttribute("id", "chartDesc");
-    this.chartDesc.style.position = "static";
-    this.chartDesc.style.top = "0%";
-    this.chartDesc.style.display = "inline-block";
-    this.chartDesc.style.verticalAlign = "top";
-    this.chartDesc.style.textAlign = "right";
-    this.chartDesc.style.right = "0%";
-    this.chartDesc.style.width = "49%";
-    this.chartDesc.style.height = "100%";
-    this.chartDesc.style.fontSize = "16px";
-
+    //this.graphicInfo.appendChild(this.chartDesc);
+    //this.chartDesc.setAttribute("id", "chartDesc");
+    //this.chartDesc.style.position = "static";
+    //this.chartDesc.style.bottom = "0%";
+    //this.chartDesc.style.display = "inline-block";
+    //this.chartDesc.style.verticalAlign = "top";
+    //this.chartDesc.style.textAlign = "right";
+    //this.chartDesc.style.right = "0%";
+    //this.chartDesc.style.width = "49%";
+    //this.chartDesc.style.height = "99%";
+    //this.chartDesc.style.fontSize = "16px";
+    //this.chartDesc.style.backgroundColor = "green";
+  
   }
 
   slider(min=0, max=100, step=1){
@@ -237,32 +247,31 @@ export class UserInterface extends Data
       return [container, slider, label];
   }
 
-  drawChart(dataArr, col='black', pos=0, onto=false, div=1)
+  drawChart(chart)
   {
+
+    var dataArr = chart.data;
+    var col = chart.col;
+    var largest = this.sharedData.analysisChartsLargest;
+
     var canvas = document.getElementById( "chart" );
     var context = canvas.getContext( "2d" );
 
-    var GRAPH_HEIGHT = 100;
-    var GRAPH_TOP = 10;
-    var GRAPH_BOTTOM = 130;
-    var GRAPH_LEFT = 5;
-    var GRAPH_RIGHT = this.chart.clientWidth;
-
-    var GRAPH_WIDTH = this.chart.clientWidth;
+    var PADDING = 10;
+    var GRAPH_TOP = PADDING;
+    var GRAPH_BOTTOM = this.chart.clientHeight - PADDING;
+    var GRAPH_HEIGHT = GRAPH_BOTTOM - GRAPH_TOP;
+    var GRAPH_LEFT = PADDING;
+    var GRAPH_RIGHT = this.chart.clientWidth - PADDING;
     var arrayLen = dataArr.length;
 
-    var largest = 0;
-    for( var i = 0; i < arrayLen; i++ ){
-        if( dataArr[ i ] > largest ){
-            largest = dataArr[ i ];
-        }
+    if (!(chart.onto)) {
+      context.clearRect( 0, 0, GRAPH_RIGHT+PADDING, GRAPH_BOTTOM +PADDING);
+      context.fillStyle = "cornsilk";
+      context.fillRect( 0, 0, GRAPH_RIGHT + PADDING, GRAPH_BOTTOM + PADDING );
     }
 
-    if (!onto) {
-      context.clearRect( 0, 0, 500, 400 );
-    }
-    // set font for fillText()
-    context.font = "9px Arial";
+  
 
     // draw X and Y axis
     context.beginPath();
