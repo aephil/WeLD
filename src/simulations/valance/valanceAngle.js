@@ -25,14 +25,14 @@ const dy2 = (d2.ri.y - d1.ri.y) ** 2;
 const dz2 = (d2.ri.z - d1.ri.z) ** 2;
 const distanceSquared = dx2 + dy2 + dz2;
 
-return distanceSquared <= 2 * edgeLen ** 2;
+return distanceSquared <= edgeLen ** 2;
 }
 
 
 lattice.makePrimitive3D(5,5,1,edgeLen);
 
 const springConstant = 0.01;
-const k = 1000;
+const k = 1;
 lattice.setInterAtomicForces(
 {
  name: "spring",
@@ -42,7 +42,14 @@ lattice.setInterAtomicForces(
 springPredicate // depending on the predicate sets the neighbour in params.
 );
 
+
 initValence(shared, k);
+
+lattice.sharedData.nodes[0].ri.x += 15;
+lattice.sharedData.nodes[0].ri.y += 15;
+
+console.log(lattice.sharedData.nodes[0].forces);
+
 
 let i = 0;
 function debug() {
