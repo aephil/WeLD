@@ -1,5 +1,6 @@
 import {assert, Data, rotX, rotY, centreToScreenXPeriodic, centreToScreenYPeriodic, colouredText} from '../helpers.js'
 import Vector from '../physics/Vector.js';
+import {Chart} from '../physics/Analysis.js';
 
 export class Renderer extends Data
 {
@@ -14,9 +15,25 @@ export class Renderer extends Data
     this.sharedData.highlighted = false;
     this.sharedData.sampleSize = 100;
     this.sharedData.probeRate = 50;
-    this.sharedData.samples1 = [];
-    this.sharedData.samples2 = [];
-    this.sharedData.samples3 = [];
+
+    this.sharedData.analysisChartsLargest = 0.1;
+    this.sharedData.analysisCharts = [
+      new Chart(this.sharedData, []),
+      new Chart(this.sharedData, []),
+      new Chart(this.sharedData, []),
+    ];
+
+    this.sharedData.analysisCharts[0].col = 'red';
+    this.sharedData.analysisCharts[1].col = 'blue';
+    this.sharedData.analysisCharts[2].col = 'green';
+
+    this.sharedData.analysisCharts[0].onto = false;
+    this.sharedData.analysisCharts[1].onto = true;
+    this.sharedData.analysisCharts[2].onto = true;
+
+
+
+
     this.sharedData.fps = 30 // framerate for drawing graphics
     this.sharedData.frames = 0;
     this.sharedData.fstart = performance.now();
@@ -94,9 +111,12 @@ export class Renderer extends Data
         this.drawToolTip();
         this.redraw();
         if (this.probe) {
-            this.ui.drawChart(this.sharedData.samples1, 'red', 0);
-            this.ui.drawChart(this.sharedData.samples2, 'blue', 0, true);
-            this.ui.drawChart(this.sharedData.samples3, 'green', 0, true);
+            this.sharedData.analysisCharts.forEach
+            (
+              (chart)=>{
+                this.ui.drawChart(chart);
+              }
+            )
           }
         this.sharedData.frames++;
       }
@@ -248,27 +268,28 @@ cameraView(pos)
 
     if (this.probe) {
 
-      if (this.sharedData.samples1.length>this.sharedData.sampleSize)
-      {
-        this.sharedData.samples1.shift();
-      }
-      if (this.sharedData.samples2.length>this.sharedData.sampleSize)
-      {
-        this.sharedData.samples2.shift();
-      }
-      if (this.sharedData.samples3.length>this.sharedData.sampleSize)
-      {
-        this.sharedData.samples3.shift();
-      }
+      this.sharedData.analysisCharts.forEach(
+        (chart)=>{
+          if (chart.data.length+1==this.sharedData.sampleSize)
+          {
+            chart.data.shift();
+          }
+          else if (chart.data.length>this.sharedData.sampleSize)
+          {
+            chart.data = chart.data.slice(-(this.sharedData.sampleSize), -1);
+          }
+
+        }
+      )
 
       if (this.sharedData.highlighted===false)
       {
         const KE = this.sharedData.quantities[0].value;
         const PE = this.sharedData.quantities[1].value;
 
-        this.sharedData.samples1.push(KE);
-        this.sharedData.samples2.push(PE);
-        this.sharedData.samples3.push(KE+PE);
+        this.sharedData.analysisCharts[0].data.push(KE);
+        this.sharedData.analysisCharts[1].data.push(PE);
+        this.sharedData.analysisCharts[2].data.push(KE+PE);
 
         if (this.probeCounter % this.sharedData.probeRate === 0)
         {
@@ -290,9 +311,9 @@ cameraView(pos)
         const KE = 0.5 * d.m *  (d.vi.x ** 2 + d.vi.y ** 2 + d.vi.z ** 2);
         const PE = this.sharedData.nodes[i].potential;
 
-        this.sharedData.samples1.push(KE);
-        this.sharedData.samples2.push(PE);
-        this.sharedData.samples3.push(KE+PE);
+        this.sharedData.analysisCharts[0].data.push(KE);
+        this.sharedData.analysisCharts[1].data.push(PE);
+        this.sharedData.analysisCharts[2].data.push(KE+PE);
 
         if (this.probeCounter % (this.sharedData.probeRate/10.) === 0)
         {
@@ -301,7 +322,9 @@ cameraView(pos)
           `
           <p>
           <text class="grey">Probing node #${i} every ${(this.sharedData.probeRate/10.)} updates</text><br>
-          <text class="red">Kinetic Energy</text> ${KE.toPrecision(5)}<br>
+          <text class="${this.sharedData.analysisCharts[0].col}">
+          ${this.sharedData.analysisCharts[0].id}
+          </text> ${KE.toPrecision(5)}<br>
           <text class="blue">Potential Energy</text> ${PE.toPrecision(5)}<br>
           <text class="green">Total Energy</text> ${(KE+PE).toPrecision(5)}<br>
           </p>
@@ -355,11 +378,13 @@ cameraView(pos)
         ctx.fill();
         ctx.stroke();
 
-       if(this.sharedData.showingEdges)
+      // check if showing all edges enabled
+       if(this.sharedData.showEdges)
        {
          n.forces.forEach((force) => {
            if(force.name=="spring")
            {
+             // check if specific edge show is enabled
              if(n.showEdges)
              {
                const imagePos1 = this.cameraView(this.sharedData.nodes[force.params[2]].ri);

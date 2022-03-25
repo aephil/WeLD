@@ -174,9 +174,9 @@ export class Lattice extends Data {
     makePerovskite3D(cellsX, cellsY, cellsZ, a, sim) {
         this.sharedData.nodes = [];
         let counter = 0;
-        for (h = 0; h < cellsZ; h++) {
-            for (i = 0; i < cellsX; i++) {
-                for (j = 0; j < cellsY; j++) {
+        for (let h = 0; h < cellsZ; h++) {
+            for (let i = 0; i < cellsX; i++) {
+                for (let j = 0; j < cellsY; j++) {
 
                     // A cation
                     this.sharedData.nodes.push(
@@ -190,7 +190,7 @@ export class Lattice extends Data {
                             // forces
                             forces: [],
                             id: counter++,
-                            r: 5,
+                            r: 3,
                             m: 1,
                             name: "A Cation",
                             neighbours: [],
@@ -220,7 +220,7 @@ export class Lattice extends Data {
                             forces: [],
 
                             id: counter++,
-                            r: 10,
+                            r: 3,
                             m: 1,
                             name: "B Cation",
                             neighbours: [],
@@ -250,7 +250,7 @@ export class Lattice extends Data {
                             forces: [],
 
                             id: counter++,
-                            r: 10,
+                            r: 5,
                             m: 1,
                             name: "O Anion",
                             neighbours: [],
@@ -279,7 +279,7 @@ export class Lattice extends Data {
                             forces: [],
 
                             id: counter++,
-                            r: 10,
+                            r: 5,
                             m: 1,
                             name: "O Anion",
                             neighbours: [],
@@ -308,7 +308,7 @@ export class Lattice extends Data {
                             forces: [],
 
                             id: counter++,
-                            r: 10,
+                            r: 5,
                             m: 1,
                             name: "O Anion",
                             neighbours: [],
