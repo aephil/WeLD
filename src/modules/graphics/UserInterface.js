@@ -99,7 +99,7 @@ export class UserInterface extends Data
     sim.style.position = "fixed";
     sim.style.top = "2.5%";
     sim.style.left = "2.5%";
-    sim.style.width = "60%";
+    sim.style.width = "69%";
     sim.style.height = "95%";
     sim.style.backgroundColor = "none";
 
@@ -118,7 +118,7 @@ export class UserInterface extends Data
     this.control.style.position = "absolute";
     this.control.style.top = "2.5%";
     this.control.style.right = "2.5%";
-    this.control.style.width = "33.5%";
+    this.control.style.width = "25%";
     this.control.style.height = "95%";
     this.control.style.color = "rgb(173,172,173)";
     this.control.style.padding = "2.5px";
@@ -171,7 +171,7 @@ export class UserInterface extends Data
     this.textInfo.setAttribute("id", "textInfo");
     this.textInfo.style.position = "static";
     this.textInfo.style.width = "99%";
-    this.textInfo.style.height = "24%";
+    this.textInfo.style.height = "40%";
     this.textInfo.style.overflowX = "hidden";
     this.textInfo.style.overflowY = "auto";
 
@@ -181,7 +181,7 @@ export class UserInterface extends Data
     this.graphicInfo.style.position = "static";
     this.graphicInfo.style.top = "0%";
     this.graphicInfo.style.width = "99%";
-    this.graphicInfo.style.height = "50%";
+    this.graphicInfo.style.height = "auto";
     this.graphicInfo.style.overflowX = "hidden";
     this.graphicInfo.style.overflowY = "hidden";
     this.graphicInfo.style.backgroundColor = "white";
@@ -191,7 +191,7 @@ export class UserInterface extends Data
     this.chart.style.position = "static";
     this.chart.style.top = "0%";
     this.chart.width = this.graphicInfo.clientWidth * 0.99;
-    this.chart.height = 2*this.graphicInfo.clientHeight/3;
+    this.chart.height = 2*this.graphicInfo.clientHeight/2;
     this.chart.id = "chart";
     this.chart.style.cursor= "crosshair";
     this.chart.style.borderColor = "black";
@@ -201,24 +201,24 @@ export class UserInterface extends Data
     this.chartToolbar.element.setAttribute("id", "chartToolbar");
     this.chartToolbar.element.style.position = "static";
     this.chartToolbar.element.style.width = (sim.clientWidth)+"px"
-    this.chartToolbar.element.style.height = "auto";
+    this.chartToolbar.element.style.height = "20px";
     this.chartToolbar.element.style.top = 3 + "px";
     this.chartToolbar.element.style.left = 3 + "px";
-    this.chartToolbar.element.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+    this.chartToolbar.element.style.backgroundColor = "none";
 
     this.chartDesc = document.createElement("div");
-    //this.graphicInfo.appendChild(this.chartDesc);
-    //this.chartDesc.setAttribute("id", "chartDesc");
-    //this.chartDesc.style.position = "static";
-    //this.chartDesc.style.bottom = "0%";
-    //this.chartDesc.style.display = "inline-block";
-    //this.chartDesc.style.verticalAlign = "top";
-    //this.chartDesc.style.textAlign = "right";
-    //this.chartDesc.style.right = "0%";
-    //this.chartDesc.style.width = "49%";
-    //this.chartDesc.style.height = "99%";
-    //this.chartDesc.style.fontSize = "16px";
-    //this.chartDesc.style.backgroundColor = "green";
+    this.graphicInfo.appendChild(this.chartDesc);
+    this.chartDesc.setAttribute("id", "chartDesc");
+    this.chartDesc.style.position = "static";
+    this.chartDesc.style.bottom = "0%";
+    this.chartDesc.style.display = "inline-block";
+    this.chartDesc.style.verticalAlign = "top";
+    this.chartDesc.style.textAlign = "right";
+    this.chartDesc.style.right = "0%";
+    this.chartDesc.style.width = "99%";
+    this.chartDesc.style.height = "auto";
+    this.chartDesc.style.fontSize = "16px";
+    this.chartDesc.style.backgroundColor = "none";
   
   }
 
