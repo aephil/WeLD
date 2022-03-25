@@ -12,56 +12,23 @@ export class Toolbar extends Data
         // spring shared variable
         this.sharedData.springK = 1;
 
-        this.optionMap =  new Map(
+        this.buttonMap = new Map(
             []
           );
 
         this.element = document.createElement("div");
         this.selection = "none";
+        this.id = "";
       }
-
-    springKSlider = ()=>
-    {
-      let container = document.createElement("div");
-      this.element.appendChild(container);
-      container.setAttribute("id", "spring_opt_ui");
-      container.style.padding = "20px 10px";
-      container.style.position = "absolute";
-      container.style.width = (this.element.clientWidth/4) + "px";
-      container.style.height = "50px";
-      container.style.top = this.element.clientHeight + 10 + "px";
-      container.style.left = 10 + "px";
-      container.style.backgroundColor = "rgba(0,0,0,0.5)";
-      container.style.borderRadius = "10px";
-
-      const label = document.createElement("p");
-      container.appendChild(label);
-      label.innerHTML = `Spring Constant: ${this.sharedData.springK}`;
-
-      const slider = document.createElement("input");
-      container.appendChild(slider);
-      slider.setAttribute("type","range");
-      slider.setAttribute("min",0.01);
-      slider.setAttribute("max",2);
-      slider.setAttribute("step",0.01);
-      slider.setAttribute("value",this.sharedData.springK);
-
-      slider.oninput = ()=> {
-        this.sharedData.springK = slider.value;
-        label.innerHTML = `Spring Constant: ${this.sharedData.springK}`;
-      }
-
-    }
-
 }
 
 Toolbar.prototype.addSlider = function(name,variable, min, max, step)
 {
-  var fn = ()=>
+  const fn = ()=>
   {
     let container = document.createElement("div");
     this.element.appendChild(container);
-    container.setAttribute("id", name+"_opt_ui");
+    container.setAttribute("id", this.id +"_"+name+"_sliderContainer");
     container.style.padding = "20px 10px";
     container.style.position = "absolute";
     container.style.width = (this.element.clientWidth/4) + "px";
@@ -76,6 +43,7 @@ Toolbar.prototype.addSlider = function(name,variable, min, max, step)
     label.innerHTML = `${name}: ${this.sharedData[variable]}`;
 
     const slider = document.createElement("input");
+    slider.setAttribute("id", this.id +"_"+name+"_slider");
     container.appendChild(slider);
     slider.setAttribute("type","range");
     slider.setAttribute("min",min);
@@ -89,67 +57,107 @@ Toolbar.prototype.addSlider = function(name,variable, min, max, step)
     }
 
   }
-  this.optionMap.set(name, fn);
+  this.buttonMap.set([name, "slider"], fn);
+}
+
+Toolbar.prototype.addSwitch = function(name, variable)
+{
+  const fn = ()=>{}; 
+  this.buttonMap.set([name, "switch", variable], fn);
 }
 
 
 Toolbar.prototype.init = function()
 {
+    const width  = (this.element.getClientWidth / this.buttonMap.length) + "px" ;
+    this.buttonMap.forEach((fn, metadata)=>{
 
-    const width  = (this.element.getClientWidth / this.optionMap.length) + "px" ;
-    this.optionMap.forEach((fn, key)=>{
-      
-      let optTab = document.createElement("div");
-      optTab.setAttribute("class", "noselect");
-      optTab.setAttribute("id", "toolbar_opt_"+key);
-      this.element.appendChild(optTab);
-      optTab.style.height = "65%";
-      optTab.style.width  = width;
-      optTab.style.color = "black";
-      optTab.style.float  = "left";
-      optTab.style.padding = "2.5px"
-      optTab.style.borderColor= "rgba(0,0,0,0.5)";
-      optTab.style.borderStyle = "solid";
-      optTab.style.borderWidth = "0.5px";
+      const [name, type] = metadata;
 
-      optTab.innerHTML = key;
-      optTab.addEventListener("mousedown", event => {
+      let button = document.createElement("div");
+      button.setAttribute("class", "noselect");
+      this.element.appendChild(button);
+      button.style.height = "65%";
+      button.style.width  = width;
+      button.style.color = "black";
+      button.style.float  = "left";
+      button.style.padding = "2.5px"
+      button.style.borderColor= "rgba(0,0,0,0.5)";
+      button.style.borderStyle = "solid";
+      button.style.borderWidth = "0.5px";
 
-        // visuals
-        optTab.style.borderColor= "rgba(255,255,0,0.5)";
-        optTab.style.color = "black";
-  
-        if (this.selection == key){
-          optTab.style.backgroundColor = "rgba(0,0,0,0)";
-          this.selection = "none";
-          this.element.removeChild(document.getElementById(key+"_opt_ui"))
-        } else {
-          if(this.selection!="none")
-          {
-            const selected = document.getElementById("toolbar_opt_"+(this.selection));
-            selected.style.backgroundColor = "rgba(0,0,0,0)";
-            selected.style.color = "black";
-            let ui = document.getElementById(this.selection+"_opt_ui")
-            if(ui!==null)
+      button.innerHTML = name;
+      if ( type == "slider")
+      {
+        button.addEventListener("mousedown", event => {
+
+          // visuals
+          button.style.borderColor= "rgba(255,255,0,0.5)";
+          button.style.color = "black";
+    
+          if (this.selection == name){
+
+            button.style.backgroundColor = "rgba(0,0,0,0)";
+            this.selection = "none";
+            this.element.removeChild(document.getElementById(this.id +"_"+name+"_sliderContainer"))
+
+          } else {
+
+            if(this.selection!="none")
             {
-              this.element.removeChild(ui);
+
+              const selected = document.getElementById(this.id+"_"+(this.selection)+"_sliderContainer");
+              selected.style.backgroundColor = "rgba(0,0,0,0)";
+              selected.style.color = "black";
+              let ui = document.getElementById(this.id+"_"+this.selection+"_sliderContainer")
+              if(ui!==null)
+              {
+                this.element.removeChild(ui);
+              }
+              
             }
-            
-          }
-          optTab.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
-          optTab.style.color = "blue";
-          this.selection = key;
 
-          // do something
-          fn();
-        }
+            button.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
+            button.style.color = "blue";
+            this.selection = name;
   
-      })
+            // do something
+            fn();
+          }
+    
+        })
 
-      optTab.addEventListener("mouseup", event => {
-        optTab.style.borderColor= "rgba(0,0,0,0.5)";
-      })
+        button.addEventListener("mouseup", event => {
+          button.style.borderColor= "rgba(0,0,0,0.5)";
+        })
+      }
+      else if ( type == "switch" )
+      {
+        const variable = metadata[2];
 
+        if ( this.sharedData[variable] )
+        {
+          button.style.borderColor= "rgba(255,255,0,0.5)";
+          button.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
+        }
+
+        button.addEventListener("mousedown", event =>
+        {
+          this.sharedData[variable] = !(this.sharedData[variable]);
+
+          if ( this.sharedData[variable] )
+          {
+            button.style.borderColor= "rgba(255,255,0,0.5)";
+            button.style.backgroundColor = "rgba(255, 255, 0, 0.5)";
+          }
+          else
+          {
+            button.style.borderColor= "rgba(0,0,0,0.5)";
+            button.style.backgroundColor = "rgba(0, 0, 0, 0)";
+          }
+
+        })
+      }
     })
 
 }

@@ -145,6 +145,9 @@ export class UserInterface extends Data
     this.terminal.init();
 
     sim.appendChild(this.canvasToolbar.element);
+
+     // set js and DOM id 
+    this.canvasToolbar.id = "canvasToolbar";
     this.canvasToolbar.element.setAttribute("id", "canvasToolbar");
     this.canvasToolbar.element.style.position = "absolute";
     this.canvasToolbar.element.style.width = (sim.clientWidth)+"px"
@@ -198,6 +201,9 @@ export class UserInterface extends Data
     this.chart.style.borderStyle = "solid";
 
     this.graphicInfo.appendChild(this.chartToolbar.element);
+
+    // set js and DOM id 
+    this.chartToolbar.id = "chartToolbar";
     this.chartToolbar.element.setAttribute("id", "chartToolbar");
     this.chartToolbar.element.style.position = "static";
     this.chartToolbar.element.style.width = (sim.clientWidth)+"px"

@@ -378,11 +378,13 @@ cameraView(pos)
         ctx.fill();
         ctx.stroke();
 
-       if(this.sharedData.showingEdges)
+      // check if showing all edges enabled
+       if(this.sharedData.showEdges)
        {
          n.forces.forEach((force) => {
            if(force.name=="spring")
            {
+             // check if specific edge show is enabled
              if(n.showEdges)
              {
                const imagePos1 = this.cameraView(this.sharedData.nodes[force.params[2]].ri);

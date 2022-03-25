@@ -8,8 +8,6 @@ export class Chart extends Data
         this.id = '';
         this.data = data;
         this.col = 'black';
-        this.max = 0;
-        this.min = 0;
         this.onto = true;
     }
 }
