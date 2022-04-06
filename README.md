@@ -61,3 +61,10 @@ Note that when we use the CommonJS syntax, we do not put the `.js`
 at the end, whereas we do when we use ES6, and additionally it is important
 that when using `require` in node for this codebase that you access
 the `transpiled` directory.
+
+## (experimental) UserInterface Terminal
+The Terminal accepts commands used to modify the simulation.
+- move [id:uint] [x:int] [y:int] [z:int]: Moves a node [id] to the location in the simulation
+- sample [size:uint]: Changes the sample size in the plot window. A higher sample size zoom out the reading.
+- probe [rate:uint]: Changes the probe rate in the plot window. The probe rate for individual nodes is rate/10.
+- fps [rate:uint] Changes the framerate.

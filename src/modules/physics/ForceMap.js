@@ -48,9 +48,12 @@ export const spring = function(d, shared, params) {
             const equilibrium = Vector.scale(nodesLen, unitSeparation);
             const extension = Vector.sub(separation, equilibrium);
 
-            const fx = -2 * k * extension.x;
-            const fy = -2 * k * extension.y;
-            const fz = -2 * k * extension.z;
+            //TODO: experimental modifiable k
+            let user_k = shared.springK;
+
+            const fx = -2 * user_k * extension.x;
+            const fy = -2 * user_k * extension.y;
+            const fz = -2 * user_k * extension.z;
             const force = {x: fx, y: fy, z: fz};
 
             // We return only the potential on one atom,

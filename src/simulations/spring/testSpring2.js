@@ -28,7 +28,7 @@ return distanceSquared <= 2 * edgeLen ** 2;
 }
 
 
-lattice.makePrimitive3D(3,3,1,edgeLen);
+lattice.makePrimitive3D(6,6,1,edgeLen);
 
 const k = 20;
 
