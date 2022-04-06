@@ -5,6 +5,17 @@ export const meanOf = function(arr) {
     return mean;
 }
 
+export const getStd = function(arr) {
+    const mean = meanOf(arr);
+    let sum = 0;
+    for (let i = 0; i < arr.length; i++) {
+        sum += (arr[i] - mean) ** 2;
+    }
+    sum = Math.sqrt(sum);
+    sum /= arr.length;
+    return sum
+}
+
 export const centreToScreenY = function(y, worldHeight=1000){
     return (worldHeight/2) - y;
 }

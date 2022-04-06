@@ -8,6 +8,8 @@ import {
 
 import { initValence } from '../../modules/physics/ForceMap.js';
 
+import { meanOf, getStd } from '../../modules/helpers.js';
+
 var shared = {};
 const edgeLen = 35;
 
@@ -48,24 +50,25 @@ initValence(shared, k);
 lattice.sharedData.nodes[0].ri.x += 15;
 lattice.sharedData.nodes[0].ri.y += 15;
 
-console.log(lattice.sharedData.nodes[0].forces);
-
-
 let i = 0;
-function debug() {
+let TEs = []
+
+function debug(shared) {
     if (i % 100 == 0) {
-        ui.clearTerminal();
-        const KE = lattice.quantities[0].value;
-        const PE = lattice.quantities[1].value;
+        const KE = shared.quantities[0].value;
+        const PE = shared.quantities[1].value;
         const TE = KE + PE;
-        console.log(lattice);
-        ui.logDebug(`Kinetic energy: ${KE}`);
-        ui.logDebug(`Potential energy: ${PE}`);
-        ui.logDebug(`Total energy: ${TE}`);
-    }
+        TEs.push(TE);
+        const mean = meanOf(TEs);
+        const std = getStd(TEs);
+        // console.log(`Mean total energy: ${mean}`);
+        console.clear();
+        console.log(`mean: ${mean}`);
+        console.log(`std: ${std}`);
+        console.log(`std / mean: ${std / mean * 100}%`);
+       }
     i += 1;
 }
-
 
 lattice.setQuantities([
     new KineticEnergy(),
@@ -75,7 +78,8 @@ lattice.setQuantities([
 // TESTING: push the first node in the x direction to simulate an initial Extension
 
 const verletController = Physics.verlet;
-const updates = [verletController.integrationStep, calculateQuantities]
+const updates = [verletController.integrationStep, calculateQuantities,
+debug]
 const nodeUpdates = [];
 
 const renderer = new Graphics.Renderer(shared);
